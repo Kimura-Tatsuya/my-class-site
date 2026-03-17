@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>３年３組 学級管理システム</title>
+    <title>My Class Portal</title>
     <style>
         /* 白黒・ＭＳゴシック基調のシンプルスタイル */
         body { 
@@ -50,7 +50,7 @@
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>学級管理システム</h1>
+        <h1>My Class Portal</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
         <button id="login-btn">ログイン</button>
@@ -64,7 +64,7 @@
 
         <main>
             <section>
-                <h2>登校日の予定</h2>
+                <h2>直近の予定</h2>
                 <div class="day-container" id="schedule-display">
                     <div id="area-1" class="day-box">確認中...</div>
                     <div id="area-2" class="day-box">確認中...</div>
@@ -72,7 +72,7 @@
             </section>
 
             <section>
-                <h2>連絡ブログ</h2>
+                <h2>担任のやつ</h2>
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
                     <button id="post-blog-btn">投稿する</button>
@@ -151,7 +151,7 @@
         };
         
         const TEACHER_EMAIL = "administrator@class.jp";
-        const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事"];
+        const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事等"];
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -205,7 +205,7 @@
             }
             
             const userName = studentMaster[user.email]?.name || "先生";
-            document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん`;
+            document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん ３年３組のポータルへようこそ`;
 
             // ログイン時刻の更新
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
@@ -285,8 +285,8 @@
             let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
                 // 科目が空欄の場合は「ー」、科目が設定されていて備考が空欄の場合は「いつも通り」
-                const subText = l.sub || "ー";
-                const noteText = l.note ? l.note : (l.sub ? "いつも通り" : "ー");
+                const subText = l.sub || "---";
+                const noteText = l.note ? l.note : (l.sub ? "いつも通り" : "---");
                 html += `<tr><td>${i+1}</td><td>${subText}</td><td>${noteText}</td></tr>`;
             });
             html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
