@@ -5,61 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学級管理システム</title>
     <style>
-        body { background-color: white; color: black; font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
-        h1, h2, h3 { border-bottom: 1px solid black; padding-bottom: 5px; }
-        section { margin-bottom: 40px; border: 1px solid #ccc; padding: 15px; border-radius: 4px; }
-        input, textarea { width: 100%; max-width: 500px; padding: 10px; margin-bottom: 10px; border: 1px solid #999; box-sizing: border-box; }
-        button { padding: 10px 20px; cursor: pointer; background: white; color: black; border: 1px solid black; font-weight: bold; }
-        button:hover { background: #eee; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85em; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-        .post-item { border-bottom: 1px dashed #ccc; padding: 15px 0; }
-        .post-date { font-size: 0.8em; color: #666; }
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        button { padding: 10px 20px; cursor: pointer; background: #333; color: white; border: none; border-radius: 4px; }
+        .post-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .post-date { font-size: 0.8em; color: gray; }
     </style>
 </head>
 <body>
 
-    <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>Class Portal</h1>
+    <div id="login-section" style="text-align: center;">
+        <h1>ログイン</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
-        <button type="button" id="login-btn">ログイン</button>
+        <button id="login-btn">ログイン</button>
         <p id="error-message" style="color:red;"></p>
     </div>
 
     <div id="main-content" style="display: none;">
-        <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid black; margin-bottom: 20px;">
-            <h2 id="welcome-msg">読み込み中...</h2>
-            <button id="logout-btn" style="border: 1px solid red; color: red;">ログアウト</button>
+        <header style="display: flex; justify-content: space-between;">
+            <h2 id="welcome-msg">こんにちは</h2>
+            <button id="logout-btn">ログアウト</button>
         </header>
 
-        <main>
-            <section>
-                <h2>📢 今週の予定</h2>
-                <div id="schedule-display"><p id="schedule-text" style="white-space: pre-wrap; font-size: 1.1em;"></p></div>
-                <div id="schedule-edit" style="display: none;">
-                    <textarea id="schedule-input" style="height:100px;"></textarea><br>
-                    <button id="update-schedule-btn">予定を更新保存</button>
-                </div>
-            </section>
+        <section>
+            <h2>📢 今週の予定</h2>
+            <div id="schedule-display"><p id="schedule-text" style="white-space: pre-wrap;"></p></div>
+            <div id="schedule-edit" style="display: none;">
+                <textarea id="schedule-input"></textarea>
+                <button id="update-schedule-btn">予定を更新</button>
+            </div>
+        </section>
 
-            <section>
-                <h2>📝 担任ブログ</h2>
-                <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px;">
-                    <textarea id="blog-input" placeholder="ブログ本文..."></textarea><br>
-                    <input type="datetime-local" id="blog-datetime" style="max-width:250px;"><br>
-                    <button id="post-blog-btn">ブログを投稿する</button>
-                </div>
-                <div id="blog-list">投稿を取得しています...</div>
-            </section>
+        <section>
+            <h2>📝 担任ブログ</h2>
+            <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 10px;">
+                <textarea id="blog-input" placeholder="ブログの内容"></textarea>
+                <button id="post-blog-btn">投稿する</button>
+            </div>
+            <div id="blog-list">読み込み中...</div>
+        </section>
 
-            <section id="admin-section" style="display: none; border: 2px solid red;">
-                <h2 style="color: red;">🛠️ 管理者メニュー</h2>
-                <input type="file" id="csv-file" accept=".csv"><br>
-                <button id="import-csv-btn">CSVインポート</button>
-                <div id="log-list" style="margin-top:20px;"></div>
-            </section>
-        </main>
+        <section id="admin-section" style="display: none; border: 2px solid red;">
+            <h2 style="color: red;">🛠 管理者メニュー</h2>
+            <input type="file" id="csv-file" accept=".csv">
+            <button id="import-csv-btn">名簿インポート</button>
+            <div id="log-list"></div>
+        </section>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -67,7 +60,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- 設定 ---
+        // 設定（ご自身のものに）
         const firebaseConfig = {
             apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
             authDomain: "my-class-site.firebaseapp.com",
@@ -78,160 +71,97 @@
         };
         const TEACHER_EMAIL = "teacher@example.com"; 
 
-        // 初期化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let studentMaster = {};
 
-        // --- 全ての処理を DOMContentLoaded の中に入れて、エラーを防ぐ ---
-        document.addEventListener('DOMContentLoaded', () => {
+        // ログイン処理を確実に紐付け
+        document.getElementById('login-btn').onclick = function() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then(res => startApp(res.user))
+                .catch(err => alert("ログインに失敗しました"));
+        };
 
-            // ログインボタンの紐付け
-            document.getElementById('login-btn').addEventListener('click', () => {
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                
-                if(!email || !password) return alert("入力してください");
-
-                firebase.auth().signInWithEmailAndPassword(email, password)
-                    .then(res => initApp(res.user))
-                    .catch(err => {
-                        document.getElementById('error-message').innerText = "ログイン失敗。メールかパスワードが違います。";
-                    });
-            });
-
-            // ログアウトボタン
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                firebase.auth().signOut().then(() => location.reload());
-            });
-
-            // 予定更新ボタン
-            document.getElementById('update-schedule-btn').addEventListener('click', updateSchedule);
-
-            // ブログ投稿ボタン
-            document.getElementById('post-blog-btn').addEventListener('click', postBlog);
-
-            // CSVインポートボタン
-            document.getElementById('import-csv-btn').addEventListener('click', importCSV);
-        });
-
-        // --- アプリ初期化 ---
-        async function initApp(user) {
+        async function startApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
 
-            // 名簿の読み込み
-            const snap = await db.collection("students").get();
-            snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
+            // 名簿から名前を取得
+            const doc = await db.collection("students").doc(user.email).get();
+            const name = doc.exists ? doc.data().name : "ゲスト";
+            document.getElementById('welcome-msg').innerText = name + " さん、おかえりなさい！";
 
-            const name = studentMaster[user.email] ? studentMaster[user.email].name : "ゲスト";
-            document.getElementById('welcome-msg').innerText = `${name} さん、おかえりなさい！`;
+            // 予定の読み込み
+            db.collection("config").doc("weekly_schedule").onSnapshot(d => {
+                if(d.exists) {
+                    document.getElementById('schedule-text').innerText = d.data().text;
+                    document.getElementById('schedule-input').value = d.data().text;
+                }
+            });
 
-            fetchSchedule();
-            fetchBlogs();
+            // ブログの読み込み（エラーが起きやすい「未来の日付除外」を一旦やめました）
+            db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
+                const list = document.getElementById('blog-list');
+                list.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const date = d.createdAt ? d.createdAt.toDate().toLocaleString() : "";
+                    list.innerHTML += `<div class="post-item"><div class="post-date">${date}</div><div>${d.content}</div></div>`;
+                });
+            });
 
+            // 管理者なら編集フォームを表示
             if (user.email === TEACHER_EMAIL) {
                 document.getElementById('admin-section').style.display = 'block';
                 document.getElementById('schedule-edit').style.display = 'block';
-                document.getElementById('schedule-display').style.display = 'none';
                 document.getElementById('blog-admin-form').style.display = 'block';
-                displayLogs();
             }
-
-            db.collection("access_logs").add({ 
-                email: user.email, 
-                loginTime: firebase.firestore.FieldValue.serverTimestamp() 
-            });
         }
 
-        // ブログ取得
-        async function fetchBlogs() {
-            const listDiv = document.getElementById('blog-list');
-            const now = new Date();
-            let query = db.collection("blogs").orderBy("createdAt", "desc").limit(20);
-
-            if (firebase.auth().currentUser.email !== TEACHER_EMAIL) {
-                query = query.where("createdAt", "<=", now);
-            }
-
-            const snap = await query.get().catch(() => {
-                listDiv.innerHTML = "ブログを表示するにはFirebaseコンソールで「インデックス作成」が必要です。";
-            });
-            if (!snap || snap.empty) { listDiv.innerHTML = "投稿がありません。"; return; }
-
-            listDiv.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : "---";
-                const div = document.createElement("div");
-                div.className = "post-item";
-                div.innerHTML = `<div class="post-date">${time}</div><div>${d.content.replace(/\n/g, '<br>')}</div>`;
-                listDiv.appendChild(div);
-            });
-        }
-
-        // 予定
-        function fetchSchedule() {
-            db.collection("config").doc("weekly_schedule").get().then(doc => {
-                if(doc.exists) {
-                    document.getElementById('schedule-text').innerText = doc.data().text;
-                    document.getElementById('schedule-input').value = doc.data().text;
-                }
-            });
-        }
-
-        function updateSchedule() {
+        // 予定更新
+        document.getElementById('update-schedule-btn').onclick = function() {
             db.collection("config").doc("weekly_schedule").set({
                 text: document.getElementById('schedule-input').value,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("予定を更新しました"));
-        }
+            }).then(() => alert("更新しました"));
+        };
 
         // ブログ投稿
-        async function postBlog() {
-            const content = document.getElementById('blog-input').value;
-            const dateInput = document.getElementById('blog-datetime').value;
-            if(!content) return;
-            const postDate = dateInput ? new Date(dateInput) : new Date();
-
-            await db.collection("blogs").add({
-                content: content,
-                createdAt: firebase.firestore.Timestamp.fromDate(postDate)
+        document.getElementById('post-blog-btn').onclick = function() {
+            const val = document.getElementById('blog-input').value;
+            if(!val) return;
+            db.collection("blogs").add({
+                content: val,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('blog-input').value = "";
+                alert("投稿しました");
             });
-            alert("投稿しました");
-            fetchBlogs();
-        }
+        };
 
-        // 名簿インポート
-        function importCSV() {
+        // ログアウト
+        document.getElementById('logout-btn').onclick = function() {
+            location.reload();
+        };
+
+        // CSV名簿インポート
+        document.getElementById('import-csv-btn').onclick = function() {
             const file = document.getElementById('csv-file').files[0];
-            if(!file) return alert("ファイルを選んでください");
+            if(!file) return;
             const reader = new FileReader();
-            reader.onload = async (e) => {
+            reader.onload = async function(e) {
                 const rows = e.target.result.split("\n");
-                const batch = db.batch();
-                rows.forEach(row => {
+                for(let row of rows) {
                     const cols = row.split(",");
-                    if(cols.length >= 2 && cols[0].includes("@")) {
-                        batch.set(db.collection("students").doc(cols[0].trim()), { name: cols[1].trim() });
+                    if(cols[0].includes("@")) {
+                        await db.collection("students").doc(cols[0].trim()).set({ name: cols[1].trim() });
                     }
-                });
-                await batch.commit();
-                alert("インポートしました。再読み込みしてください。");
+                }
+                alert("名簿を読み込みました");
             };
             reader.readAsText(file);
-        }
-
-        async function displayLogs() {
-            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(10).get();
-            let html = "<table><tr><th>日時</th><th>氏名</th></tr>";
-            snap.forEach(doc => {
-                const d = doc.data();
-                const n = studentMaster[d.email] ? studentMaster[d.email].name : d.email;
-                html += `<tr><td>${d.loginTime?d.loginTime.toDate().toLocaleString():''}</td><td>${n}</td></tr>`;
-            });
-            document.getElementById('log-list').innerHTML = html + "</table>";
-        }
+        };
     </script>
 </body>
 </html>
