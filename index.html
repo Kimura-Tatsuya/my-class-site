@@ -2,45 +2,65 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>学級ポータル</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>３年３組 学級のページ</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
-        section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
-        input, textarea { width: 100%; margin-bottom: 10px; padding: 5px; }
-        button { padding: 10px; cursor: pointer; background: #333; color: #fff; border: none; }
-        .post { border-bottom: 1px solid #eee; padding: 10px 0; }
+        body { background-color: white; color: black; font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
+        h1 { border-bottom: 2px solid black; padding-bottom: 10px; }
+        section { margin-bottom: 30px; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
+        input { width: 100%; max-width: 300px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; cursor: pointer; background: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #555; }
+        .error { color: red; font-size: 0.9em; min-height: 1.5em; }
+        
+        /* 管理者用ログテーブルのスタイル */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #eee; }
+        #admin-log-section { background: #fff9f9; border: 2px solid #f44336; }
     </style>
 </head>
 <body>
 
-    <div id="login-area">
-        <h1>ログイン</h1>
-        <input type="email" id="email" placeholder="メールアドレス">
-        <input type="password" id="pw" placeholder="パスワード">
-        <button id="login-btn">ログイン</button>
+    <div id="login-section" style="text-align: center; margin-top: 50px;">
+        <h1>Class Portal</h1>
+        <p>ID（メール形式）とパスワードを入力してください。</p>
+        <input type="email" id="email" placeholder="s01@class.jp"><br>
+        <input type="password" id="password" placeholder="Password"><br>
+        <button type="button" onclick="login()">Login</button>
+        <p id="error-message" class="error"></p>
     </div>
 
-    <div id="main-area" style="display:none;">
-        <h2 id="user-name">こんにちは</h2>
-        <button onclick="location.reload()">ログアウト</button>
+    <div id="main-content" style="display: none;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>３年３組 学級のページ</h1>
+            <button onclick="logout()" style="background:#f44336;">Logout</button>
+        </header>
 
-        <section>
-            <h3>📢 今週の予定</h3>
-            <div id="sch-view" style="white-space: pre-wrap; background: #f9f9f9; padding: 10px;"></div>
-            <div id="sch-edit" style="display:none;">
-                <textarea id="sch-input"></textarea>
-                <button id="sch-btn">予定を保存</button>
-            </div>
-        </section>
+        <main>
+            <section>
+                <h2>📢 今週の予定</h2>
+                <p>月曜：移動教室あり（理科室）</p>
+                <p>火曜：漢字小テスト</p>
+                <p>金曜：学級会</p>
+            </section>
 
-        <section>
-            <h3>📝 担任ブログ</h3>
-            <div id="blog-edit" style="display:none;">
-                <textarea id="blog-input" placeholder="ブログを書く"></textarea>
-                <button id="blog-btn">投稿</button>
-            </div>
-            <div id="blog-list">読み込み中...</div>
-        </section>
+            <section id="admin-log-section" style="display: none;">
+                <h2>📊 【管理者用】アクセスログ</h2>
+                <p style="font-size: 0.8em; color: #666;">最新の20件を表示しています。</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ログイン日時</th>
+                            <th>ユーザーID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                        <tr><td colspan="2" style="text-align:center;">読み込み中...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -48,83 +68,97 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // ★ここをご自身のものに書き換えてください
+        // --- Firebase 設定値 ---
         const firebaseConfig = {
             apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
             authDomain: "my-class-site.firebaseapp.com",
             projectId: "my-class-site",
             storageBucket: "my-class-site.firebasestorage.app",
             messagingSenderId: "125594983188",
-            appId: "1:125594983188:web:129aa54e9d3a39ca700001"
+            appId: "1:125594983188:web:129aa54e9d3a39ca700001",
+            measurementId: "G-4EQ3Z9Q4NT"
         };
-        const TEACHER = "teacher@example.com"; 
 
+        // --- 管理者（先生）のメールアドレス ---
+        const TEACHER_EMAIL = "administrator@class.jp"; // ★ここを自分のアドレスに変更
+
+        // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ログインボタン
-        document.getElementById('login-btn').onclick = () => {
-            const mail = document.getElementById('email').value;
-            const pass = document.getElementById('pw').value;
-            firebase.auth().signInWithEmailAndPassword(mail, pass)
-                .then(res => setup(res.user))
-                .catch(e => alert("ログイン失敗: " + e.message));
-        };
+        // ログイン処理
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-message');
 
-        async function setup(user) {
-            document.getElementById('login-area').style.display = 'none';
-            document.getElementById('main-area').style.display = 'block';
+            errorMsg.innerText = "認証中...";
 
-            // 名簿から名前を取得
-            db.collection("students").doc(user.email).get().then(doc => {
-                if(doc.exists) document.getElementById('user-name').innerText = doc.data().name + " さん、こんにちは";
-            });
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // 画面表示の切り替え
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
 
-            // 予定の表示
-            db.collection("config").doc("weekly").onSnapshot(doc => {
-                if(doc.exists) {
-                    document.getElementById('sch-view').innerText = doc.data().text;
-                    document.getElementById('sch-input').value = doc.data().text;
-                }
-            });
+                    // 先生ならログを表示
+                    if (user.email === TEACHER_EMAIL) {
+                        document.getElementById('admin-log-section').style.display = 'block';
+                        loadLogs();
+                    }
 
-            // ブログの表示
-            db.collection("blogs").orderBy("at", "desc").limit(10).onSnapshot(snap => {
-                const out = document.getElementById('blog-list');
-                out.innerHTML = "";
-                snap.forEach(d => {
-                    const data = d.data();
-                    out.innerHTML += `<div class="post"><small>${data.at?.toDate().toLocaleString() || ""}</small><div>${data.txt}</div></div>`;
+                    // ログを保存（バックグラウンド）
+                    db.collection("access_logs").add({
+                        email: user.email,
+                        loginTime: firebase.firestore.FieldValue.serverTimestamp(),
+                        userAgent: navigator.userAgent
+                    }).catch(err => console.error("Log save error:", err));
+                })
+                .catch((error) => {
+                    console.error("Login Error:", error.code);
+                    errorMsg.innerText = "IDまたはパスワードが違います。";
                 });
-                if(snap.empty) out.innerHTML = "まだ投稿がありません。";
-            });
-
-            // 先生なら編集機能を出すす
-            if(user.email === TEACHER) {
-                document.getElementById('sch-edit').style.display = 'block';
-                document.getElementById('blog-edit').style.display = 'block';
-            }
         }
 
-        // 予定保存
-        document.getElementById('sch-btn').onclick = () => {
-            db.collection("config").doc("weekly").set({
-                text: document.getElementById('sch-input').value,
-                at: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("保存しました"));
-        };
+        // ログデータを取得して表示する関数
+        function loadLogs() {
+            const tbody = document.getElementById('log-table-body');
+            
+            db.collection("access_logs")
+                .orderBy("loginTime", "desc")
+                .limit(20)
+                .get()
+                .then(snap => {
+                    tbody.innerHTML = "";
+                    if (snap.empty) {
+                        tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>データがありません</td></tr>";
+                        return;
+                    }
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const date = d.loginTime ? d.loginTime.toDate().toLocaleString() : "記録中...";
+                        tbody.innerHTML += `<tr>
+                            <td>${date}</td>
+                            <td>${d.email}</td>
+                        </tr>`;
+                    });
+                })
+                .catch(err => {
+                    console.error("Load Logs Error:", err);
+                    tbody.innerHTML = `<tr><td colspan="2" style="color:red;">
+                        エラー：権限がないか、インデックスが未作成です。<br>
+                        ${err.message}
+                    </td></tr>`;
+                });
+        }
 
-        // ブログ投稿
-        document.getElementById('blog-btn').onclick = () => {
-            const txt = document.getElementById('blog-input').value;
-            if(!txt) return;
-            db.collection("blogs").add({
-                txt: txt,
-                at: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('blog-input').value = "";
+        // ログアウト処理
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                location.reload();
             });
-        };
+        }
     </script>
 </body>
 </html>
