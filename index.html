@@ -72,6 +72,11 @@
             </section>
 
             <section>
+                <h2>回収物・提出物</h2>
+                <div id="submission-list">確認中...</div>
+            </section>
+
+            <section>
                 <h2>担任のやつ</h2>
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
@@ -81,8 +86,18 @@
             </section>
 
             <section id="admin-area" style="display: none; border: 2px solid black;">
-                <h2 style="border-bottom: 2px solid black;">管理者用メニュー：予定設定</h2>
+                <h2 style="border-bottom: 2px solid black;">管理者用メニュー：予定・提出物設定</h2>
                 
+                <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
+                    <div style="margin-top:10px;">
+                        提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書">
+                        締め切り：<input type="date" id="subm-deadline" style="width:150px;">
+                        <button onclick="addSubmission()">追加</button>
+                    </div>
+                    <table id="admin-submission-table" style="margin-top:15px;"></table>
+                </details>
+
                 <details class="admin-form-box">
                     <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割</summary>
                     曜日：<select id="reg-day-select" onchange="loadRegularSetting()" style="width:150px;">
@@ -210,6 +225,35 @@
             // ログイン時刻の更新
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
+            // 提出物一覧の読み込み（締め切りが近い順）
+            db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
+                const listEl = document.getElementById('submission-list');
+                const adminTable = document.getElementById('admin-submission-table');
+                
+                if(snap.empty) {
+                    listEl.innerHTML = "<p>現在、回収している提出物はありません。</p>";
+                    if(adminTable) adminTable.innerHTML = "";
+                    return;
+                }
+
+                let listHtml = "<table><tr><th>提出物名</th><th>締め切り</th></tr>";
+                let adminHtml = "<tr><th>提出物名</th><th>締め切り</th><th>操作</th></tr>";
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const dObj = new Date(d.deadline);
+                    const week = ["日", "月", "火", "水", "木", "金", "土"];
+                    const dateStr = isNaN(dObj) ? d.deadline : `${dObj.getMonth()+1}月${dObj.getDate()}日（${week[dObj.getDay()]}）`;
+                    
+                    listHtml += `<tr><td style="text-align:left;">${d.title}</td><td>${dateStr}</td></tr>`;
+                    adminHtml += `<tr><td style="text-align:left;">${d.title}</td><td>${dateStr}</td><td><button onclick="deleteSubmission('${doc.id}')">削除</button></td></tr>`;
+                });
+                listHtml += "</table>";
+
+                listEl.innerHTML = listHtml;
+                if(adminTable) adminTable.innerHTML = adminHtml;
+            });
+
             // ブログの読み込み
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
                 const list = document.getElementById('blog-list'); list.innerHTML = "";
@@ -247,7 +291,6 @@
             let checkDate = new Date();
             const todayStr = checkDate.toISOString().split('T')[0];
 
-            // 登校日を2日分探す
             while (foundDays.length < 2) {
                 let dateStr = checkDate.toISOString().split('T')[0];
                 if (isSchoolDay(dateStr)) {
@@ -256,13 +299,11 @@
                 checkDate.setDate(checkDate.getDate() + 1);
             }
 
-            // 左側のラベル判定
-            let label1 = foundDays[0].gap === 0 ? "本日" : "次回";
+            let label1 = foundDays[0].gap === 0 ? "[本日]" : "[次回]";
             await renderDay(foundDays[0].date, "area-1", label1);
 
-            // 右側のラベル判定
             const dateDiff = (new Date(foundDays[1].date) - new Date(foundDays[0].date)) / (1000*60*60*24);
-            let label2 = dateDiff === 1 ? "明日" : "次回";
+            let label2 = dateDiff === 1 ? "[明日]" : "[次回]";
             await renderDay(foundDays[1].date, "area-2", label2);
         }
 
@@ -284,13 +325,33 @@
 
             let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
-                // 科目が空欄の場合は「ー」、科目が設定されていて備考が空欄の場合は「いつも通り」
                 const subText = l.sub || "---";
                 const noteText = l.note ? l.note : (l.sub ? "いつも通り" : "---");
                 html += `<tr><td>${i+1}</td><td>${subText}</td><td>${noteText}</td></tr>`;
             });
             html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
             el.innerHTML = html;
+        }
+
+        // --- 管理機能（提出物） ---
+        async function addSubmission() {
+            const title = document.getElementById('subm-title').value.trim();
+            const deadline = document.getElementById('subm-deadline').value;
+            if(!title || !deadline) return alert("提出物名と締め切り日を入力してください");
+            
+            await db.collection("submissions").add({
+                title: title,
+                deadline: deadline,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            document.getElementById('subm-title').value = "";
+            document.getElementById('subm-deadline').value = "";
+            alert("追加しました");
+        }
+        async function deleteSubmission(id) {
+            if(confirm("この提出物を一覧から削除しますか？")) {
+                await db.collection("submissions").doc(id).delete();
+            }
         }
 
         // --- 管理機能（予定・休業期間） ---
