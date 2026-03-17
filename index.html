@@ -1,16 +1,3 @@
-<div id="login-form">
-    <h2>クラス専用ページにログイン</h2>
-    <input type="text" id="student-id" placeholder="出席番号など">
-    <input type="password" id="password" placeholder="パスワード">
-    <button onclick="login()">ログイン</button>
-</div>
-
-<div id="class-content" style="display:none;">
-    <h2>〇年〇組の秘密の連絡事項</h2>
-    <p>ここに、ログインした人だけが見れる情報を書きます。</p>
-    <button onclick="changePassword()">パスワードを変更する</button>
-</div>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -45,6 +32,20 @@
     </header>
 
     <main>
+
+<div id="login-form">
+    <h2>クラス専用ページにログイン</h2>
+    <input type="text" id="student-id" placeholder="出席番号など">
+    <input type="password" id="password" placeholder="パスワード">
+    <button onclick="login()">ログイン</button>
+</div>
+
+<div id="class-content" style="display:none;">
+    <h2>〇年〇組の秘密の連絡事項</h2>
+    <p>ここに、ログインした人だけが見れる情報を書きます。</p>
+    <button onclick="changePassword()">パスワードを変更する</button>
+</div>
+
         <section>
             <h2>今週の予定</h2>
             <ul>
