@@ -42,6 +42,11 @@
         th, td { border: 1px solid black; padding: 8px; text-align: center; }
         th { background: white; } 
         
+        /* テーブルの列幅最適化 */
+        .col-period { width: 45px; white-space: nowrap; } 
+        .col-subject { width: 75px; white-space: nowrap; } 
+        .col-note { width: auto; text-align: left !important; word-break: break-all; } 
+
         .admin-form-box { background: white; padding: 15px; border: 1px solid black; margin-bottom: 20px; }
         .post-item { border-bottom: 1px dashed black; padding: 15px 0; }
         .post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; }
@@ -147,10 +152,20 @@
                 <h2 style="border-bottom: 2px solid black;">管理者用メニュー：名簿管理</h2>
                 
                 <div class="admin-form-box">
-                    <h3>新規登録</h3>
+                    <h3>新規登録 / CSV一括操作</h3>
+                    
+                    <p style="margin-bottom:5px; font-weight:bold;">【1件ずつ個別登録】</p>
                     <input type="email" id="direct-email" placeholder="メールアドレス" style="width:250px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:150px;">
                     <button onclick="registerDirect()">新規登録</button>
+
+                    <hr style="border-top:1px dashed black; margin:15px 0;">
+                    
+                    <p style="margin-bottom:5px; font-weight:bold;">【CSV一括登録・出力】</p>
+                    <p style="font-size:0.85em; margin-top:0;">※形式：「メールアドレス,氏名」の2列で作成してください。</p>
+                    <input type="file" id="csv-file" accept=".csv" style="width:250px; border:none; padding:0;">
+                    <button onclick="importCSV()">インポート（一括登録）</button>
+                    <button onclick="exportCSV()">エクスポート（ダウンロード）</button>
                 </div>
 
                 <h3>登録済み一覧（名前の直接編集が可能）</h3>
@@ -364,12 +379,17 @@
                 data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30" };
             }
 
-            let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
+            let html = `<span class="day-label">${label}</span>
+            <table>
+                <tr>
+                    <th class="col-period">校時</th>
+                    <th class="col-subject">科目</th>
+                    <th class="col-note">備考</th>
+                </tr>`;
             data.lessons.forEach((l, i) => {
                 const subText = l.sub || "---";
-                // ★「いつも通り」の自動入力をやめて、空欄にするよう変更しました
                 const noteText = l.note || "";
-                html += `<tr><td>${i+1}</td><td>${subText}</td><td>${noteText}</td></tr>`;
+                html += `<tr><td>${i+1}</td><td>${subText}</td><td class="col-note">${noteText}</td></tr>`;
             });
             html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
             el.innerHTML = html;
@@ -475,7 +495,7 @@
             }
         }
 
-        // --- 名簿管理（追加・表内直接編集・削除） ---
+        // --- 名簿管理 ---
         async function loadStudentList() {
             const snap = await db.collection("students").get();
             let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>操作</th></tr>";
@@ -534,22 +554,79 @@
             }
         }
 
+        // --- CSV エクスポート・インポート機能 ---
+        async function exportCSV() {
+            const snap = await db.collection("students").get();
+            let csv = "メールアドレス,氏名\n";
+            snap.forEach(doc => {
+                csv += `${doc.id},${doc.data().name}\n`;
+            });
+            // Excelで文字化けしないようBOMを付与
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], {type: 'text/csv'}); 
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "students_list.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function importCSV() {
+            const fileInput = document.getElementById('csv-file');
+            const file = fileInput.files[0];
+            if (!file) return alert("CSVファイルを選択してください");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r\n|\n/);
+                let count = 0;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const email = parts[0].trim();
+                        const name = parts[1].trim();
+                        
+                        // ヘッダー行はスキップ
+                        if (email === "メールアドレス") continue; 
+                        
+                        if (email && name) {
+                            await db.collection("students").doc(email).set({ name: name });
+                            count++;
+                        }
+                    }
+                }
+                alert(`${count}件の生徒データをインポートしました`);
+                fileInput.value = "";
+                loadStudentList();
+            };
+            reader.readAsText(file);
+        }
+
+        // --- 予定・休業期間 ---
         async function loadRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const doc = await db.collection("config").doc("regular_schedule").get();
-            const table = document.getElementById('reg-table'); table.innerHTML = "";
+            const table = document.getElementById('reg-table'); 
+            table.innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th></tr>";
             const data = doc.exists ? (doc.data()[day] || []) : [];
             for (let i = 0; i < 6; i++) {
                 let opts = SUBJECTS.map(s => `<option value="${s}" ${s===(data[i]||"")?'selected':''}>${s||"（空欄）"}</option>`).join('');
-                table.innerHTML += `<tr><td>${i+1}</td><td><select id="reg-sub-${i}">${opts}</select></td></tr>`;
+                table.innerHTML += `<tr><td>${i+1}</td><td><select id="reg-sub-${i}" style="margin:0; padding:4px;">${opts}</select></td></tr>`;
             }
         }
+        
         async function saveRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const lessons = Array.from({length:6}, (_, i) => document.getElementById(`reg-sub-${i}`).value);
             await db.collection("config").doc("regular_schedule").set({ [day]: lessons }, { merge: true });
             alert("保存しました"); displayNextSchoolDays();
         }
+
         async function saveVacation() {
             const s = document.getElementById('vac-start').value, e = document.getElementById('vac-end').value;
             if(!s || !e) return;
@@ -566,7 +643,8 @@
         async function loadScheduleEdit() {
             const date = document.getElementById('edit-date-select').value; if(!date) return;
             const doc = await db.collection("schedules").doc(date).get();
-            const table = document.getElementById('edit-table'); table.innerHTML = "";
+            const table = document.getElementById('edit-table'); 
+            table.innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th><th class='col-note'>備考</th></tr>";
             let data = doc.exists ? doc.data() : null;
             if(!data) {
                 const dayNum = new Date(date).getDay();
@@ -576,12 +654,13 @@
             }
             data.lessons.forEach((l, i) => {
                 let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
-                table.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}">${opts}</select></td><td><input type="text" id="edit-note-${i}" value="${l.note}"></td></tr>`;
+                table.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0; padding:4px;">${opts}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note}" style="margin:0; padding:4px; width:100%; box-sizing:border-box;"></td></tr>`;
             });
             initExitTimeOptions(document.getElementById('edit-exit-time'));
             document.getElementById('edit-exit-time').value = data.exitTime;
             document.getElementById('edit-form').style.display = "block";
         }
+        
         async function saveSchedule() {
             const date = document.getElementById('edit-date-select').value;
             const lessons = Array.from({length:6}, (_, i) => ({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }));
