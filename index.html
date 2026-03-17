@@ -1,88 +1,67 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>クラスのホームページ</title>
-    <style>
-        /* ここで見た目を整えます（白地に黒文字） */
-        body {
-            background-color: white;
-            color: black;
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 {
-            border-bottom: 2px solid black;
-            padding-bottom: 10px;
-        }
-        section {
-            margin-bottom: 30px;
-        }
-    </style>
-</head>
 <body>
+    <div id="login-section" style="text-align: center; margin-top: 50px;">
+        <h1>学級専用ページ</h1>
+        <p>出席番号（メール形式）とパスワードを入力してください</p>
+        <input type="email" id="email" placeholder="s01@class.jp" style="padding: 8px;"><br><br>
+        <input type="password" id="password" placeholder="パスワード" style="padding: 8px;"><br><br>
+        <button onclick="login()" style="padding: 10px 20px; cursor: pointer;">ログイン</button>
+        <p id="error-message" style="color: red;"></p>
+    </div>
 
-    <header>
-        <h1>３年３組 学級だより</h1>
-        <p>ここは私たちのクラスの公式ホームページです。</p>
-    </header>
+    <div id="main-content" style="display: none;">
+        <header>
+            <h1>３年３組 学級だより</h1>
+            <button onclick="logout()">ログアウト</button>
+        </header>
+        <main>
+            <section>
+                <h2>今週の予定</h2>
+                <p>ここはログインした生徒だけが閲覧できるページです。</p>
+            </section>
+        </main>
+    </div>
 
-    <main>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-<div id="login-form">
-    <h2>クラス専用ページにログイン</h2>
-    <input type="text" id="student-id" placeholder="出席番号など">
-    <input type="password" id="password" placeholder="パスワード">
-    <button onclick="login()">ログイン</button>
-</div>
+    <script>
+        // --- ここにあなたの firebaseConfig を貼り付けます ---
+        const firebaseConfig = {
+    	   apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
+    	   authDomain: "my-class-site.firebaseapp.com",
+    	   projectId: "my-class-site",
+    	   storageBucket: "my-class-site.firebasestorage.app",
+    	   messagingSenderId: "125594983188",
+    	   appId: "1:125594983188:web:129aa54e9d3a39ca700001",
+    	   measurementId: "G-4EQ3Z9Q4NT"
+        };
+        firebase.initializeApp(firebaseConfig);
+        // -----------------------------------------------
 
-<div id="class-content" style="display:none;">
-    <h2>〇年〇組の秘密の連絡事項</h2>
-    <p>ここに、ログインした人だけが見れる情報を書きます。</p>
-    <button onclick="changePassword()">パスワードを変更する</button>
-</div>
+        // ログインボタンを押した時の動き
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-message');
 
-        <section>
-            <h2>今週の予定</h2>
-            <ul>
-                <li>月曜日：体育館履きを忘れないこと</li>
-                <li>水曜日：単語テスト</li>
-                <li>金曜日：校外学習（お弁当持参）</li>
-            </ul>
-        </section>
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // ログイン成功
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    alert("ログインしました！");
+                })
+                .catch((error) => {
+                    // ログイン失敗
+                    errorMsg.innerText = "IDまたはパスワードが違います。";
+                });
+        }
 
-        <section>
-            <h2>お知らせ</h2>
-            <p>新しい掲示物を更新しました。教室の後ろを確認してください。</p>
-        </section>
-    </main>
-
-    <footer>
-        <hr>
-        <p>&copy; 2026 ３年３組</p>
-    </footer>
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-<script>
-  // 先ほどコピーした「設定値」をここに貼り付けます
-  const firebaseConfig = {
-    apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
-    authDomain: "my-class-site.firebaseapp.com",
-    projectId: "my-class-site",
-    storageBucket: "my-class-site.firebasestorage.app",
-    messagingSenderId: "125594983188",
-    appId: "1:125594983188:web:129aa54e9d3a39ca700001",
-    measurementId: "G-4EQ3Z9Q4NT"
-  };
-
-  // Firebaseを初期化
-  firebase.initializeApp(firebaseConfig);
-</script>
+        // ログアウトの動き
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                location.reload(); // ページを再読み込みしてログイン画面に戻す
+            });
+        }
+    </script>
 </body>
-</html>
