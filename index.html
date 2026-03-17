@@ -44,7 +44,10 @@
         
         .admin-form-box { background: white; padding: 15px; border: 1px solid black; margin-bottom: 20px; }
         .post-item { border-bottom: 1px dashed black; padding: 15px 0; }
-        .post-date { font-size: 0.8em; margin-bottom: 5px; }
+        .post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; }
+        
+        .admin-actions { margin-top: 10px; text-align: right; }
+        .admin-actions button { padding: 4px 10px; font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -78,22 +81,34 @@
 
             <section>
                 <h2>担任のやつ</h2>
+                
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
-                    <button id="post-blog-btn">投稿する</button>
+                    <button id="post-blog-btn">新規投稿する</button>
                 </div>
+
+                <div id="blog-edit-form" style="display: none; border: 2px dashed black;" class="admin-form-box">
+                    <h3>記事の編集</h3>
+                    投稿日時：<input type="datetime-local" id="edit-blog-date" style="max-width: 250px;"><br>
+                    内容：<textarea id="edit-blog-input"></textarea><br>
+                    <button onclick="updateBlog()">この内容と日時で更新する</button>
+                    <button onclick="cancelBlogEdit()">キャンセル</button>
+                </div>
+
                 <div id="blog-list"></div>
             </section>
 
             <section id="admin-area" style="display: none; border: 2px solid black;">
                 <h2 style="border-bottom: 2px solid black;">管理者用メニュー：予定・提出物設定</h2>
                 
-                <details class="admin-form-box">
+                <details class="admin-form-box" open>
                     <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書">
                         締め切り：<input type="date" id="subm-deadline" style="width:150px;">
-                        <button onclick="addSubmission()">追加</button>
+                        <button id="subm-add-btn" onclick="addSubmission()">追加</button>
+                        <button id="subm-update-btn" style="display:none;" onclick="updateSubmission()">更新する</button>
+                        <button id="subm-cancel-btn" style="display:none;" onclick="cancelSubmEdit()">キャンセル</button>
                     </div>
                     <table id="admin-submission-table" style="margin-top:15px;"></table>
                 </details>
@@ -130,11 +145,15 @@
 
             <section id="student-admin-area" style="display: none; border: 2px solid black;">
                 <h2 style="border-bottom: 2px solid black;">管理者用メニュー：名簿管理</h2>
+                
                 <div class="admin-form-box">
+                    <h3>新規登録</h3>
                     <input type="email" id="direct-email" placeholder="メールアドレス" style="width:250px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:150px;">
-                    <button onclick="registerDirect()">登録</button>
+                    <button onclick="registerDirect()">新規登録</button>
                 </div>
+
+                <h3>登録済み一覧（名前の直接編集が可能）</h3>
                 <div id="student-list-area"></div>
             </section>
 
@@ -173,8 +192,11 @@
         let studentMaster = {};
         let vacationData = [];
         let holidays = {};
+        let isAdmin = false;
 
-        // 10分刻みの下校時刻オプション生成
+        let editingBlogId = null;
+        let editingSubmId = null;
+
         function initExitTimeOptions(targetEl) {
             let html = "";
             for(let h=13; h<=19; h++) {
@@ -186,7 +208,6 @@
             targetEl.innerHTML = html;
         }
 
-        // ログイン処理
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
@@ -195,12 +216,11 @@
                 .catch((error) => alert("ログイン失敗\nエラー内容: " + error.message));
         };
 
-        // アプリケーション初期化
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
+            isAdmin = (user.email === TEACHER_EMAIL);
 
-            // 祝日、休業期間、名簿データの取得
             const [hRes, vSnap, sSnap] = await Promise.all([
                 fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()).catch(() => ({})),
                 db.collection("config").doc("vacations").get(),
@@ -210,22 +230,16 @@
             vacationData = vSnap.exists ? vSnap.data().periods : [];
             sSnap.forEach(doc => { studentMaster[doc.id] = { name: doc.data().name, lastLogin: doc.data().lastLogin?.toDate() }; });
 
-            // --- 時間帯による挨拶の切り替え ---
             const hour = new Date().getHours();
             let greeting = "こんにちは";
-            if (hour >= 17 || hour < 6) {
-                greeting = "こんばんは";
-            } else if (hour >= 6 && hour < 11) {
-                greeting = "おはようございます";
-            }
+            if (hour >= 17 || hour < 6) greeting = "こんばんは";
+            else if (hour >= 6 && hour < 11) greeting = "おはようございます";
             
             const userName = studentMaster[user.email]?.name || "先生";
             document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん！ ３年３組のポータルへようこそ！`;
 
-            // ログイン時刻の更新
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
-            // 提出物一覧の読み込み（締め切りが近い順）
             db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
                 const listEl = document.getElementById('submission-list');
                 const adminTable = document.getElementById('admin-submission-table');
@@ -246,7 +260,14 @@
                     const dateStr = isNaN(dObj) ? d.deadline : `${dObj.getMonth()+1}月${dObj.getDate()}日（${week[dObj.getDay()]}）`;
                     
                     listHtml += `<tr><td style="text-align:left;">${d.title}</td><td>${dateStr}</td></tr>`;
-                    adminHtml += `<tr><td style="text-align:left;">${d.title}</td><td>${dateStr}</td><td><button onclick="deleteSubmission('${doc.id}')">削除</button></td></tr>`;
+                    adminHtml += `<tr>
+                                    <td style="text-align:left;">${d.title}</td>
+                                    <td>${dateStr}</td>
+                                    <td>
+                                        <button onclick="startEditSubm('${doc.id}', '${d.title.replace(/'/g, "\\'")}', '${d.deadline}')">編集</button>
+                                        <button onclick="deleteSubmission('${doc.id}')">削除</button>
+                                    </td>
+                                  </tr>`;
                 });
                 listHtml += "</table>";
 
@@ -254,17 +275,38 @@
                 if(adminTable) adminTable.innerHTML = adminHtml;
             });
 
-            // ブログの読み込み
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
                 const list = document.getElementById('blog-list'); list.innerHTML = "";
                 snap.forEach(d => {
-                    const date = d.data().createdAt ? d.data().createdAt.toDate().toLocaleString() : "";
-                    list.innerHTML += `<div class="post-item"><div class="post-date">${date}</div><div>${d.data().content.replace(/\n/g, '<br>')}</div></div>`;
+                    const data = d.data();
+                    let dateStr = "";
+                    let isoDate = "";
+                    if (data.createdAt) {
+                        const dateObj = data.createdAt.toDate();
+                        dateStr = dateObj.toLocaleString();
+                        dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset());
+                        isoDate = dateObj.toISOString().slice(0, 16);
+                    }
+
+                    let adminBtns = "";
+                    if (isAdmin) {
+                        const escapedContent = data.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+                        adminBtns = `
+                        <div class="admin-actions">
+                            <button onclick="startEditBlog('${d.id}', '${escapedContent}', '${isoDate}')">編集</button>
+                            <button onclick="deleteBlog('${d.id}')">削除</button>
+                        </div>`;
+                    }
+
+                    list.innerHTML += `<div class="post-item">
+                                        <div class="post-date">${dateStr}</div>
+                                        <div>${data.content.replace(/\n/g, '<br>')}</div>
+                                        ${adminBtns}
+                                       </div>`;
                 });
             });
 
-            // 管理者機能の解放
-            if (user.email === TEACHER_EMAIL) {
+            if (isAdmin) {
                 document.getElementById('admin-area').style.display = 'block';
                 document.getElementById('student-admin-area').style.display = 'block';
                 document.getElementById('blog-admin-form').style.display = 'block';
@@ -276,7 +318,6 @@
             displayNextSchoolDays();
         }
 
-        // --- 登校日判定と表示 ---
         function isSchoolDay(dateStr) {
             const d = new Date(dateStr);
             const day = d.getDay();
@@ -326,14 +367,14 @@
             let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
                 const subText = l.sub || "---";
-                const noteText = l.note ? l.note : (l.sub ? "いつも通り" : "---");
+                // ★「いつも通り」の自動入力をやめて、空欄にするよう変更しました
+                const noteText = l.note || "";
                 html += `<tr><td>${i+1}</td><td>${subText}</td><td>${noteText}</td></tr>`;
             });
             html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
             el.innerHTML = html;
         }
 
-        // --- 管理機能（提出物） ---
         async function addSubmission() {
             const title = document.getElementById('subm-title').value.trim();
             const deadline = document.getElementById('subm-deadline').value;
@@ -348,13 +389,151 @@
             document.getElementById('subm-deadline').value = "";
             alert("追加しました");
         }
+
+        function startEditSubm(id, title, deadline) {
+            editingSubmId = id;
+            document.getElementById('subm-title').value = title;
+            document.getElementById('subm-deadline').value = deadline;
+            document.getElementById('subm-add-btn').style.display = 'none';
+            document.getElementById('subm-update-btn').style.display = 'inline-block';
+            document.getElementById('subm-cancel-btn').style.display = 'inline-block';
+        }
+
+        async function updateSubmission() {
+            const title = document.getElementById('subm-title').value.trim();
+            const deadline = document.getElementById('subm-deadline').value;
+            if(!title || !deadline) return alert("提出物名と締め切り日を入力してください");
+
+            await db.collection("submissions").doc(editingSubmId).update({
+                title: title,
+                deadline: deadline
+            });
+            alert("更新しました");
+            cancelSubmEdit();
+        }
+
+        function cancelSubmEdit() {
+            editingSubmId = null;
+            document.getElementById('subm-title').value = "";
+            document.getElementById('subm-deadline').value = "";
+            document.getElementById('subm-add-btn').style.display = 'inline-block';
+            document.getElementById('subm-update-btn').style.display = 'none';
+            document.getElementById('subm-cancel-btn').style.display = 'none';
+        }
+
         async function deleteSubmission(id) {
-            if(confirm("この提出物を一覧から削除しますか？")) {
+            if(confirm("この提出物を削除しますか？")) {
                 await db.collection("submissions").doc(id).delete();
             }
         }
 
-        // --- 管理機能（予定・休業期間） ---
+        document.getElementById('post-blog-btn').onclick = async () => {
+            const content = document.getElementById('blog-input').value; 
+            if(!content) return;
+            await db.collection("blogs").add({ 
+                content, 
+                createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+            document.getElementById('blog-input').value = ""; 
+            alert("投稿しました");
+        };
+
+        function startEditBlog(id, content, isoDate) {
+            editingBlogId = id;
+            document.getElementById('edit-blog-input').value = content;
+            document.getElementById('edit-blog-date').value = isoDate;
+            document.getElementById('blog-edit-form').style.display = 'block';
+            document.getElementById('blog-admin-form').style.display = 'none';
+            document.getElementById('blog-edit-form').scrollIntoView({behavior: "smooth"});
+        }
+
+        async function updateBlog() {
+            const content = document.getElementById('edit-blog-input').value;
+            const dateStr = document.getElementById('edit-blog-date').value;
+            if(!content || !dateStr) return alert("内容と日時を入力してください");
+
+            const newDate = new Date(dateStr);
+            await db.collection("blogs").doc(editingBlogId).update({
+                content: content,
+                createdAt: firebase.firestore.Timestamp.fromDate(newDate)
+            });
+            alert("記事を更新しました");
+            cancelBlogEdit();
+        }
+
+        function cancelBlogEdit() {
+            editingBlogId = null;
+            document.getElementById('edit-blog-input').value = "";
+            document.getElementById('edit-blog-date').value = "";
+            document.getElementById('blog-edit-form').style.display = 'none';
+            document.getElementById('blog-admin-form').style.display = 'block';
+        }
+
+        async function deleteBlog(id) {
+            if(confirm("この記事を削除しますか？")) {
+                await db.collection("blogs").doc(id).delete();
+            }
+        }
+
+        // --- 名簿管理（追加・表内直接編集・削除） ---
+        async function loadStudentList() {
+            const snap = await db.collection("students").get();
+            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>操作</th></tr>";
+            snap.forEach(doc => { 
+                const d = doc.data();
+                const safeId = doc.id.replace(/[@.]/g, '_');
+                html += `<tr id="row-${safeId}">
+                            <td id="name-td-${safeId}">${d.name}</td>
+                            <td>${doc.id}</td>
+                            <td id="action-td-${safeId}">
+                                <button onclick="startInlineEditStudent('${safeId}', '${doc.id}', '${d.name}')">編集</button>
+                                <button onclick="deleteStudent('${doc.id}')">削除</button>
+                            </td>
+                         </tr>`; 
+            });
+            document.getElementById('student-list-area').innerHTML = html + "</table>";
+        }
+
+        function startInlineEditStudent(safeId, email, currentName) {
+            const nameTd = document.getElementById(`name-td-${safeId}`);
+            const actionTd = document.getElementById(`action-td-${safeId}`);
+            
+            nameTd.innerHTML = `<input type="text" id="input-name-${safeId}" value="${currentName}" style="width:90%; padding:4px; margin:0;">`;
+            
+            actionTd.innerHTML = `
+                <button onclick="saveInlineEditStudent('${email}', '${safeId}')">保存</button>
+                <button onclick="loadStudentList()">キャンセル</button>
+            `;
+        }
+
+        async function saveInlineEditStudent(email, safeId) {
+            const newName = document.getElementById(`input-name-${safeId}`).value.trim();
+            if (!newName) return alert("氏名を入力してください");
+            
+            await db.collection("students").doc(email).update({ name: newName });
+            alert("氏名を更新しました");
+            loadStudentList(); 
+        }
+
+        async function registerDirect() {
+            const email = document.getElementById('direct-email').value.trim();
+            const name = document.getElementById('direct-name').value.trim();
+            if(!email || !name) return alert("メールアドレスと氏名を入力してください");
+            
+            await db.collection("students").doc(email).set({ name });
+            document.getElementById('direct-email').value = ""; 
+            document.getElementById('direct-name').value = "";
+            loadStudentList();
+            alert("新規登録しました");
+        }
+
+        async function deleteStudent(id) {
+            if(confirm("この生徒を名簿から削除しますか？")) { 
+                await db.collection("students").doc(id).delete(); 
+                loadStudentList(); 
+            }
+        }
+
         async function loadRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const doc = await db.collection("config").doc("regular_schedule").get();
@@ -408,30 +587,6 @@
             const lessons = Array.from({length:6}, (_, i) => ({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }));
             await db.collection("schedules").doc(date).set({ lessons, exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
             alert("保存しました"); displayNextSchoolDays();
-        }
-
-        // --- 管理機能（ブログ・名簿・パスワード） ---
-        document.getElementById('post-blog-btn').onclick = () => {
-            const content = document.getElementById('blog-input').value; if(!content) return;
-            db.collection("blogs").add({ content, createdAt: firebase.firestore.FieldValue.serverTimestamp() })
-              .then(() => { document.getElementById('blog-input').value = ""; alert("投稿しました"); });
-        };
-
-        async function loadStudentList() {
-            const snap = await db.collection("students").get();
-            let html = "<table><tr><th>氏名</th><th>メール</th><th>操作</th></tr>";
-            snap.forEach(doc => { html += `<tr><td>${doc.data().name}</td><td>${doc.id}</td><td><button onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`; });
-            document.getElementById('student-list-area').innerHTML = html + "</table>";
-        }
-        async function registerDirect() {
-            const email = document.getElementById('direct-email').value, name = document.getElementById('direct-name').value;
-            if(!email || !name) return;
-            await db.collection("students").doc(email).set({ name });
-            document.getElementById('direct-email').value = ""; document.getElementById('direct-name').value = "";
-            loadStudentList();
-        }
-        async function deleteStudent(id) {
-            if(confirm("削除しますか？")) { await db.collection("students").doc(id).delete(); loadStudentList(); }
         }
 
         document.getElementById('change-pw-btn').onclick = async () => {
