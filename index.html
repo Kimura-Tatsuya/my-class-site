@@ -10,105 +10,70 @@
         section { margin-bottom: 40px; border: 1px solid #000; padding: 20px; }
         input, textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #000; box-sizing: border-box; font-family: inherit; }
         button { padding: 8px 15px; cursor: pointer; background: white; color: black; border: 1px solid black; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; }
-        button:hover { background: #eeeeee; }
         .day-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
-        .day-box { flex: 1; border: 1px solid #000; padding: 10px; min-width: 300px; }
-        .day-label { font-weight: bold; font-size: 1.1em; border-bottom: 1px solid #000; display: block; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.9em; }
-        th, td { border: 1px solid black; padding: 5px; text-align: center; }
+        .day-box { flex: 1; border: 1px solid #000; padding: 15px; min-width: 320px; background: #fff; }
+        .day-label { font-weight: bold; font-size: 1.1em; border-bottom: 2px solid #000; display: block; margin-bottom: 10px; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
         th { background: #f2f2f2; }
-        .note-cell { text-align: left; }
         .admin-form-box { background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px; }
-        .unread-msg { color: red; font-weight: bold; font-size: 0.8em; margin-top: 10px; }
-        .holiday-text { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>学級管理システム ログイン</h1>
+        <h1>学級管理システム</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
         <button id="login-btn">ログイン</button>
-        <p id="error-message" style="color:red; font-weight:bold;"></p>
     </div>
 
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 id="welcome-msg" style="border:none; margin:0;">確認中...</h2>
-            <button id="logout-btn">ログアウト</button>
+            <h2 id="welcome-msg" style="border:none; margin:0;">こんにちは</h2>
+            <button onclick="location.reload()">ログアウト</button>
         </header>
 
         <main>
             <section>
-                <h2>本日の予定・明日の予定</h2>
-                <div class="day-container" id="display-area">
-                    <div id="today-area" class="day-box">読み込み中...</div>
-                    <div id="tomorrow-area" class="day-box">読み込み中...</div>
+                <h2>直近の登校予定</h2>
+                <div class="day-container" id="schedule-display">
+                    <div id="area-1" class="day-box">確認中...</div>
+                    <div id="area-2" class="day-box">確認中...</div>
                 </div>
             </section>
 
-            <section id="schedule-admin-section" style="display: none; border: 2px solid blue;">
-                <h2 style="color: blue;">予定管理（レギュラー・臨時設定）</h2>
+            <section id="admin-area" style="display: none; border: 2px solid blue;">
+                <h2 style="color: blue;">管理者：予定設定</h2>
                 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］長期休業・臨時休校の設定</summary>
-                    <div style="margin-top:10px;">
-                        開始日：<input type="date" id="vacation-start" style="width:150px;"> 
-                        終了日：<input type="date" id="vacation-end" style="width:150px;"><br>
-                        理由：<input type="text" id="vacation-title" placeholder="例：夏休み、開校記念日" style="width:250px;">
-                        <button onclick="saveVacation()">期間設定を保存</button>
-                        <div id="vacation-list" style="margin-top:10px; font-size:0.8em;"></div>
-                    </div>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割</summary>
+                    曜日：<select id="reg-day-select" onchange="loadRegularSetting()">
+                        <option value="mon">月曜日</option><option value="tue">火曜日</option>
+                        <option value="wed">水曜日</option><option value="thu">木曜日</option>
+                        <option value="fri">金曜日</option>
+                    </select>
+                    <table id="reg-table"></table>
+                    <button onclick="saveRegularSetting()">標準を保存</button>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割</summary>
-                    <div style="margin-top:10px;">
-                        曜日：<select id="reg-day-select" style="max-width:100px;">
-                            <option value="mon">月曜日</option><option value="tue">火曜日</option>
-                            <option value="wed">水曜日</option><option value="thu">木曜日</option>
-                            <option value="fri">金曜日</option>
-                        </select>
-                        <button onclick="loadRegularSetting()">設定呼出</button>
-                        <table id="reg-table" style="max-width:300px;"></table>
-                        <button onclick="saveRegularSetting()" style="margin-top:10px;">標準を保存</button>
-                    </div>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］長期休業・臨時休校（この期間をスキップ）</summary>
+                    開始：<input type="date" id="vac-start"> 終了：<input type="date" id="vac-end">
+                    <button onclick="saveVacation()">期間を登録</button>
+                    <div id="vacation-list"></div>
                 </details>
 
                 <div class="admin-form-box">
-                    <h3>特別な予定変更（日別編集）</h3>
-                    日付：<input type="date" id="edit-date-select" style="max-width:200px;">
+                    <h3>予定の個別編集</h3>
+                    日付：<input type="date" id="edit-date-select">
                     <button onclick="loadScheduleEdit()">編集データ呼出</button>
-                    <div id="edit-form-wrapper" style="display:none; margin-top:15px;">
-                        <table id="edit-table">
-                            <thead><tr><th>校時</th><th>科目</th><th>備考</th></tr></thead>
-                            <tbody id="edit-table-body"></tbody>
-                        </table>
-                        最終下校：<input type="time" id="edit-exit-time" style="max-width:120px;">
-                        <button id="save-sch-btn" style="background:#e3f2fd;">保存・公開</button>
-                        <div id="unread-monitor" class="unread-msg"></div>
+                    <div id="edit-form" style="display:none; margin-top:15px;">
+                        <table id="edit-table"></table>
+                        最終下校時刻：<select id="edit-exit-time"></select>
+                        <button onclick="saveSchedule()" style="background:#e3f2fd;">保存・公開</button>
                     </div>
                 </div>
-            </section>
-
-            <section>
-                <h2>担任ブログ</h2>
-                <div id="blog-admin-form" style="display: none;" class="admin-form-box">
-                    <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
-                    <button id="post-blog-btn">投稿</button>
-                </div>
-                <div id="blog-list">取得中...</div>
-            </section>
-
-            <section id="admin-section" style="display: none; border: 3px double #000;">
-                <h2 style="background:#000; color:#fff; padding:5px;">名簿管理</h2>
-                <div class="admin-form-box">
-                    <input type="email" id="direct-email" placeholder="メール" style="width:200px;">
-                    <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
-                    <button id="direct-reg-btn">登録</button>
-                </div>
-                <div id="student-list-area"></div>
             </section>
         </main>
     </div>
@@ -127,208 +92,151 @@
             appId: "1:125594983188:web:129aa54e9d3a39ca700001"
         };
         const TEACHER_EMAIL = "administrator@class.jp";
-        const SUBJECT_LIST = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事"];
+        const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事"];
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let studentMaster = {};
         let vacationData = [];
         let holidays = {};
 
-        // 祝日データ取得（外部API: holidays-jp）
-        async function fetchHolidays() {
-            try {
-                const res = await fetch('https://holidays-jp.github.io/api/v1/date.json');
-                holidays = await res.json();
-            } catch (e) { console.error("祝日取得失敗"); }
+        function initExitTimeOptions(targetEl) {
+            let html = "";
+            for(let h=13; h<=19; h++) {
+                for(let m=0; m<60; m+=10) {
+                    let time = `${h}:${m===0?'00':m}`;
+                    html += `<option value="${time}">${time}</option>`;
+                }
+            }
+            targetEl.innerHTML = html;
         }
 
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(() => alert("ログイン失敗"));
+            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(() => alert("失敗"));
         };
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
-            
-            await fetchHolidays();
-            
-            // 名簿・長期休暇設定の取得
-            const [sSnap, vSnap] = await Promise.all([
-                db.collection("students").get(),
+
+            const [hRes, vSnap] = await Promise.all([
+                fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()),
                 db.collection("config").doc("vacations").get()
             ]);
-            sSnap.forEach(doc => { studentMaster[doc.id] = { name: doc.data().name, lastLogin: doc.data().lastLogin?.toDate() }; });
+            holidays = hRes;
             vacationData = vSnap.exists ? vSnap.data().periods : [];
 
-            document.getElementById('welcome-msg').innerText = (studentMaster[user.email]?.name || "先生") + " さん";
-            await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
-
-            refreshDailyDisplay();
-
             if (user.email === TEACHER_EMAIL) {
-                document.getElementById('schedule-admin-section').style.display = 'block';
-                document.getElementById('admin-section').style.display = 'block';
-                document.getElementById('blog-admin-form').style.display = 'block';
-                loadStudentList();
+                document.getElementById('admin-area').style.display = 'block';
+                initExitTimeOptions(document.getElementById('edit-exit-time'));
                 loadRegularSetting();
                 renderVacationList();
             }
-
-            db.collection("blogs").orderBy("createdAt", "desc").limit(10).onSnapshot(snap => {
-                const list = document.getElementById('blog-list'); list.innerHTML = "";
-                snap.forEach(d => { list.innerHTML += `<div class="post-item"><div>${d.data().content}</div></div>`; });
-            });
+            displayNextSchoolDays();
         }
 
-        function getISODate(offset) {
-            const d = new Date(); d.setDate(d.getDate() + offset);
-            return d.toISOString().split('T')[0];
-        }
-
-        function getDisplayLabel(dateStr, offset) {
+        function isSchoolDay(dateStr) {
             const d = new Date(dateStr);
-            const weeks = ["日", "月", "火", "水", "木", "金", "土"];
-            const prefix = (offset === 0) ? "【今日】" : (offset === 1) ? "【明日】" : "";
-            return `${prefix} ${d.getMonth()+1}/${d.getDate()} (${weeks[d.getDay()]})`;
+            const day = d.getDay();
+            if (day === 0 || day === 6) return false;
+            if (holidays[dateStr]) return false;
+            if (vacationData.find(v => dateStr >= v.start && dateStr <= v.end)) return false;
+            return true;
         }
 
-        // --- コアロジック：表示判定 ---
-        async function refreshDailyDisplay() {
-            await renderDay(getISODate(0), "today-area", 0);
-            await renderDay(getISODate(1), "tomorrow-area", 1);
+        async function displayNextSchoolDays() {
+            let foundDays = [];
+            let checkDate = new Date();
+            while (foundDays.length < 2) {
+                let dateStr = checkDate.toISOString().split('T')[0];
+                if (isSchoolDay(dateStr)) foundDays.push(dateStr);
+                checkDate.setDate(checkDate.getDate() + 1);
+            }
+            await renderDay(foundDays[0], "area-1", "本日");
+            await renderDay(foundDays[1], "area-2", "次回");
         }
 
-        async function renderDay(dateStr, elId, offset) {
+        async function renderDay(dateStr, elId, prefix) {
             const el = document.getElementById(elId);
-            const label = getDisplayLabel(dateStr, offset);
-            
-            // 1. 祝日判定
-            if (holidays[dateStr]) {
-                el.innerHTML = `<span class="day-label">${label}</span><p class="holiday-text">祝日 (${holidays[dateStr]})：休み</p>`;
-                return;
-            }
+            const d = new Date(dateStr);
+            const week = ["日", "月", "火", "水", "木", "金", "土"];
+            // 表示形式を「本日〇月〇日（〇）」に変更
+            const label = `${prefix} ${d.getMonth()+1}月${d.getDate()}日（${week[d.getDay()]}）`;
 
-            // 2. 長期休暇・臨時休校判定
-            const vacation = vacationData.find(v => dateStr >= v.start && dateStr <= v.end);
-            if (vacation) {
-                el.innerHTML = `<span class="day-label">${label}</span><p class="holiday-text">${vacation.title}：休み</p>`;
-                return;
-            }
-
-            // 3. 土日判定
-            const dayNum = new Date(dateStr).getDay();
-            if (dayNum === 0 || dayNum === 6) {
-                el.innerHTML = `<span class="day-label">${label}</span><p>休日</p>`;
-                return;
-            }
-
-            // 4. 日別予定（Firestore）の確認
             const doc = await db.collection("schedules").doc(dateStr).get();
             let data = doc.exists ? doc.data() : null;
 
-            // 5. データがない場合は「標準時間割」を自動生成して表示
             if (!data) {
                 const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
                 const regDoc = await db.collection("config").doc("regular_schedule").get();
-                const regWeek = regDoc.exists ? regDoc.data()[dayKeys[dayNum]] : null;
-                data = {
-                    lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })),
-                    exitTime: "16:30",
-                    isAuto: true // 自動生成フラグ
-                };
+                const regWeek = regDoc.exists ? regDoc.data()[dayKeys[d.getDay()]] : null;
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30" };
             }
 
             let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
-                html += `<tr><td>${i+1}</td><td>${l.sub}</td><td class="note-cell">${l.note || "いつも通り"}</td></tr>`;
+                html += `<tr><td>${i+1}</td><td>${l.sub || "ー"}</td><td>${l.note || "いつも通り"}</td></tr>`;
             });
-            html += `</table><p style="text-align:right;">最終下校：${data.exitTime}${data.isAuto ? ' (標準)' : ''}</p>`;
+            html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
             el.innerHTML = html;
         }
 
-        // --- 管理機能：レギュラー設定 ---
+        // --- 管理機能 ---
         async function loadRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const doc = await db.collection("config").doc("regular_schedule").get();
-            const table = document.getElementById('reg-table');
-            table.innerHTML = "";
+            const table = document.getElementById('reg-table'); table.innerHTML = "";
             const data = doc.exists ? (doc.data()[day] || []) : [];
             for (let i = 0; i < 6; i++) {
-                let opts = SUBJECT_LIST.map(s => `<option value="${s}" ${s===(data[i]||"")?'selected':''}>${s||"（空欄）"}</option>`).join('');
+                let opts = SUBJECTS.map(s => `<option value="${s}" ${s===(data[i]||"")?'selected':''}>${s||"空"}</option>`).join('');
                 table.innerHTML += `<tr><td>${i+1}</td><td><select id="reg-sub-${i}">${opts}</select></td></tr>`;
             }
         }
         async function saveRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
-            const lessons = [];
-            for (let i=0; i<6; i++) { lessons.push(document.getElementById(`reg-sub-${i}`).value); }
+            const lessons = Array.from({length:6}, (_, i) => document.getElementById(`reg-sub-${i}`).value);
             await db.collection("config").doc("regular_schedule").set({ [day]: lessons }, { merge: true });
-            alert("保存しました。変更がない日はこの時間割が自動表示されます。");
-            refreshDailyDisplay();
+            alert("保存完了"); displayNextSchoolDays();
         }
-
-        // --- 管理機能：長期休暇設定 ---
         async function saveVacation() {
-            const start = document.getElementById('vacation-start').value;
-            const end = document.getElementById('vacation-end').value;
-            const title = document.getElementById('vacation-title').value;
-            if(!start || !end || !title) return alert("入力不足");
-            vacationData.push({ start, end, title });
+            const s = document.getElementById('vac-start').value, e = document.getElementById('vac-end').value;
+            if(!s || !e) return;
+            vacationData.push({ start: s, end: e });
             await db.collection("config").doc("vacations").set({ periods: vacationData });
-            renderVacationList(); refreshDailyDisplay();
+            renderVacationList(); displayNextSchoolDays();
         }
         function renderVacationList() {
-            const div = document.getElementById('vacation-list');
-            div.innerHTML = "設定済み：<br>" + vacationData.map((v, i) => 
-                `${v.start}〜${v.end} [${v.title}] <button onclick="deleteVacation(${i})">削除</button>`).join('<br>');
+            document.getElementById('vacation-list').innerHTML = vacationData.map((v, i) => 
+                `${v.start} 〜 ${v.end} <button onclick="deleteVac(${i})">削除</button>`).join('<br>');
         }
-        async function deleteVacation(i) {
-            vacationData.splice(i, 1);
-            await db.collection("config").doc("vacations").set({ periods: vacationData });
-            renderVacationList(); refreshDailyDisplay();
-        }
+        async function deleteVac(i) { vacationData.splice(i,1); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); displayNextSchoolDays(); }
 
-        // --- 管理機能：日別編集 ---
         async function loadScheduleEdit() {
-            const date = document.getElementById('edit-date-select').value;
-            if(!date) return;
+            const date = document.getElementById('edit-date-select').value; if(!date) return;
             const doc = await db.collection("schedules").doc(date).get();
-            const body = document.getElementById('edit-table-body'); body.innerHTML = "";
+            const table = document.getElementById('edit-table'); table.innerHTML = "";
             let data = doc.exists ? doc.data() : null;
-
             if(!data) {
                 const dayNum = new Date(date).getDay();
-                const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
                 const regDoc = await db.collection("config").doc("regular_schedule").get();
-                const regData = regDoc.exists ? regDoc.data()[dayKeys[dayNum]] : null;
+                const regData = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayNum]] : null;
                 data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30" };
             }
             data.lessons.forEach((l, i) => {
-                let opts = SUBJECT_LIST.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
-                body.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}">${opts}</select></td><td><input type="text" id="edit-note-${i}" value="${l.note}"></td></tr>`;
+                let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"空"}</option>`).join('');
+                table.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}">${opts}</select></td><td><input type="text" id="edit-note-${i}" value="${l.note}"></td></tr>`;
             });
+            initExitTimeOptions(document.getElementById('edit-exit-time'));
             document.getElementById('edit-exit-time').value = data.exitTime;
-            document.getElementById('edit-form-wrapper').style.display = "block";
+            document.getElementById('edit-form').style.display = "block";
         }
-
-        document.getElementById('save-sch-btn').onclick = async () => {
+        async function saveSchedule() {
             const date = document.getElementById('edit-date-select').value;
-            const lessons = [];
-            for(let i=0; i<6; i++) { lessons.push({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }); }
+            const lessons = Array.from({length:6}, (_, i) => ({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }));
             await db.collection("schedules").doc(date).set({ lessons, exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-            alert("保存完了"); refreshDailyDisplay();
-        };
-
-        // 基本機能
-        async function loadStudentList() {
-            const snap = await db.collection("students").get();
-            let h = "<table>"; snap.forEach(doc => h += `<tr><td>${doc.data().name}</td></tr>`);
-            document.getElementById('student-list-area').innerHTML = h + "</table>";
+            alert("保存完了"); displayNextSchoolDays();
         }
-        document.getElementById('logout-btn').onclick = () => location.reload();
     </script>
 </body>
 </html>
