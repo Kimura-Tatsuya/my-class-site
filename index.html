@@ -8,9 +8,12 @@
         body { background-color: white; color: black; font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
         h1 { border-bottom: 2px solid black; padding-bottom: 10px; }
         section { margin-bottom: 30px; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
-        input { width: 100%; max-width: 300px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; cursor: pointer; background: #333; color: #fff; border: none; border-radius: 4px; }
-        .error { color: red; font-size: 0.9em; }
+        input { width: 100%; max-width: 300px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; cursor: pointer; background: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #555; }
+        .error { color: red; font-size: 0.9em; min-height: 1.5em; }
+        .logout-btn { background: #f44336; }
+        .logout-btn:hover { background: #d32f2f; }
     </style>
 </head>
 <body>
@@ -18,21 +21,33 @@
     <div id="login-section" style="text-align: center; margin-top: 50px;">
         <h1>Class Portal</h1>
         <p>ID（メール形式）とパスワードを入力してください。</p>
-        <input type="email" id="email" placeholder="s01@class.jp"><br>
-        <input type="password" id="password" placeholder="Password"><br>
-        <button type="button" onclick="login()">Login</button>
+        <div style="margin: 20px 0;">
+            <input type="email" id="email" placeholder="例: s01@class.jp"><br>
+            <input type="password" id="password" placeholder="Password"><br>
+            <button type="button" onclick="login()">Login</button>
+        </div>
         <p id="error-message" class="error"></p>
     </div>
 
     <div id="main-content" style="display: none;">
-        <header style="display: flex; justify-content: space-between; align-items: center;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1>３年３組 学級のページ</h1>
-            <button onclick="logout()" style="background:#f44336;">Logout</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
         <main>
             <section>
                 <h2>📢 今週の予定</h2>
-                <p>ログインに成功しました！ここに内容を記載します。</p>
+                <p>ログインに成功しました！ここにクラスの連絡事項を記載します。</p>
+                <ul>
+                    <li>配布物の確認</li>
+                    <li>次回の時間割変更について</li>
+                </ul>
+            </section>
+            
+            <section style="background: #fdfdfd;">
+                <h3>⚙️ 設定</h3>
+                <p>パスワードを忘れた、または変更したい場合はこちら。</p>
+                <button onclick="resetPassword()" style="background: #666;">再設定メールを送信</button>
             </section>
         </main>
     </div>
@@ -42,7 +57,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- 設定値 ---
+        // --- Firebase設定値 ---
         const firebaseConfig = {
             apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
             authDomain: "my-class-site.firebaseapp.com",
@@ -53,36 +68,57 @@
             measurementId: "G-4EQ3Z9Q4NT"
         };
 
-        // Firebaseの初期化
+        // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ログイン関数（ここが定義されていないとエラーになります）
+        // ログイン関数
         function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('error-message');
 
-            console.log("Login attempt for:", email); // 動作確認用のログ
+            console.log("ログイン試行:", email);
+            errorMsg.innerText = "認証中...";
 
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // ログを保存
+                    console.log("認証成功！");
+                    
+                    // 1. まず画面を切り替える（生徒を待たせない）
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+
+                    // 2. ログを保存（失敗してもログイン状態は維持）
                     db.collection("access_logs").add({
                         email: email,
                         loginTime: firebase.firestore.FieldValue.serverTimestamp(),
                         userAgent: navigator.userAgent
-                    }).then(() => {
-                        document.getElementById('login-section').style.display = 'none';
-                        document.getElementById('main-content').style.display = 'block';
-                    });
+                    }).catch(err => console.error("ログ保存エラー（無視して可）:", err));
                 })
                 .catch((error) => {
-                    console.error("Login Error:", error.code);
-                    errorMsg.innerText = "IDまたはパスワードが違います。";
+                    console.error("エラー詳細:", error.code, error.message);
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        errorMsg.innerText = "IDまたはパスワードが正しくありません。";
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg.innerText = "ID（メール形式）を正しく入力してください。";
+                    } else {
+                        errorMsg.innerText = "ログインに失敗しました。時間をおいて試すか、先生に連絡してください。";
+                    }
                 });
         }
 
+        // パスワード再設定
+        function resetPassword() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                firebase.auth().sendPasswordResetEmail(user.email)
+                    .then(() => alert("再設定メールを送信しました。メールボックスを確認してください。"))
+                    .catch((err) => alert("エラー: " + err.message));
+            }
+        }
+
+        // ログアウト
         function logout() {
             firebase.auth().signOut().then(() => {
                 location.reload();
