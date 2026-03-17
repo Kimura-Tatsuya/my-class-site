@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>３年３組 学級管理システム</title>
+    <title>Class 3-3 Portal</title>
     <style>
         /* ＭＳ ゴシックを基調としたスタイル */
         body { 
@@ -33,15 +33,19 @@
         }
         button:hover { background: #eeeeee; }
         .post-item { border-bottom: 1px dashed #000; padding: 15px 0; }
-        .post-date { font-size: 0.8em; color: #444; }
-        /* 更新日時のスタイル */
+        .post-date { font-size: 0.8em; color: #444; margin-bottom: 5px; }
         .update-stamp { font-size: 0.9em; margin-left: 10px; font-weight: normal; }
+        
+        /* 管理用ボタンのスタイル */
+        .admin-controls { margin-top: 10px; }
+        .btn-edit { font-size: 0.8em; border-color: blue; color: blue; }
+        .btn-delete { font-size: 0.8em; border-color: red; color: red; }
     </style>
 </head>
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>学級管理システム ログイン</h1>
+        <h1>Class 3-3 Portal</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
         <button type="button" id="login-btn">ログイン</button>
@@ -65,7 +69,7 @@
             </section>
 
             <section>
-                <h2>担任ブログ</h2>
+                <h2>担任日誌</h2>
                 <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 15px; margin-bottom: 15px; border: 1px solid #000;">
                     <textarea id="blog-input" placeholder="投稿内容を入力してください"></textarea><br>
                     <button id="post-blog-btn">ブログを投稿する</button>
@@ -122,7 +126,7 @@
             const userDoc = await db.collection("students").doc(user.email).get();
             document.getElementById('welcome-msg').innerText = (userDoc.exists ? userDoc.data().name : "ゲスト") + " さん、おかえりなさい";
 
-            // 予定と更新日時の読み込み
+            // 予定読み込み
             db.collection("config").doc("weekly_schedule").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
@@ -130,21 +134,34 @@
                     document.getElementById('schedule-input').value = data.text;
                     if(data.updatedAt) {
                         const date = data.updatedAt.toDate();
-                        const dateStr = (date.getMonth() + 1) + "/" + date.getDate() + " " + 
-                                        date.getHours().toString().padStart(2, '0') + ":" + 
-                                        date.getMinutes().toString().padStart(2, '0');
+                        const dateStr = (date.getMonth() + 1) + "/" + date.getDate() + " " + date.getHours().toString().padStart(2, '0') + ":" + date.getMinutes().toString().padStart(2, '0');
                         document.getElementById('last-update-time').innerText = dateStr + " 更新";
                     }
                 }
             });
 
-            db.collection("blogs").orderBy("createdAt", "desc").limit(10).onSnapshot(snap => {
+            // ブログ読み込み
+            db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
                 const list = document.getElementById('blog-list');
                 list.innerHTML = "";
                 snap.forEach(d => {
                     const data = d.data();
+                    const id = d.id;
                     const date = data.createdAt ? data.createdAt.toDate().toLocaleString('ja-JP') : "日時不明";
-                    list.innerHTML += `<div class="post-item"><div class="post-date">${date}</div><div>${data.content}</div></div>`;
+                    
+                    let html = `<div class="post-item" id="post-${id}">
+                        <div class="post-date">${date}</div>
+                        <div class="post-content">${data.content.replace(/\n/g, '<br>')}</div>`;
+                    
+                    // 管理者用操作ボタン
+                    if (user.email === TEACHER_EMAIL) {
+                        html += `<div class="admin-controls">
+                            <button class="btn-edit" onclick="editBlog('${id}')">編集</button>
+                            <button class="btn-delete" onclick="deleteBlog('${id}')">削除</button>
+                        </div>`;
+                    }
+                    html += `</div>`;
+                    list.innerHTML += html;
                 });
             });
 
@@ -158,12 +175,42 @@
             db.collection("access_logs").add({ email: user.email, loginTime: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
-        // 予定保存時に日時を記録
+        // ブログ編集機能
+        async function editBlog(id) {
+            const doc = await db.collection("blogs").doc(id).get();
+            if(!doc.exists) return;
+            const newContent = prompt("ブログの内容を編集してください:", doc.data().content);
+            if(newContent !== null && newContent !== "") {
+                await db.collection("blogs").doc(id).update({
+                    content: newContent,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("編集しました");
+            }
+        }
+
+        // ブログ削除機能
+        async function deleteBlog(id) {
+            if(confirm("この投稿を完全に削除してもよろしいですか？")) {
+                await db.collection("blogs").doc(id).delete();
+                alert("削除しました");
+            }
+        }
+
         document.getElementById('update-schedule-btn').onclick = () => {
             db.collection("config").doc("weekly_schedule").set({
                 text: document.getElementById('schedule-input').value,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => alert("保存しました"));
+        };
+
+        document.getElementById('post-blog-btn').onclick = () => {
+            const content = document.getElementById('blog-input').value;
+            if(!content) return;
+            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
+                document.getElementById('blog-input').value = "";
+                alert("投稿しました");
+            });
         };
 
         async function loadLogs() {
@@ -187,15 +234,6 @@
             a.href = URL.createObjectURL(blob);
             a.download = "student_list.csv";
             a.click();
-        };
-
-        document.getElementById('post-blog-btn').onclick = () => {
-            const content = document.getElementById('blog-input').value;
-            if(!content) return;
-            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
-                document.getElementById('blog-input').value = "";
-                alert("投稿しました");
-            });
         };
 
         document.getElementById('import-csv-btn').onclick = () => {
