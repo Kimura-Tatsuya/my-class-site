@@ -5,29 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>３年３組 学級管理システム</title>
     <style>
-        body { background-color: white; color: black; font-family: "MS UI Gothic", "MS Gothic", "Osaka", sans-serif; line-height: 1.5; padding: 20px; max-width: 850px; margin: 0 auto; }
-        h1, h2, h3 { font-weight: bold; border-bottom: 1px solid black; margin-top: 25px; padding-bottom: 5px; }
+        /* ＭＳ ゴシックを基調としたスタイル */
+        body { 
+            background-color: white; 
+            color: black; 
+            font-family: "MS UI Gothic", "MS Gothic", "Osaka", sans-serif; 
+            line-height: 1.5; 
+            padding: 20px; 
+            max-width: 850px; 
+            margin: 0 auto; 
+        }
+        h1, h2, h3 { 
+            font-weight: bold;
+            border-bottom: 1px solid black; 
+            margin-top: 25px;
+            padding-bottom: 5px;
+        }
         section { margin-bottom: 40px; border: 1px solid #000; padding: 20px; }
-        input, textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #000; box-sizing: border-box; font-family: inherit; }
-        button { padding: 8px 15px; cursor: pointer; background: white; color: black; border: 1px solid black; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; }
+        input, textarea, select { 
+            width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; 
+            border: 1px solid #000; box-sizing: border-box; font-family: inherit;
+        }
+        button { 
+            padding: 8px 15px; cursor: pointer; background: white; color: black; 
+            border: 1px solid black; font-weight: bold; font-family: inherit;
+            margin-right: 5px; margin-bottom: 5px;
+        }
         button:hover { background: #eeeeee; }
         
+        /* 予定の横並び用レイアウト */
+        .day-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+        .day-box { flex: 1; border: 1px solid #000; padding: 10px; min-width: 300px; }
+        .day-label { font-weight: bold; font-size: 1.1em; border-bottom: 1px solid #000; display: block; margin-bottom: 10px; }
+
         .flex-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
-        .day-container { display: flex; gap: 20px; margin-top: 10px; }
-        .day-box { flex: 1; border: 1px solid #000; padding: 10px; min-width: 280px; }
-        
         .post-item { border-bottom: 1px dashed #000; padding: 15px 0; }
         .post-date { font-size: 0.8em; color: #444; margin-bottom: 5px; }
-        .edit-area { background: #f0f0f0; padding: 10px; border: 1px solid #000; margin-top: 10px; display: none; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.9em; }
+        th, td { border: 1px solid black; padding: 5px; text-align: center; }
         th { background: #f2f2f2; }
-        .text-left { text-align: left; }
+        .note-cell { text-align: left; }
 
-        .btn-small { font-size: 0.8em; padding: 4px 8px; }
-        .btn-red { color: red; border-color: red; }
-        .btn-blue { color: blue; border-color: blue; }
         .admin-form-box { background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px; }
         .unread-msg { color: red; font-weight: bold; font-size: 0.8em; margin-top: 10px; }
         #log-area { display: none; margin-top: 10px; }
@@ -39,7 +58,7 @@
         <h1>学級管理システム ログイン</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
-        <button type="button" id="login-btn">ログイン</button>
+        <button id="login-btn">ログイン</button>
         <p id="error-message" style="color:red; font-weight:bold;"></p>
     </div>
 
@@ -53,24 +72,41 @@
             <section>
                 <h2>本日の予定・明日の予定</h2>
                 <div class="day-container">
-                    <div id="today-area" class="day-box">取得中...</div>
-                    <div id="tomorrow-area" class="day-box">取得中...</div>
+                    <div id="today-area" class="day-box">読み込み中...</div>
+                    <div id="tomorrow-area" class="day-box">読み込み中...</div>
                 </div>
             </section>
 
-            <section id="schedule-admin-section" style="display: none;">
-                <h2 style="color: blue;">予定編集（5週間先まで）</h2>
+            <section id="schedule-admin-section" style="display: none; border: 2px solid blue;">
+                <h2 style="color: blue;">予定管理（レギュラー・日別編集）</h2>
+                
+                <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割を登録する</summary>
+                    <div style="margin-top:10px;">
+                        曜日：<select id="reg-day-select" style="max-width:100px;">
+                            <option value="mon">月曜日</option><option value="tue">火曜日</option>
+                            <option value="wed">水曜日</option><option value="thu">木曜日</option>
+                            <option value="fri">金曜日</option>
+                        </select>
+                        <button onclick="loadRegularSetting()">設定呼出</button>
+                        <table id="reg-table" style="max-width:300px;"></table>
+                        <button onclick="saveRegularSetting()" style="margin-top:10px;">この曜日の標準を保存</button>
+                    </div>
+                </details>
+
                 <div class="admin-form-box">
+                    <h3>日別の予定作成（5週間先まで対応）</h3>
                     日付選択：<input type="date" id="edit-date-select" style="max-width:200px;">
-                    <button onclick="loadScheduleEdit()">編集データ呼出</button>
+                    <button onclick="loadScheduleEdit()">編集データ呼出 / 新規作成</button>
+                    
                     <div id="edit-form-wrapper" style="display:none; margin-top:15px;">
                         <table>
-                            <tr><th>校時</th><th>科目</th><th>備考（特別な連絡がない場合は「いつも通り」）</th></tr>
+                            <thead><tr><th>校時</th><th>科目</th><th>備考（空欄なら「いつも通り」）</th></tr></thead>
                             <tbody id="edit-table-body"></tbody>
                         </table>
                         <div style="margin-top:10px;">
                             最終下校時刻：<input type="time" id="edit-exit-time" style="max-width:120px;">
-                            <button id="save-sch-btn" style="background:#e1f5fe;">保存・更新</button>
+                            <button id="save-sch-btn" style="background:#e3f2fd;">この日の予定を保存・公開</button>
                         </div>
                         <div id="unread-monitor" class="unread-msg"></div>
                     </div>
@@ -80,49 +116,40 @@
             <section>
                 <h2>担任ブログ</h2>
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box">
-                    <textarea id="blog-input" placeholder="投稿内容を入力してください"></textarea><br>
+                    <textarea id="blog-input" placeholder="投稿内容を入力"></textarea><br>
                     <button id="post-blog-btn">ブログを投稿する</button>
                 </div>
                 <div id="blog-list">取得中...</div>
             </section>
 
             <section id="admin-section" style="display: none; border: 3px double #000;">
-                <h2 style="background: #000; color: #fff; padding: 5px;">管理者専用メニュー（名簿・ログ）</h2>
+                <h2 style="background:#000; color:#fff; padding:5px;">名簿・アクセス管理</h2>
                 <div class="admin-form-box">
                     <div class="flex-row">
                         <input type="email" id="direct-email" placeholder="メールアドレス" style="max-width:250px;">
                         <input type="text" id="direct-name" placeholder="氏名" style="max-width:150px;">
                         <button id="direct-reg-btn">登録・更新</button>
                     </div>
-                    <hr>
-                    <input type="file" id="csv-file" accept=".csv" style="display:block;">
-                    <div class="flex-row">
-                        <button id="import-csv-btn">名簿インポート(CSV)</button>
-                        <button id="export-student-btn">名簿エクスポート(CSV)</button>
-                    </div>
                 </div>
-                <h3>登録状況一覧</h3>
                 <div id="student-list-area"></div>
-                <h3>アクセスログ</h3>
-                <button id="toggle-log-btn">ログを表示する</button>
+                <button id="toggle-log-btn" style="margin-top:15px;">アクセスログを表示</button>
                 <div id="log-area">
                     <table>
-                        <thead><tr><th>日時</th><th>利用者（氏名・メール）</th></tr></thead>
+                        <thead><tr><th>日時</th><th>利用者</th></tr></thead>
                         <tbody id="log-table-body"></tbody>
                     </table>
                 </div>
             </section>
 
             <section>
-                <h2>設定（パスワード変更）</h2>
+                <h2>パスワード変更</h2>
                 <div style="max-width:400px;">
-                    <p style="font-size:0.8em; margin-bottom:5px;">※コピー＆ペースト禁止</p>
                     <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
                     <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
-                    <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用再入力）" onpaste="return false;"><br>
-                    <button id="change-pw-btn">パスワードを変更・確定する</button>
+                    <input type="password" id="new-password-confirm" placeholder="確認用再入力" onpaste="return false;"><br>
+                    <button id="change-pw-btn">パスワードを更新する</button>
                 </div>
-                <p id="pw-msg" style="font-size:0.9em; margin-top:10px; font-weight:bold;"></p>
+                <p id="pw-msg" style="font-weight:bold;"></p>
             </section>
         </main>
     </div>
@@ -145,236 +172,177 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let studentMaster = {}; // { email: { name, lastLogin } }
+        let studentMaster = {};
 
+        // ログイン
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(err => { document.getElementById('error-message').innerText = "ログイン失敗"; });
+            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(() => { document.getElementById('error-message').innerText="ログイン失敗"; });
         };
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
 
-            // 名簿とログイン時刻の同期
-            const studentSnap = await db.collection("students").get();
-            studentSnap.forEach(doc => { 
-                studentMaster[doc.id] = { name: doc.data().name, lastLogin: doc.data().lastLogin ? doc.data().lastLogin.toDate() : null }; 
-            });
+            // 名簿/ログイン時間同期
+            const sSnap = await db.collection("students").get();
+            sSnap.forEach(doc => { studentMaster[doc.id] = { name: doc.data().name, lastLogin: doc.data().lastLogin ? doc.data().lastLogin.toDate() : null }; });
 
-            const myInfo = studentMaster[user.email];
-            document.getElementById('welcome-msg').innerText = (myInfo ? myInfo.name : "未登録") + " さん、おかえりなさい";
-
-            // 自身のログイン時刻を更新
+            document.getElementById('welcome-msg').innerText = (studentMaster[user.email]?.name || "先生") + " さん、こんにちは";
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
 
-            // 今日・明日の表示
+            // 予定表表示
             refreshDailyDisplay();
 
-            // ブログ読み込み
+            // ブログ取得
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
-                const list = document.getElementById('blog-list');
-                list.innerHTML = "";
+                const list = document.getElementById('blog-list'); list.innerHTML = "";
                 snap.forEach(d => {
                     const data = d.data();
-                    const id = d.id;
-                    const date = data.createdAt ? data.createdAt.toDate().toLocaleString('ja-JP') : "日時不明";
-                    let html = `<div class="post-item"><div class="post-date">${date}</div><div>${data.content.replace(/\n/g, '<br>')}</div>`;
-                    if (user.email === TEACHER_EMAIL) {
-                        html += `<div id="edit-area-${id}" class="edit-area"><textarea id="edit-input-${id}" style="width:100%">${data.content}</textarea><button class="btn-small" onclick="saveBlogEdit('${id}')">更新</button><button class="btn-small" onclick="toggleEdit('${id}')">戻る</button></div>
-                        <div class="flex-row" style="margin-top:10px;"><button class="btn-small" onclick="toggleEdit('${id}')">編集</button><button class="btn-small btn-red" onclick="deleteBlog('${id}')">削除</button></div>`;
-                    }
-                    html += `</div>`;
-                    list.innerHTML += html;
+                    list.innerHTML += `<div class="post-item"><div class="post-date">${data.createdAt?.toDate().toLocaleString() || ""}</div><div>${data.content.replace(/\n/g, '<br>')}</div></div>`;
                 });
             });
 
             if (user.email === TEACHER_EMAIL) {
-                document.getElementById('admin-section').style.display = 'block';
                 document.getElementById('schedule-admin-section').style.display = 'block';
+                document.getElementById('admin-section').style.display = 'block';
                 document.getElementById('blog-admin-form').style.display = 'block';
-                document.getElementById('toggle-log-btn').onclick = toggleLogs;
-                document.getElementById('direct-reg-btn').onclick = registerDirect;
-                document.getElementById('save-sch-btn').onclick = saveSchedule;
                 loadStudentList();
+                loadRegularSetting();
             }
-
             db.collection("access_logs").add({ email: user.email, loginTime: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
-        // --- スケジュール機能 ---
-
+        // --- 予定表：表示ロジック ---
         function getISODate(offset = 0) {
-            const d = new Date();
-            d.setDate(d.getDate() + offset);
+            const d = new Date(); d.setDate(d.getDate() + offset);
             return d.toISOString().split('T')[0];
         }
-
+        function getDisplayLabel(offset) {
+            const d = new Date(); d.setDate(d.getDate() + offset);
+            const weeks = ["日", "月", "火", "水", "木", "金", "土"];
+            const prefix = (offset === 0) ? "【今日】" : (offset === 1) ? "【明日】" : "";
+            return `${prefix} ${d.getMonth()+1}/${d.getDate()} (${weeks[d.getDay()]}) の予定`;
+        }
         async function refreshDailyDisplay() {
-            renderDayCard(getISODate(0), "today-area", "【今日】");
-            renderDayCard(getISODate(1), "tomorrow-area", "【明日】");
+            renderDay(getISODate(0), "today-area", getDisplayLabel(0));
+            renderDay(getISODate(1), "tomorrow-area", getDisplayLabel(1));
         }
-
-        async function renderDayCard(dateStr, elId, label) {
-            const doc = await db.collection("schedules").doc(dateStr).get();
+        async function renderDay(date, elId, label) {
+            const doc = await db.collection("schedules").doc(date).get();
             const el = document.getElementById(elId);
-            if (!doc.exists) {
-                el.innerHTML = `<strong>${label} ${dateStr}</strong><p>予定が登録されていません</p>`;
-                return;
-            }
+            if (!doc.exists) { el.innerHTML = `<span class="day-label">${label}</span><p>未登録です</p>`; return; }
             const data = doc.data();
-            let table = `<strong>${label} ${dateStr}</strong><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
-            data.lessons.forEach((l, i) => {
-                table += `<tr><td>${i+1}</td><td>${l.sub}</td><td class="text-left">${l.note || "いつも通り"}</td></tr>`;
-            });
-            table += `</table><p style="text-align:right; margin-top:5px;">最終下校：${data.exitTime || "---"}</p>`;
-            el.innerHTML = table;
+            let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
+            data.lessons.forEach((l, i) => { html += `<tr><td>${i+1}</td><td>${l.sub}</td><td class="note-cell">${l.note || "いつも通り"}</td></tr>`; });
+            html += `</table><p style="text-align:right; margin-top:5px;">最終下校：${data.exitTime}</p>`;
+            el.innerHTML = html;
         }
 
-        async function loadScheduleEdit() {
-            const dateStr = document.getElementById('edit-date-select').value;
-            if(!dateStr) return alert("日付を選択してください");
-            
-            const doc = await db.collection("schedules").doc(dateStr).get();
-            const body = document.getElementById('edit-table-body');
-            body.innerHTML = "";
-            const data = doc.exists ? doc.data() : null;
-
+        // --- 管理者：レギュラー設定 ---
+        async function loadRegularSetting() {
+            const day = document.getElementById('reg-day-select').value;
+            const doc = await db.collection("config").doc("regular_schedule").get();
+            const table = document.getElementById('reg-table');
+            table.innerHTML = "";
+            const data = doc.exists ? (doc.data()[day] || []) : [];
             for (let i = 0; i < 6; i++) {
-                const curSub = data ? data.lessons[i].sub : "国語";
-                const curNote = data ? data.lessons[i].note : "";
-                let options = SUBJECT_LIST.map(s => `<option value="${s}" ${s === curSub ? 'selected' : ''}>${s}</option>`).join('');
-                body.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin-bottom:0;">${options}</select></td>
-                                   <td><input type="text" id="edit-note-${i}" value="${curNote}" placeholder="いつも通り" style="margin-bottom:0;"></td></tr>`;
-            }
-            document.getElementById('edit-exit-time').value = data ? data.exitTime : "16:30";
-            document.getElementById('edit-form-wrapper').style.display = "block";
-
-            // 未確認者リスト（更新後にログインがない生徒）
-            if (data && data.updatedAt) {
-                const updateTime = data.updatedAt.toDate();
-                const unread = Object.keys(studentMaster).filter(email => {
-                    if (email === TEACHER_EMAIL) return false;
-                    const lastLogin = studentMaster[email].lastLogin;
-                    return !lastLogin || lastLogin < updateTime;
-                });
-                document.getElementById('unread-monitor').innerText = unread.length > 0 ? 
-                    "更新後の未確認者：" + unread.map(e => studentMaster[e].name).join(", ") : "全員確認済みです";
-            } else {
-                document.getElementById('unread-monitor').innerText = "";
+                const sub = data[i] || "国語";
+                let opts = SUBJECT_LIST.map(s => `<option value="${s}" ${s===sub?'selected':''}>${s}</option>`).join('');
+                table.innerHTML += `<tr><td>${i+1}</td><td><select id="reg-sub-${i}">${opts}</select></td></tr>`;
             }
         }
-
-        async function saveSchedule() {
-            const dateStr = document.getElementById('edit-date-select').value;
+        async function saveRegularSetting() {
+            const day = document.getElementById('reg-day-select').value;
             const lessons = [];
-            for (let i = 0; i < 6; i++) {
-                lessons.push({
-                    sub: document.getElementById(`edit-sub-${i}`).value,
-                    note: document.getElementById(`edit-note-${i}`).value
-                });
-            }
-            const exitTime = document.getElementById('edit-exit-time').value;
-            await db.collection("schedules").doc(dateStr).set({
-                lessons, exitTime, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            alert("保存しました");
-            refreshDailyDisplay();
-            loadScheduleEdit();
+            for (let i = 0; i < 6; i++) { lessons.push(document.getElementById(`reg-sub-${i}`).value); }
+            await db.collection("config").doc("regular_schedule").set({ [day]: lessons }, { merge: true });
+            alert("標準設定を保存しました");
         }
 
-        // --- 以下、既存機能の維持 ---
+        // --- 管理者：日別編集 ---
+        async function loadScheduleEdit() {
+            const date = document.getElementById('edit-date-select').value;
+            if(!date) return alert("日付を選択してください");
+            const doc = await db.collection("schedules").doc(date).get();
+            const body = document.getElementById('edit-table-body'); body.innerHTML = "";
+            let data = doc.exists ? doc.data() : null;
 
+            if (!data) { // 新規ならレギュラーを呼出
+                const d = new Date(date);
+                const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+                const regDoc = await db.collection("config").doc("regular_schedule").get();
+                const regData = regDoc.exists ? regDoc.data()[dayKeys[d.getDay()]] : null;
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "国語", note: "" })), exitTime: "16:30" };
+            }
+
+            data.lessons.forEach((l, i) => {
+                let opts = SUBJECT_LIST.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s}</option>`).join('');
+                body.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}">${opts}</select></td><td><input type="text" id="edit-note-${i}" value="${l.note}"></td></tr>`;
+            });
+            document.getElementById('edit-exit-time').value = data.exitTime;
+            document.getElementById('edit-form-wrapper').style.display = "block";
+            
+            // 未確認者リスト表示
+            if(data.updatedAt) {
+                const ut = data.updatedAt.toDate();
+                const unread = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL && (!studentMaster[e].lastLogin || studentMaster[e].lastLogin < ut));
+                document.getElementById('unread-monitor').innerText = unread.length ? "更新後の未ログイン者：" + unread.map(e => studentMaster[e].name).join(", ") : "全員確認済み";
+            } else { document.getElementById('unread-monitor').innerText = ""; }
+        }
+
+        document.getElementById('save-sch-btn').onclick = async () => {
+            const date = document.getElementById('edit-date-select').value;
+            const lessons = [];
+            for(let i=0; i<6; i++) { lessons.push({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }); }
+            await db.collection("schedules").doc(date).set({ lessons, exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            alert("公開しました"); refreshDailyDisplay(); loadScheduleEdit();
+        };
+
+        // --- 名簿・ログ・ブログ基本機能 ---
         async function loadStudentList() {
             const snap = await db.collection("students").get();
-            let html = "<table><tr><th>名前</th><th>メール</th><th>操作</th></tr>";
-            snap.forEach(doc => {
-                const email = doc.id, name = doc.data().name;
-                html += `<tr id="row-${email.replace(/[@.]/g, '-')}"><td class="name-cell">${name}</td><td>${email}</td>
-                    <td><button class="btn-small btn-blue" onclick="editStudentRow('${email}', '${name}')">編集</button>
-                    <button class="btn-small btn-red" onclick="deleteStudent('${email}')">削除</button></td></tr>`;
-            });
+            let html = "<table><tr><th>氏名</th><th>操作</th></tr>";
+            snap.forEach(doc => { html += `<tr><td>${doc.data().name} (${doc.id})</td><td><button class="btn-small btn-red" onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`; });
             document.getElementById('student-list-area').innerHTML = html + "</table>";
         }
-        function editStudentRow(email, currentName) {
-            const rowId = `row-${email.replace(/[@.]/g, '-')}`, row = document.getElementById(rowId);
-            row.innerHTML = `<td><input type="text" id="edit-name-${rowId}" value="${currentName}" style="margin-bottom:0; width:120px;"></td><td>${email}</td>
-                <td><button class="btn-small" onclick="saveStudentEdit('${email}', '${rowId}')">保存</button><button class="btn-small" onclick="loadStudentList()">取消</button></td>`;
-        }
-        async function saveStudentEdit(email, rowId) {
-            const newName = document.getElementById(`edit-name-${rowId}`).value.trim();
-            if(!newName) return alert("入力してください");
-            await db.collection("students").doc(email).update({ name: newName });
-            studentMaster[email].name = newName; loadStudentList();
-        }
-        async function deleteStudent(email) {
-            if(confirm("削除しますか？")) { await db.collection("students").doc(email).delete(); delete studentMaster[email]; loadStudentList(); }
-        }
-        function toggleLogs() {
-            const area = document.getElementById('log-area'), btn = document.getElementById('toggle-log-btn');
-            if (area.style.display === 'block') { area.style.display = 'none'; btn.innerText = "ログを表示する"; }
-            else { area.style.display = 'block'; btn.innerText = "ログを非表示にする"; loadLogs(); }
-        }
-        async function loadLogs() {
-            const tbody = document.getElementById('log-table-body'); tbody.innerHTML = "取得中...";
-            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(30).get();
-            tbody.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data(), time = d.loginTime ? d.loginTime.toDate().toLocaleString() : "---";
-                const displayName = studentMaster[d.email] ? `${studentMaster[d.email].name} (${d.email})` : d.email;
-                tbody.innerHTML += `<tr><td>${time}</td><td>${displayName}</td></tr>`;
-            });
-        }
-        document.getElementById('change-pw-btn').onclick = async () => {
-            const user = firebase.auth().currentUser, oldPw = document.getElementById('old-password').value,
-                  newPw = document.getElementById('new-password').value, confirmPw = document.getElementById('new-password-confirm').value, msg = document.getElementById('pw-msg');
-            if(!oldPw || !newPw || !confirmPw) return alert("全項目入力してください");
-            if(newPw !== confirmPw) return alert("不一致");
-            try {
-                await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, oldPw));
-                await user.updatePassword(newPw);
-                msg.style.color = "blue"; msg.innerText = "完了";
-                document.getElementById('old-password').value = ""; document.getElementById('new-password').value = ""; document.getElementById('new-password-confirm').value = "";
-            } catch (err) { msg.style.color = "red"; msg.innerText = "失敗"; }
-        };
         async function registerDirect() {
-            const email = document.getElementById('direct-email').value.trim(), name = document.getElementById('direct-name').value.trim();
-            if(!email || !name) return alert("入力してください");
-            await db.collection("students").doc(email).set({ name: name });
-            studentMaster[email] = { name: name, lastLogin: null }; loadStudentList();
+            const email = document.getElementById('direct-email').value, name = document.getElementById('direct-name').value;
+            if(!email || !name) return;
+            await db.collection("students").doc(email).set({ name }); loadStudentList();
         }
-        function toggleEdit(id) { const area = document.getElementById(`edit-area-${id}`); area.style.display = (area.style.display === 'block') ? 'none' : 'block'; }
-        async function saveBlogEdit(id) {
-            const newContent = document.getElementById(`edit-input-${id}`).value;
-            await db.collection("blogs").doc(id).update({ content: newContent }); alert("更新完了");
-        }
-        async function deleteBlog(id) { if(confirm("削除？")) await db.collection("blogs").doc(id).delete(); }
-        document.getElementById('export-student-btn').onclick = async () => {
-            const snap = await db.collection("students").get();
-            let csv = "メールアドレス,名前\n"; snap.forEach(doc => { csv += `${doc.id},${doc.data().name}\n`; });
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: "text/csv" });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "student_list.csv"; a.click();
-        };
-        document.getElementById('import-csv-btn').onclick = () => {
-            const file = document.getElementById('csv-file').files[0]; if(!file) return alert("選択してください");
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const rows = e.target.result.split("\n");
-                for(let row of rows) {
-                    const cols = row.split(",");
-                    if(cols.length >= 2 && cols[0].includes("@")) await db.collection("students").doc(cols[0].trim()).set({ name: cols[1].trim() });
-                }
-                alert("完了"); loadStudentList();
-            };
-            reader.readAsText(file);
-        };
+        async function deleteStudent(id) { if(confirm("削除？")) { await db.collection("students").doc(id).delete(); loadStudentList(); } }
+        
         document.getElementById('post-blog-btn').onclick = () => {
             const content = document.getElementById('blog-input').value; if(!content) return;
-            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() })
-              .then(() => { document.getElementById('blog-input').value = ""; alert("投稿完了"); });
+            db.collection("blogs").add({ content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { document.getElementById('blog-input').value = ""; alert("投稿完了"); });
         };
-        document.getElementById('logout-btn').onclick = () => { location.reload(); };
+
+        function toggleLogs() {
+            const area = document.getElementById('log-area');
+            if(area.style.display === 'block') area.style.display = 'none';
+            else { 
+                area.style.display = 'block';
+                db.collection("access_logs").orderBy("loginTime", "desc").limit(20).get().then(snap => {
+                    const tbody = document.getElementById('log-table-body'); tbody.innerHTML = "";
+                    snap.forEach(doc => { 
+                        const name = studentMaster[doc.data().email]?.name || doc.data().email;
+                        tbody.innerHTML += `<tr><td>${doc.data().loginTime?.toDate().toLocaleString()}</td><td>${name}</td></tr>`; 
+                    });
+                });
+            }
+        }
+
+        document.getElementById('change-pw-btn').onclick = async () => {
+            const user = firebase.auth().currentUser, oldPw = document.getElementById('old-password').value, newPw = document.getElementById('new-password').value;
+            try {
+                await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, oldPw));
+                await user.updatePassword(newPw); alert("変更完了");
+            } catch (e) { alert("失敗"); }
+        };
+        document.getElementById('logout-btn').onclick = () => location.reload();
+        document.getElementById('reg-day-select').onchange = loadRegularSetting;
     </script>
 </body>
 </html>
