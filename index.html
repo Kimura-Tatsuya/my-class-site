@@ -32,14 +32,17 @@
             margin-right: 5px; margin-bottom: 5px;
         }
         button:hover { background: #eeeeee; }
+        
         .flex-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
         .post-item { border-bottom: 1px dashed #000; padding: 15px 0; }
         .post-date { font-size: 0.8em; color: #444; margin-bottom: 5px; }
         .update-stamp { font-size: 0.9em; margin-left: 10px; font-weight: normal; }
         .edit-area { background: #f0f0f0; padding: 10px; border: 1px solid #000; margin-top: 10px; display: none; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
         th, td { border: 1px solid black; padding: 8px; text-align: left; }
         th { background: #f2f2f2; }
+        
         .btn-small { font-size: 0.8em; padding: 4px 8px; }
         .btn-red { color: red; border-color: red; }
         .admin-form-box { background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px; }
@@ -82,6 +85,7 @@
 
             <section id="admin-section" style="display: none; border: 3px double #000;">
                 <h2 style="background: #000; color: #fff; padding: 5px;">管理者専用メニュー</h2>
+                
                 <h3>名簿管理・直接登録</h3>
                 <div class="admin-form-box">
                     <div class="flex-row">
@@ -96,8 +100,10 @@
                         <button id="export-student-btn">名簿エクスポート(CSV)</button>
                     </div>
                 </div>
+
                 <h3>登録状況一覧</h3>
                 <div id="student-list-area"></div>
+
                 <h3>アクセスログ</h3>
                 <button id="load-log-btn">ログを表示/更新</button>
                 <div id="log-area" style="margin-top:10px;">
@@ -139,22 +145,34 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let studentMaster = {};
+        let studentMaster = {}; // ログ表示・名前表示用
 
+        // ログイン処理
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(err => { document.getElementById('error-message').innerText = "ログイン失敗"; });
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .then(res => initApp(res.user))
+                .catch(err => { document.getElementById('error-message').innerText = "ログイン失敗。アドレスかパスワードが違います。"; });
         };
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
 
-            const studentSnap = await db.collection("students").get();
-            studentSnap.forEach(doc => { studentMaster[doc.id] = doc.data().name; });
-            document.getElementById('welcome-msg').innerText = (studentMaster[user.email] || "ゲスト") + " さん、おかえりなさい";
+            // 1. 自身の名前を students コレクションから取得（「確認中...」対策）
+            try {
+                const userDoc = await db.collection("students").doc(user.email).get();
+                if (userDoc.exists) {
+                    document.getElementById('welcome-msg').innerText = userDoc.data().name + " さん、おかえりなさい";
+                } else {
+                    document.getElementById('welcome-msg').innerText = "未登録ユーザー さん、おかえりなさい";
+                }
+            } catch (e) {
+                document.getElementById('welcome-msg').innerText = "ログイン完了 (" + user.email + ")";
+            }
 
+            // 2. 予定読み込み
             db.collection("config").doc("weekly_schedule").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
@@ -168,6 +186,7 @@
                 }
             });
 
+            // 3. ブログ読み込み
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
                 const list = document.getElementById('blog-list');
                 list.innerHTML = "";
@@ -195,6 +214,7 @@
                 });
             });
 
+            // 4. 管理者専用機能
             if (user.email === TEACHER_EMAIL) {
                 document.getElementById('admin-section').style.display = 'block';
                 document.getElementById('schedule-edit').style.display = 'block';
@@ -202,11 +222,17 @@
                 document.getElementById('load-log-btn').onclick = loadLogs;
                 document.getElementById('direct-reg-btn').onclick = registerDirect;
                 loadStudentList();
+                
+                // ログ表示用に名簿を全てキャッシュ
+                const studentSnap = await db.collection("students").get();
+                studentSnap.forEach(doc => { studentMaster[doc.id] = doc.data().name; });
             }
+
+            // 5. ログインログ記録
             db.collection("access_logs").add({ email: user.email, loginTime: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
-        // ★パスワード変更機能（セキュリティ強化版）
+        // パスワード変更
         document.getElementById('change-pw-btn').onclick = async () => {
             const user = firebase.auth().currentUser;
             const oldPw = document.getElementById('old-password').value;
@@ -216,47 +242,35 @@
             msg.innerText = "";
 
             if(!oldPw || !newPw || !confirmPw) { alert("すべての項目を入力してください。"); return; }
-            if(newPw !== confirmPw) { alert("新しいパスワードが一致しません。"); return; }
-            if(newPw.length < 6) { alert("新しいパスワードは6文字以上にしてください。"); return; }
+            if(newPw !== confirmPw) { alert("新しいパスワード（確認用）が一致しません。"); return; }
+            if(newPw.length < 6) { alert("パスワードは6文字以上にしてください。"); return; }
 
             try {
-                // 再認証が必要
                 const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPw);
                 await user.reauthenticateWithCredential(credential);
-                // パスワード更新
                 await user.updatePassword(newPw);
                 msg.style.color = "blue";
-                msg.innerText = "パスワードを更新しました。";
+                msg.innerText = "パスワードを変更しました。";
                 document.getElementById('old-password').value = "";
                 document.getElementById('new-password').value = "";
                 document.getElementById('new-password-confirm').value = "";
             } catch (err) {
                 msg.style.color = "red";
-                msg.innerText = "エラー：現在のパスワードが正しくないか、変更に失敗しました。";
+                msg.innerText = "エラー：現在のパスワードが正しくないか、再認証に失敗しました。";
             }
         };
 
-        // 管理者用・ブログ・名簿処理（共通）
+        // 管理者：個別名簿登録
         async function registerDirect() {
             const email = document.getElementById('direct-email').value.trim();
             const name = document.getElementById('direct-name').value.trim();
-            if(!email || !name) return alert("入力してください");
+            if(!email || !name) return alert("メールと氏名を入力してください");
             await db.collection("students").doc(email).set({ name: name });
-            studentMaster[email] = name;
+            alert("登録・更新しました");
             loadStudentList();
         }
-        function toggleEdit(id) {
-            const area = document.getElementById(`edit-area-${id}`);
-            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
-        }
-        async function saveBlogEdit(id) {
-            const newContent = document.getElementById(`edit-input-${id}`).value;
-            await db.collection("blogs").doc(id).update({ content: newContent, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-            alert("更新完了");
-        }
-        async function deleteBlog(id) {
-            if(confirm("削除しますか？")) await db.collection("blogs").doc(id).delete();
-        }
+
+        // 管理者：名簿一覧表示
         async function loadStudentList() {
             const snap = await db.collection("students").get();
             let html = "<table><tr><th>名前</th><th>メール</th><th>操作</th></tr>";
@@ -265,9 +279,12 @@
             });
             document.getElementById('student-list-area').innerHTML = html + "</table>";
         }
+
         async function deleteStudent(email) {
             if(confirm("削除しますか？")) { await db.collection("students").doc(email).delete(); loadStudentList(); }
         }
+
+        // 管理者：アクセスログ表示（氏名紐づけ）
         async function loadLogs() {
             const tbody = document.getElementById('log-table-body');
             tbody.innerHTML = "取得中...";
@@ -280,6 +297,22 @@
                 tbody.innerHTML += `<tr><td>${time}</td><td>${displayName}</td></tr>`;
             });
         }
+
+        // ブログ編集・削除
+        function toggleEdit(id) {
+            const area = document.getElementById(`edit-area-${id}`);
+            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
+        }
+        async function saveBlogEdit(id) {
+            const newContent = document.getElementById(`edit-input-${id}`).value;
+            await db.collection("blogs").doc(id).update({ content: newContent, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            alert("更新しました");
+        }
+        async function deleteBlog(id) {
+            if(confirm("削除しますか？")) await db.collection("blogs").doc(id).delete();
+        }
+
+        // CSVエクスポート
         document.getElementById('export-student-btn').onclick = async () => {
             const snap = await db.collection("students").get();
             let csv = "メールアドレス,名前\n";
@@ -290,6 +323,8 @@
             a.download = "student_list.csv";
             a.click();
         };
+
+        // CSVインポート
         document.getElementById('import-csv-btn').onclick = () => {
             const file = document.getElementById('csv-file').files[0];
             if(!file) return alert("選択してください");
@@ -306,14 +341,23 @@
             };
             reader.readAsText(file);
         };
+
+        // 予定保存
         document.getElementById('update-schedule-btn').onclick = () => {
-            db.collection("config").doc("weekly_schedule").set({ text: document.getElementById('schedule-input').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => alert("保存完了"));
+            db.collection("config").doc("weekly_schedule").set({ 
+                text: document.getElementById('schedule-input').value, 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+            }).then(() => alert("保存しました"));
         };
+
+        // ブログ投稿
         document.getElementById('post-blog-btn').onclick = () => {
             const content = document.getElementById('blog-input').value;
             if(!content) return;
-            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { document.getElementById('blog-input').value = ""; alert("投稿完了"); });
+            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() })
+              .then(() => { document.getElementById('blog-input').value = ""; alert("投稿しました"); });
         };
+
         document.getElementById('logout-btn').onclick = () => { location.reload(); };
     </script>
 </body>
