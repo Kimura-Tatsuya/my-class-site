@@ -32,11 +32,10 @@
             margin-right: 5px; margin-bottom: 5px;
         }
         button:hover { background: #eeeeee; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-        th { background: #f2f2f2; }
         .post-item { border-bottom: 1px dashed #000; padding: 15px 0; }
         .post-date { font-size: 0.8em; color: #444; }
+        /* 更新日時のスタイル */
+        .update-stamp { font-size: 0.9em; margin-left: 10px; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -57,7 +56,7 @@
 
         <main>
             <section>
-                <h2>今週の予定</h2>
+                <h2>今週の予定 <span id="last-update-time" class="update-stamp"></span></h2>
                 <div id="schedule-display"><p id="schedule-text" style="white-space: pre-wrap;"></p></div>
                 <div id="schedule-edit" style="display: none;">
                     <textarea id="schedule-input"></textarea><br>
@@ -76,22 +75,16 @@
 
             <section id="admin-section" style="display: none; border: 3px double #000;">
                 <h2 style="background: #000; color: #fff; padding: 5px;">管理者専用メニュー</h2>
-                
                 <h3>名簿管理</h3>
                 <input type="file" id="csv-file" accept=".csv">
                 <button id="import-csv-btn">名簿インポート(CSV)</button>
                 <button id="export-student-btn">名簿エクスポート(CSV)</button>
-
                 <h3>アクセスログ</h3>
                 <button id="load-log-btn">ログを表示/更新</button>
                 <div id="log-area" style="margin-top:10px;">
-                    <table id="log-table">
-                        <thead>
-                            <tr><th>日時</th><th>メールアドレス</th></tr>
-                        </thead>
-                        <tbody id="log-table-body">
-                            <tr><td colspan="2">「表示」ボタンを押してください</td></tr>
-                        </tbody>
+                    <table style="width:100%; border-collapse:collapse; font-size:0.9em; border:1px solid black;">
+                        <thead><tr style="background:#f2f2f2;"><th>日時</th><th>メール</th></tr></thead>
+                        <tbody id="log-table-body"></tbody>
                     </table>
                 </div>
             </section>
@@ -116,36 +109,35 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ログイン処理
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            const errP = document.getElementById('error-message');
-            errP.innerText = "";
-
-            firebase.auth().signInWithEmailAndPassword(email, pass)
-                .then(res => initApp(res.user))
-                .catch(err => { errP.innerText = "ログインに失敗しました。"; });
+            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(err => { document.getElementById('error-message').innerText = "ログインに失敗しました。"; });
         };
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
 
-            // 氏名取得
             const userDoc = await db.collection("students").doc(user.email).get();
-            const name = userDoc.exists ? userDoc.data().name : "ゲスト";
-            document.getElementById('welcome-msg').innerText = name + " さん、おかえりなさい";
+            document.getElementById('welcome-msg').innerText = (userDoc.exists ? userDoc.data().name : "ゲスト") + " さん、おかえりなさい";
 
-            // 予定読み込み
+            // 予定と更新日時の読み込み
             db.collection("config").doc("weekly_schedule").onSnapshot(doc => {
                 if(doc.exists) {
-                    document.getElementById('schedule-text').innerText = doc.data().text;
-                    document.getElementById('schedule-input').value = doc.data().text;
+                    const data = doc.data();
+                    document.getElementById('schedule-text').innerText = data.text;
+                    document.getElementById('schedule-input').value = data.text;
+                    if(data.updatedAt) {
+                        const date = data.updatedAt.toDate();
+                        const dateStr = (date.getMonth() + 1) + "/" + date.getDate() + " " + 
+                                        date.getHours().toString().padStart(2, '0') + ":" + 
+                                        date.getMinutes().toString().padStart(2, '0');
+                        document.getElementById('last-update-time').innerText = dateStr + " 更新";
+                    }
                 }
             });
 
-            // ブログ読み込み
             db.collection("blogs").orderBy("createdAt", "desc").limit(10).onSnapshot(snap => {
                 const list = document.getElementById('blog-list');
                 list.innerHTML = "";
@@ -156,7 +148,6 @@
                 });
             });
 
-            // 権限判定：管理者のみ表示
             if (user.email === TEACHER_EMAIL) {
                 document.getElementById('admin-section').style.display = 'block';
                 document.getElementById('schedule-edit').style.display = 'block';
@@ -164,32 +155,29 @@
                 document.getElementById('load-log-btn').onclick = loadLogs;
             }
 
-            // アクセスログ記録（サーバーのルールで、生徒は「作成」のみ許可される）
-            db.collection("access_logs").add({ 
-                email: user.email, 
-                loginTime: firebase.firestore.FieldValue.serverTimestamp() 
-            });
+            db.collection("access_logs").add({ email: user.email, loginTime: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
-        // アクセスログ読み込み（管理者のみ成功する）
+        // 予定保存時に日時を記録
+        document.getElementById('update-schedule-btn').onclick = () => {
+            db.collection("config").doc("weekly_schedule").set({
+                text: document.getElementById('schedule-input').value,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("保存しました"));
+        };
+
         async function loadLogs() {
             const tbody = document.getElementById('log-table-body');
             tbody.innerHTML = "<tr><td colspan='2'>読み込み中...</td></tr>";
-            
-            try {
-                const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(50).get();
-                tbody.innerHTML = "";
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const time = d.loginTime ? d.loginTime.toDate().toLocaleString() : "---";
-                    tbody.innerHTML += `<tr><td>${time}</td><td>${d.email}</td></tr>`;
-                });
-            } catch (e) {
-                tbody.innerHTML = "<tr><td colspan='2' style='color:red;'>閲覧権限がありません。</td></tr>";
-            }
+            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(50).get();
+            tbody.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const time = d.loginTime ? d.loginTime.toDate().toLocaleString() : "---";
+                tbody.innerHTML += `<tr style="border-bottom:1px solid black;"><td>${time}</td><td>${d.email}</td></tr>`;
+            });
         }
 
-        // 名簿エクスポート
         document.getElementById('export-student-btn').onclick = async () => {
             const snap = await db.collection("students").get();
             let csv = "メールアドレス,名前\n";
@@ -201,28 +189,15 @@
             a.click();
         };
 
-        // 予定保存
-        document.getElementById('update-schedule-btn').onclick = () => {
-            db.collection("config").doc("weekly_schedule").set({
-                text: document.getElementById('schedule-input').value,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("保存しました"));
-        };
-
-        // ブログ投稿
         document.getElementById('post-blog-btn').onclick = () => {
             const content = document.getElementById('blog-input').value;
             if(!content) return;
-            db.collection("blogs").add({
-                content: content,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
+            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
                 document.getElementById('blog-input').value = "";
                 alert("投稿しました");
             });
         };
 
-        // 名簿インポート
         document.getElementById('import-csv-btn').onclick = () => {
             const file = document.getElementById('csv-file').files[0];
             if(!file) return alert("ファイルを選択してください");
