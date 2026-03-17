@@ -32,24 +32,17 @@
             margin-right: 5px; margin-bottom: 5px;
         }
         button:hover { background: #eeeeee; }
-        
-        /* ボタン横並び用 */
-        .flex-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-        
+        .flex-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
         .post-item { border-bottom: 1px dashed #000; padding: 15px 0; }
         .post-date { font-size: 0.8em; color: #444; margin-bottom: 5px; }
         .update-stamp { font-size: 0.9em; margin-left: 10px; font-weight: normal; }
-        
-        /* 編集エリア */
         .edit-area { background: #f0f0f0; padding: 10px; border: 1px solid #000; margin-top: 10px; display: none; }
-        
-        /* 名簿テーブル */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
         th, td { border: 1px solid black; padding: 8px; text-align: left; }
         th { background: #f2f2f2; }
-        
         .btn-small { font-size: 0.8em; padding: 4px 8px; }
         .btn-red { color: red; border-color: red; }
+        .admin-form-box { background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -70,15 +63,6 @@
 
         <main>
             <section>
-                <h2>設定</h2>
-                <div class="flex-row">
-                    <input type="password" id="new-password" placeholder="新しいパスワード" style="max-width:200px; margin-bottom:0;">
-                    <button id="change-pw-btn">パスワードを変更する</button>
-                </div>
-                <p id="pw-msg" style="font-size:0.8em; margin:0;"></p>
-            </section>
-
-            <section>
                 <h2>今週の予定 <span id="last-update-time" class="update-stamp"></span></h2>
                 <div id="schedule-display"><p id="schedule-text" style="white-space: pre-wrap;"></p></div>
                 <div id="schedule-edit" style="display: none;">
@@ -89,7 +73,7 @@
 
             <section>
                 <h2>担任ブログ</h2>
-                <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 15px; margin-bottom: 15px; border: 1px solid #000;">
+                <div id="blog-admin-form" style="display: none;" class="admin-form-box">
                     <textarea id="blog-input" placeholder="投稿内容を入力してください"></textarea><br>
                     <button id="post-blog-btn">ブログを投稿する</button>
                 </div>
@@ -98,25 +82,42 @@
 
             <section id="admin-section" style="display: none; border: 3px double #000;">
                 <h2 style="background: #000; color: #fff; padding: 5px;">管理者専用メニュー</h2>
-                
-                <h3>名簿管理</h3>
-                <input type="file" id="csv-file" accept=".csv" style="display:block;">
-                <div class="flex-row">
-                    <button id="import-csv-btn">名簿インポート(CSV)</button>
-                    <button id="export-student-btn">名簿エクスポート(CSV)</button>
+                <h3>名簿管理・直接登録</h3>
+                <div class="admin-form-box">
+                    <div class="flex-row">
+                        <input type="email" id="direct-email" placeholder="メールアドレス" style="max-width:250px;">
+                        <input type="text" id="direct-name" placeholder="氏名" style="max-width:150px;">
+                        <button id="direct-reg-btn">登録・更新</button>
+                    </div>
+                    <hr>
+                    <input type="file" id="csv-file" accept=".csv" style="display:block;">
+                    <div class="flex-row">
+                        <button id="import-csv-btn">名簿インポート(CSV)</button>
+                        <button id="export-student-btn">名簿エクスポート(CSV)</button>
+                    </div>
                 </div>
-
                 <h3>登録状況一覧</h3>
                 <div id="student-list-area"></div>
-
                 <h3>アクセスログ</h3>
                 <button id="load-log-btn">ログを表示/更新</button>
                 <div id="log-area" style="margin-top:10px;">
-                    <table id="log-table">
-                        <thead><tr><th>日時</th><th>メール</th></tr></thead>
+                    <table>
+                        <thead><tr><th>日時</th><th>利用者（氏名・メール）</th></tr></thead>
                         <tbody id="log-table-body"></tbody>
                     </table>
                 </div>
+            </section>
+
+            <section>
+                <h2>設定（パスワード変更）</h2>
+                <div style="max-width:400px;">
+                    <p style="font-size:0.8em; margin-bottom:5px;">※コピー＆ペーストは禁止されています。手入力してください。</p>
+                    <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
+                    <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
+                    <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用再入力）" onpaste="return false;"><br>
+                    <button id="change-pw-btn">パスワードを変更・確定する</button>
+                </div>
+                <p id="pw-msg" style="font-size:0.9em; margin-top:10px; font-weight:bold;"></p>
             </section>
         </main>
     </div>
@@ -138,21 +139,22 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        let studentMaster = {};
 
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(err => { document.getElementById('error-message').innerText = "ログインに失敗しました。"; });
+            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(err => { document.getElementById('error-message').innerText = "ログイン失敗"; });
         };
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
 
-            const userDoc = await db.collection("students").doc(user.email).get();
-            document.getElementById('welcome-msg').innerText = (userDoc.exists ? userDoc.data().name : "ゲスト") + " さん、おかえりなさい";
+            const studentSnap = await db.collection("students").get();
+            studentSnap.forEach(doc => { studentMaster[doc.id] = doc.data().name; });
+            document.getElementById('welcome-msg').innerText = (studentMaster[user.email] || "ゲスト") + " さん、おかえりなさい";
 
-            // 予定読み込み
             db.collection("config").doc("weekly_schedule").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
@@ -166,7 +168,6 @@
                 }
             });
 
-            // ブログ読み込み
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
                 const list = document.getElementById('blog-list');
                 list.innerHTML = "";
@@ -174,17 +175,15 @@
                     const data = d.data();
                     const id = d.id;
                     const date = data.createdAt ? data.createdAt.toDate().toLocaleString('ja-JP') : "日時不明";
-                    
-                    let html = `<div class="post-item" id="post-${id}">
+                    let html = `<div class="post-item">
                         <div class="post-date">${date}</div>
-                        <div id="content-${id}" class="post-content">${data.content.replace(/\n/g, '<br>')}</div>`;
-                    
+                        <div>${data.content.replace(/\n/g, '<br>')}</div>`;
                     if (user.email === TEACHER_EMAIL) {
                         html += `
                         <div id="edit-area-${id}" class="edit-area">
                             <textarea id="edit-input-${id}" style="width:100%">${data.content}</textarea>
                             <button class="btn-small" onclick="saveBlogEdit('${id}')">更新</button>
-                            <button class="btn-small" onclick="toggleEdit('${id}')">キャンセル</button>
+                            <button class="btn-small" onclick="toggleEdit('${id}')">戻る</button>
                         </div>
                         <div class="flex-row" style="margin-top:10px;">
                             <button class="btn-small" onclick="toggleEdit('${id}')">編集</button>
@@ -201,66 +200,86 @@
                 document.getElementById('schedule-edit').style.display = 'block';
                 document.getElementById('blog-admin-form').style.display = 'block';
                 document.getElementById('load-log-btn').onclick = loadLogs;
+                document.getElementById('direct-reg-btn').onclick = registerDirect;
                 loadStudentList();
             }
-
             db.collection("access_logs").add({ email: user.email, loginTime: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
-        // パスワード変更機能
-        document.getElementById('change-pw-btn').onclick = () => {
+        // ★パスワード変更機能（セキュリティ強化版）
+        document.getElementById('change-pw-btn').onclick = async () => {
+            const user = firebase.auth().currentUser;
+            const oldPw = document.getElementById('old-password').value;
             const newPw = document.getElementById('new-password').value;
+            const confirmPw = document.getElementById('new-password-confirm').value;
             const msg = document.getElementById('pw-msg');
-            if (newPw.length < 6) { alert("パスワードは6文字以上で入力してください。"); return; }
-            
-            firebase.auth().currentUser.updatePassword(newPw).then(() => {
+            msg.innerText = "";
+
+            if(!oldPw || !newPw || !confirmPw) { alert("すべての項目を入力してください。"); return; }
+            if(newPw !== confirmPw) { alert("新しいパスワードが一致しません。"); return; }
+            if(newPw.length < 6) { alert("新しいパスワードは6文字以上にしてください。"); return; }
+
+            try {
+                // 再認証が必要
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPw);
+                await user.reauthenticateWithCredential(credential);
+                // パスワード更新
+                await user.updatePassword(newPw);
                 msg.style.color = "blue";
-                msg.innerText = "パスワードを正常に変更しました。";
+                msg.innerText = "パスワードを更新しました。";
+                document.getElementById('old-password').value = "";
                 document.getElementById('new-password').value = "";
-            }).catch(err => {
+                document.getElementById('new-password-confirm').value = "";
+            } catch (err) {
                 msg.style.color = "red";
-                msg.innerText = "エラー：再ログインが必要な場合があります。";
-            });
+                msg.innerText = "エラー：現在のパスワードが正しくないか、変更に失敗しました。";
+            }
         };
 
-        // ブログ編集（インライン）
+        // 管理者用・ブログ・名簿処理（共通）
+        async function registerDirect() {
+            const email = document.getElementById('direct-email').value.trim();
+            const name = document.getElementById('direct-name').value.trim();
+            if(!email || !name) return alert("入力してください");
+            await db.collection("students").doc(email).set({ name: name });
+            studentMaster[email] = name;
+            loadStudentList();
+        }
         function toggleEdit(id) {
             const area = document.getElementById(`edit-area-${id}`);
             area.style.display = (area.style.display === 'block') ? 'none' : 'block';
         }
-
         async function saveBlogEdit(id) {
             const newContent = document.getElementById(`edit-input-${id}`).value;
-            await db.collection("blogs").doc(id).update({
-                content: newContent,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            alert("更新しました");
+            await db.collection("blogs").doc(id).update({ content: newContent, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            alert("更新完了");
         }
-
         async function deleteBlog(id) {
             if(confirm("削除しますか？")) await db.collection("blogs").doc(id).delete();
         }
-
-        // 名簿状況の表示
         async function loadStudentList() {
             const snap = await db.collection("students").get();
             let html = "<table><tr><th>名前</th><th>メール</th><th>操作</th></tr>";
             snap.forEach(doc => {
-                html += `<tr><td>${doc.data().name}</td><td>${doc.id}</td>
-                <td><button class="btn-small btn-red" onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`;
+                html += `<tr><td>${doc.data().name}</td><td>${doc.id}</td><td><button class="btn-small btn-red" onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`;
             });
             document.getElementById('student-list-area').innerHTML = html + "</table>";
         }
-
         async function deleteStudent(email) {
-            if(confirm(email + " を名簿から削除しますか？")) {
-                await db.collection("students").doc(email).delete();
-                loadStudentList();
-            }
+            if(confirm("削除しますか？")) { await db.collection("students").doc(email).delete(); loadStudentList(); }
         }
-
-        // ボタン並列化済みのCSV処理
+        async function loadLogs() {
+            const tbody = document.getElementById('log-table-body');
+            tbody.innerHTML = "取得中...";
+            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(30).get();
+            tbody.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const time = d.loginTime ? d.loginTime.toDate().toLocaleString() : "---";
+                const displayName = studentMaster[d.email] ? `${studentMaster[d.email]} (${d.email})` : d.email;
+                tbody.innerHTML += `<tr><td>${time}</td><td>${displayName}</td></tr>`;
+            });
+        }
         document.getElementById('export-student-btn').onclick = async () => {
             const snap = await db.collection("students").get();
             let csv = "メールアドレス,名前\n";
@@ -271,10 +290,9 @@
             a.download = "student_list.csv";
             a.click();
         };
-
         document.getElementById('import-csv-btn').onclick = () => {
             const file = document.getElementById('csv-file').files[0];
-            if(!file) return alert("ファイルを選択してください");
+            if(!file) return alert("選択してください");
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const rows = e.target.result.split("\n");
@@ -284,39 +302,18 @@
                         await db.collection("students").doc(cols[0].trim()).set({ name: cols[1].trim() });
                     }
                 }
-                alert("インポート完了");
-                loadStudentList();
+                alert("完了"); loadStudentList();
             };
             reader.readAsText(file);
         };
-
         document.getElementById('update-schedule-btn').onclick = () => {
-            db.collection("config").doc("weekly_schedule").set({
-                text: document.getElementById('schedule-input').value,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("保存しました"));
+            db.collection("config").doc("weekly_schedule").set({ text: document.getElementById('schedule-input').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => alert("保存完了"));
         };
-
         document.getElementById('post-blog-btn').onclick = () => {
             const content = document.getElementById('blog-input').value;
             if(!content) return;
-            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
-                document.getElementById('blog-input').value = "";
-                alert("投稿しました");
-            });
+            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { document.getElementById('blog-input').value = ""; alert("投稿完了"); });
         };
-
-        async function loadLogs() {
-            const tbody = document.getElementById('log-table-body');
-            tbody.innerHTML = "<tr><td colspan='2'>読み込み中...</td></tr>";
-            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(30).get();
-            tbody.innerHTML = "";
-            snap.forEach(doc => {
-                const time = doc.data().loginTime ? doc.data().loginTime.toDate().toLocaleString() : "---";
-                tbody.innerHTML += `<tr><td>${time}</td><td>${doc.data().email}</td></tr>`;
-            });
-        }
-
         document.getElementById('logout-btn').onclick = () => { location.reload(); };
     </script>
 </body>
