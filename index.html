@@ -17,16 +17,15 @@
         .post-item { border-bottom: 1px dashed #ccc; padding: 15px 0; }
         .post-date { font-size: 0.8em; color: #666; margin-bottom: 5px; }
         .pagination { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
-        .info-text { font-size: 0.8em; color: #555; }
     </style>
 </head>
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
         <h1>Class Portal</h1>
-        <input type="email" id="email" placeholder="メールアドレス"><br>
-        <input type="password" id="password" placeholder="パスワード"><br>
-        <button onclick="login()">ログイン</button>
+        <input type="email" id="login-email" placeholder="メールアドレス"><br>
+        <input type="password" id="login-password" placeholder="パスワード"><br>
+        <button type="button" onclick="login()">ログイン</button>
         <p id="error-message" style="color:red;"></p>
     </div>
 
@@ -49,45 +48,32 @@
 
             <section id="blog-section">
                 <h2>📝 担任ブログ</h2>
-                
                 <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px;">
                     <h3>新規投稿</h3>
                     <textarea id="blog-input" placeholder="ブログ本文を入力..."></textarea><br>
-                    <label class="info-text">日時指定（空欄で現在時刻投稿）:</label><br>
+                    <label style="font-size: 0.8em;">日時指定（空欄で現在時刻）:</label><br>
                     <input type="datetime-local" id="blog-datetime" style="max-width: 250px;"><br>
                     <button onclick="postBlog()">ブログを投稿する</button>
                 </div>
-
                 <div id="blog-list">投稿を取得しています...</div>
-                
                 <div class="pagination">
-                    <button id="blog-prev" onclick="fetchBlogs('prev')" style="display:none;">前の20件</button>
-                    <button id="blog-next" onclick="fetchBlogs('next')" style="display:none;">次の20件</button>
+                    <button id="blog-prev" onclick="fetchBlogs('prev')" style="display:none;">前へ</button>
+                    <button id="blog-next" onclick="fetchBlogs('next')" style="display:none;">次へ</button>
                 </div>
-            </section>
-
-            <section>
-                <h3>🔑 パスワード変更</h3>
-                <input type="password" id="new-password" placeholder="新しいパスワード(6文字以上)" style="max-width:250px;">
-                <button onclick="changePassword()">パスワード更新</button>
             </section>
 
             <section id="admin-section" style="display: none; border: 2px solid red;">
                 <h2 style="color: red;">🛠️ 管理者メニュー</h2>
-                
                 <div>
                     <h3>👥 名簿管理 (CSV)</h3>
-                    <p class="info-text">CSV形式: メールアドレス,氏名,クラス,番号</p>
                     <input type="file" id="csv-file" accept=".csv"><br>
-                    <button onclick="importCSV()">CSVから名簿インポート</button>
-                    <button onclick="exportCSV()">現在の名簿を出力</button>
+                    <button onclick="importCSV()">インポート</button>
+                    <button onclick="exportCSV()">書き出し</button>
                     <p id="import-status" style="font-weight:bold; color:blue;"></p>
                 </div>
-
                 <div style="margin-top: 20px;">
-                    <h3>📊 最近のアクセスログ</h3>
+                    <h3>📊 ログ</h3>
                     <div id="log-list"></div>
-                    <button onclick="downloadLogCSV()" style="margin-top: 10px;">全ログをCSV保存</button>
                 </div>
             </section>
         </main>
@@ -107,40 +93,15 @@
             messagingSenderId: "125594983188",
             appId: "1:125594983188:web:129aa54e9d3a39ca700001"
         };
-        const TEACHER_EMAIL = "teacher@example.com"; // 先生のアドレス
+        const TEACHER_EMAIL = "teacher@example.com"; 
 
+        // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let studentMaster = {};
         let blogCursorFirst = null;
         let blogCursorLast = null;
 
-        // ログイン
+        // 【ここが重要】login関数を確実に定義
         function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then(res => initApp(res.user))
-                .catch(err => document.getElementById('error-message').innerText = "ログインに失敗しました。");
-        }
-
-        async function initApp(user) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-
-            // 名簿取得
-            const snap = await db.collection("students").get();
-            snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
-
-            // 氏名表示
-            const name = studentMaster[user.email] ? studentMaster[user.email].name : "ゲスト";
-            document.getElementById('welcome-msg').innerText = `${name} さん、おかえりなさい！`;
-
-            fetchSchedule();
-            fetchBlogs();
-
-            if (user.email === TEACHER_EMAIL) {
-                document.getElementById('admin-section').style.display = 'block';
-                document.getElementById('schedule-edit').style.display = 'block';
-                document.getElementById('schedule-display').style.display = 'none';
-                document.getElementById('blog-admin-form').style.display = 'block';
+            console
