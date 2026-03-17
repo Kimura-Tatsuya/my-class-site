@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Class Portal</title>
+    <title>３年３組 学級管理システム</title>
     <style>
         /* 白黒・ＭＳゴシック基調のシンプルスタイル */
         body { 
@@ -50,7 +50,7 @@
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>My Class Portal</h1>
+        <h1>学級管理システム</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
         <button id="login-btn">ログイン</button>
@@ -64,7 +64,7 @@
 
         <main>
             <section>
-                <h2>教科連絡や主な予定</h2>
+                <h2>登校日の予定</h2>
                 <div class="day-container" id="schedule-display">
                     <div id="area-1" class="day-box">確認中...</div>
                     <div id="area-2" class="day-box">確認中...</div>
@@ -72,7 +72,7 @@
             </section>
 
             <section>
-                <h2>担任の駄辯</h2>
+                <h2>連絡ブログ</h2>
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
                     <button id="post-blog-btn">投稿する</button>
@@ -139,17 +139,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // ★ご自身の情報に書き換えてください
+        // ユーザーから提供されたFirebaseの構成情報
         const firebaseConfig = {
-  	    apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
- 	    authDomain: "my-class-site.firebaseapp.com",
- 	    databaseURL: "https://my-class-site-default-rtdb.firebaseio.com",
-	    projectId: "my-class-site",
-	    storageBucket: "my-class-site.firebasestorage.app",
+            apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
+            authDomain: "my-class-site.firebaseapp.com",
+            databaseURL: "https://my-class-site-default-rtdb.firebaseio.com",
+            projectId: "my-class-site",
+            storageBucket: "my-class-site.firebasestorage.app",
             messagingSenderId: "125594983188",
-	    appId: "1:125594983188:web:129aa54e9d3a39ca700001",
-	    measurementId: "G-4EQ3Z9Q4NT"
+            appId: "1:125594983188:web:129aa54e9d3a39ca700001",
+            measurementId: "G-4EQ3Z9Q4NT"
         };
+        
         const TEACHER_EMAIL = "administrator@class.jp";
         const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事"];
 
@@ -159,7 +160,7 @@
         let vacationData = [];
         let holidays = {};
 
-        // 10分刻みの下校時刻生成
+        // 10分刻みの下校時刻オプション生成
         function initExitTimeOptions(targetEl) {
             let html = "";
             for(let h=13; h<=19; h++) {
@@ -171,11 +172,13 @@
             targetEl.innerHTML = html;
         }
 
-        // ログイン処理
+        // ログイン処理（エラー詳細アラート付き）
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).then(res => initApp(res.user)).catch(() => alert("ログインに失敗しました"));
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .then(res => initApp(res.user))
+                .catch((error) => alert("ログイン失敗\nエラー内容: " + error.message));
         };
 
         // アプリケーション初期化
@@ -185,7 +188,7 @@
 
             // 祝日、休業期間、名簿データの取得
             const [hRes, vSnap, sSnap] = await Promise.all([
-                fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()),
+                fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()).catch(() => ({})),
                 db.collection("config").doc("vacations").get(),
                 db.collection("students").get()
             ]);
@@ -205,7 +208,7 @@
             const userName = studentMaster[user.email]?.name || "先生";
             document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん`;
 
-            // ログイン時刻の更新（エラー回避のcatch付き）
+            // ログイン時刻の更新
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
             // ブログの読み込み
@@ -230,7 +233,7 @@
             displayNextSchoolDays();
         }
 
-        // --- 予定表の表示関連 ---
+        // --- 登校日判定と表示 ---
         function isSchoolDay(dateStr) {
             const d = new Date(dateStr);
             const day = d.getDay();
@@ -245,6 +248,7 @@
             let checkDate = new Date();
             const todayStr = checkDate.toISOString().split('T')[0];
 
+            // 登校日を2日分探す
             while (foundDays.length < 2) {
                 let dateStr = checkDate.toISOString().split('T')[0];
                 if (isSchoolDay(dateStr)) {
@@ -253,9 +257,11 @@
                 checkDate.setDate(checkDate.getDate() + 1);
             }
 
+            // 左側のラベル判定（今日なら「本日」、それ以外なら「次回」）
             let label1 = foundDays[0].gap === 0 ? "本日" : "次回";
             await renderDay(foundDays[0].date, "area-1", label1);
 
+            // 右側のラベル判定（左側の翌日なら「明日」、間が空くなら「次回」）
             const dateDiff = (new Date(foundDays[1].date) - new Date(foundDays[0].date)) / (1000*60*60*24);
             let label2 = dateDiff === 1 ? "明日" : "次回";
             await renderDay(foundDays[1].date, "area-2", label2);
@@ -350,8 +356,8 @@
 
         async function loadStudentList() {
             const snap = await db.collection("students").get();
-            let html = "<table><tr><th>氏名</th><th>操作</th></tr>";
-            snap.forEach(doc => { html += `<tr><td>${doc.data().name} (${doc.id})</td><td><button onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`; });
+            let html = "<table><tr><th>氏名</th><th>メール</th><th>操作</th></tr>";
+            snap.forEach(doc => { html += `<tr><td>${doc.data().name}</td><td>${doc.id}</td><td><button onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`; });
             document.getElementById('student-list-area').innerHTML = html + "</table>";
         }
         async function registerDirect() {
