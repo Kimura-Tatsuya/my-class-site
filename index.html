@@ -79,7 +79,7 @@
             </section>
 
             <section>
-                <h2>週予定（月〜金）</h2>
+                <h2>週予定</h2>
                 <div id="weekly-schedule-display" style="overflow-x: auto; margin-top: 10px;">
                     確認中...
                 </div>
@@ -160,9 +160,11 @@
                     日付：<input type="date" id="edit-date-select" style="width:200px;">
                     <button onclick="loadScheduleEdit()">編集データ呼出</button>
                     <div id="edit-form" style="display:none; margin-top:15px;">
-                        <table id="edit-table"></table>
-                        最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
-                        <button onclick="saveSchedule()">この内容で保存・公開</button>
+                        <div id="edit-table-container"></div>
+                        <div style="margin-top:10px;">
+                            最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
+                        </div>
+                        <button onclick="saveSchedule()" style="margin-top:10px;">この内容で保存・公開</button>
                     </div>
                 </div>
             </section>
@@ -246,6 +248,14 @@
         let editingBlogId = null;
         let editingSubmId = null;
 
+        // ★日本時間で確実なYYYY-MM-DDを取得する関数
+        function getLocalDateStr(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+            const d = ('0' + dateObj.getDate()).slice(-2);
+            return `${y}-${m}-${d}`;
+        }
+
         function initExitTimeOptions(targetEl) {
             let html = "";
             for(let h=13; h<=19; h++) {
@@ -305,12 +315,12 @@
                 accessedAt: firebase.firestore.FieldValue.serverTimestamp()
             }).catch(()=>{});
 
-            displayAllSchedules();
-
+            // 提出物一覧を取得してからスケジュール表示を呼ぶ（週予定に提出物を反映させるため）
             db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
                 submissionsList = [];
                 snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
                 renderSubmissionsUI();
+                displayAllSchedules(); // 提出物が更新されたら週予定も再描画
             });
 
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
@@ -350,7 +360,6 @@
                 loadRegularSetting();
                 renderVacationList();
 
-                // 管理者：ダイレクトメッセージの監視
                 db.collection("messages").orderBy("createdAt", "desc").onSnapshot(snap => {
                     const listEl = document.getElementById('admin-message-list');
                     if (snap.empty) {
@@ -391,12 +400,15 @@
         async function displayNextSchoolDays() {
             let foundDays = [];
             let checkDate = new Date();
-            const todayStr = checkDate.toISOString().split('T')[0];
+            const todayStr = getLocalDateStr(checkDate);
 
             while (foundDays.length < 2) {
-                let dateStr = checkDate.toISOString().split('T')[0];
+                let dateStr = getLocalDateStr(checkDate);
                 if (isSchoolDay(dateStr)) {
-                    foundDays.push({ date: dateStr, gap: (new Date(dateStr) - new Date(todayStr)) / (1000*60*60*24) });
+                    // 日付の差分からgap（何日後か）を計算
+                    let diffMs = new Date(dateStr) - new Date(todayStr);
+                    let gap = Math.round(diffMs / (1000*60*60*24));
+                    foundDays.push({ date: dateStr, gap: gap });
                 }
                 checkDate.setDate(checkDate.getDate() + 1);
             }
@@ -404,7 +416,7 @@
             let label1 = foundDays[0].gap === 0 ? "[本日]" : "[次回]";
             await renderDay(foundDays[0].date, "area-1", label1);
 
-            const dateDiff = (new Date(foundDays[1].date) - new Date(foundDays[0].date)) / (1000*60*60*24);
+            const dateDiff = Math.round((new Date(foundDays[1].date) - new Date(foundDays[0].date)) / (1000*60*60*24));
             let label2 = dateDiff === 1 ? "[明日]" : "[次回]";
             await renderDay(foundDays[1].date, "area-2", label2);
         }
@@ -425,7 +437,7 @@
                 const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
                 const regDoc = await db.collection("config").doc("regular_schedule").get();
                 const regWeek = regDoc.exists ? regDoc.data()[dayKeys[d.getDay()]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30" };
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30", event: "" };
             }
 
             let html = `<span class="day-label">${displayLabel}</span>
@@ -438,6 +450,7 @@
             el.innerHTML = html;
         }
 
+        // --- 週予定（横書き・行事予定と提出物を表示） ---
         async function displayWeeklySchedule() {
             let d = new Date();
             let currentDay = d.getDay();
@@ -451,12 +464,8 @@
             for(let i=0; i<5; i++) {
                 let tempD = new Date(d);
                 tempD.setDate(d.getDate() + i);
-                weekDates.push(tempD.toISOString().split('T')[0]);
+                weekDates.push(getLocalDateStr(tempD));
             }
-
-            const regDoc = await db.collection("config").doc("regular_schedule").get();
-            const regData = regDoc.exists ? regDoc.data() : {};
-            const dayKeys = ["mon", "tue", "wed", "thu", "fri"];
 
             let docPromises = weekDates.map(dateStr => db.collection("schedules").doc(dateStr).get());
             let docs = await Promise.all(docPromises);
@@ -467,21 +476,18 @@
                 if(doc.exists) {
                     weekData.push(doc.data());
                 } else {
-                    let regWeek = regData[dayKeys[i]];
-                    weekData.push({
-                        lessons: Array.from({length:6}, (_, idx) => ({ sub: regWeek?.[idx] || "", note: "" })),
-                        exitTime: "16:30"
-                    });
+                    weekData.push({ event: "" });
                 }
             }
 
             const weekNames = ["月", "火", "水", "木", "金"];
 
-            let html = `<table style="min-width: 600px;">
+            let html = `<table style="width: 100%; min-width: 400px;">
                         <tr>
-                            <th style="width:40px;">日付</th>
-                            <th style="width:30px;">曜日</th>
-                            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>下校</th>
+                            <th style="width:15%;">日付</th>
+                            <th style="width:10%;">曜日</th>
+                            <th style="width:40%;">主な行事予定</th>
+                            <th style="width:35%;">提出物（締切）</th>
                         </tr>`;
             
             for(let i=0; i<5; i++) {
@@ -493,19 +499,22 @@
 
                 let bgStyle = (!isSchoolDayBool) ? "background-color: #f2f2f2;" : "";
                 
+                // 該当日の提出物をリストアップ
+                let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
+                let subsHtml = subsForDay.map(s => `・${s.title}`).join("<br>") || "---";
+
                 html += `<tr style="${bgStyle}">
                             <td style="text-align:center;">${dateObj.getMonth()+1}/${dateObj.getDate()}</td>
                             <td style="text-align:center; font-weight:bold;">${weekNames[i]}</td>`;
                 
                 if (!isSchoolDayBool) {
-                    let reason = holidayName ? holidayName : (isVacation ? "長期休業等" : "休み");
-                    html += `<td colspan="7" style="text-align:center; color:#666; font-weight:bold; letter-spacing: 2px;">${reason}</td>`;
+                    let reason = holidayName ? `<span style="color:red; font-weight:bold;">${holidayName}</span>` : (isVacation ? "長期休業等" : "休み");
+                    html += `<td style="text-align:center; font-weight:bold; letter-spacing: 1px;">${reason}</td>
+                             <td style="text-align:left; font-size:0.9em; padding-left:10px;">${subsHtml}</td>`;
                 } else {
-                    let wd = weekData[i];
-                    for(let p=0; p<6; p++) {
-                        html += `<td style="text-align:center;">${wd.lessons[p].sub || "---"}</td>`;
-                    }
-                    html += `<td style="text-align:center; font-size:0.9em;">${wd.exitTime || "16:30"}</td>`;
+                    let eventText = weekData[i].event || "---";
+                    html += `<td style="text-align:center;">${eventText}</td>
+                             <td style="text-align:left; font-size:0.9em; padding-left:10px;">${subsHtml}</td>`;
                 }
                 html += `</tr>`;
             }
@@ -915,19 +924,25 @@
         async function loadScheduleEdit() {
             const date = document.getElementById('edit-date-select').value; if(!date) return;
             const doc = await db.collection("schedules").doc(date).get();
-            const table = document.getElementById('edit-table'); 
-            table.innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th><th class='col-note'>備考</th></tr>";
+            
             let data = doc.exists ? doc.data() : null;
             if(!data) {
                 const dayNum = new Date(date).getDay();
                 const regDoc = await db.collection("config").doc("regular_schedule").get();
                 const regData = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayNum]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30" };
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30", event: "" };
             }
+
+            let html = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event || ""}" style="width:100%; box-sizing:border-box;"></div>`;
+            html += `<table style="width:100%;"><tr><th class='col-period'>校時</th><th class='col-subject'>科目</th><th class='col-note'>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
                 let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
-                table.innerHTML += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0; padding:4px;">${opts}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note}" style="margin:0; padding:4px; width:100%; box-sizing:border-box;"></td></tr>`;
+                html += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0; padding:4px;">${opts}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note}" style="margin:0; padding:4px; width:100%; box-sizing:border-box;"></td></tr>`;
             });
+            html += `</table>`;
+
+            document.getElementById('edit-table-container').innerHTML = html;
+
             initExitTimeOptions(document.getElementById('edit-exit-time'));
             document.getElementById('edit-exit-time').value = data.exitTime;
             document.getElementById('edit-form').style.display = "block";
@@ -935,8 +950,14 @@
         
         async function saveSchedule() {
             const date = document.getElementById('edit-date-select').value;
+            const eventVal = document.getElementById('edit-event').value;
             const lessons = Array.from({length:6}, (_, i) => ({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }));
-            await db.collection("schedules").doc(date).set({ lessons, exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            await db.collection("schedules").doc(date).set({ 
+                event: eventVal, 
+                lessons: lessons, 
+                exitTime: document.getElementById('edit-exit-time').value, 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+            });
             alert("保存しました"); displayAllSchedules();
             recordSystemUpdate(); 
         }
