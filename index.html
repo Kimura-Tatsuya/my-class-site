@@ -139,7 +139,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // ユーザーから提供されたFirebaseの構成情報
         const firebaseConfig = {
             apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
             authDomain: "my-class-site.firebaseapp.com",
@@ -172,7 +171,7 @@
             targetEl.innerHTML = html;
         }
 
-        // ログイン処理（エラー詳細アラート付き）
+        // ログイン処理
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
@@ -257,11 +256,11 @@
                 checkDate.setDate(checkDate.getDate() + 1);
             }
 
-            // 左側のラベル判定（今日なら「本日」、それ以外なら「次回」）
+            // 左側のラベル判定
             let label1 = foundDays[0].gap === 0 ? "本日" : "次回";
             await renderDay(foundDays[0].date, "area-1", label1);
 
-            // 右側のラベル判定（左側の翌日なら「明日」、間が空くなら「次回」）
+            // 右側のラベル判定
             const dateDiff = (new Date(foundDays[1].date) - new Date(foundDays[0].date)) / (1000*60*60*24);
             let label2 = dateDiff === 1 ? "明日" : "次回";
             await renderDay(foundDays[1].date, "area-2", label2);
@@ -285,7 +284,10 @@
 
             let html = `<span class="day-label">${label}</span><table><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
-                html += `<tr><td>${i+1}</td><td>${l.sub || "ー"}</td><td>${l.note || "いつも通り"}</td></tr>`;
+                // 科目が空欄の場合は「ー」、科目が設定されていて備考が空欄の場合は「いつも通り」
+                const subText = l.sub || "ー";
+                const noteText = l.note ? l.note : (l.sub ? "いつも通り" : "ー");
+                html += `<tr><td>${i+1}</td><td>${subText}</td><td>${noteText}</td></tr>`;
             });
             html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
             el.innerHTML = html;
