@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3-3 ハイパー学級管理</title>
+    <title>My Class Portal</title>
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 950px; margin: 0 auto; background: #f4f4f4; }
         section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; }
@@ -40,7 +40,7 @@
         </header>
 
         <section>
-            <h2>📅 スケジュール確認</h2>
+            <h2>スケジュール確認</h2>
             <div class="flex-container" id="daily-display">
                 <div id="today-area" class="schedule-card today-card">読み込み中...</div>
                 <div id="tomorrow-area" class="schedule-card tomorrow-card">読み込み中...</div>
@@ -51,7 +51,7 @@
         </section>
 
         <section id="admin-area" class="hidden">
-            <h2 style="color: blue;">🛠 予定編集（5週間先まで可）</h2>
+            <h2 style="color: blue;">予定編集（最大5週先まで）</h2>
             <div class="admin-form-box">
                 日付を選択：<input type="date" id="edit-date-select"> 
                 <button onclick="loadEditData()">編集データ呼出</button>
@@ -85,7 +85,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        const firebaseConfig = { /* あなたのConfig */ };
+        const firebaseConfig = {
+ 	   apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
+ 	   authDomain: "my-class-site.firebaseapp.com",
+  	   databaseURL: "https://my-class-site-default-rtdb.firebaseio.com",
+ 	   projectId: "my-class-site",
+ 	   storageBucket: "my-class-site.firebasestorage.app",
+ 	   messagingSenderId: "125594983188",
+ 	   appId: "1:125594983188:web:129aa54e9d3a39ca700001",
+ 	   measurementId: "G-4EQ3Z9Q4NT"
+};
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const TEACHER_EMAIL = "administrator@class.jp";
