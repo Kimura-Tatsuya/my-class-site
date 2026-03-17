@@ -1,17 +1,17 @@
 <body>
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>学級専用ページ</h1>
-        <p>IDとパスワードを入力してください。</p>
+        <h1>Class Portal</h1>
+        <p>Please enter your ID and password.</p>
         <input type="email" id="email" placeholder="ID" style="padding: 8px;"><br><br>
-        <input type="password" id="password" placeholder="パスワード" style="padding: 8px;"><br><br>
-        <button onclick="login()" style="padding: 10px 20px; cursor: pointer;">ログイン</button>
+        <input type="password" id="password" placeholder="Password" style="padding: 8px;"><br><br>
+        <button onclick="login()" style="padding: 10px 20px; cursor: pointer;">Login</button>
         <p id="error-message" style="color: red;"></p>
     </div>
 
     <div id="main-content" style="display: none;">
         <header>
-            <h1>３年３組 学級だより</h1>
-            <button onclick="logout()">ログアウト</button>
+            <h1>３年３組 学級のページ</h1>
+            <button onclick="logout()">Logout</button>
         </header>
         <main>
             <section>
@@ -49,7 +49,7 @@
                     // ログイン成功
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
-                    alert("ログインしました！");
+                    alert("クラスルームへようこそ！");
                 })
                 .catch((error) => {
                     // ログイン失敗
