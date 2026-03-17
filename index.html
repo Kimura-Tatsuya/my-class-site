@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class 3-3 Portal</title>
+    <title>３年３組 学級管理システム</title>
     <style>
         /* ＭＳ ゴシックを基調としたスタイル */
         body { 
@@ -32,20 +32,30 @@
             margin-right: 5px; margin-bottom: 5px;
         }
         button:hover { background: #eeeeee; }
+        
+        /* ボタン横並び用 */
+        .flex-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        
         .post-item { border-bottom: 1px dashed #000; padding: 15px 0; }
         .post-date { font-size: 0.8em; color: #444; margin-bottom: 5px; }
         .update-stamp { font-size: 0.9em; margin-left: 10px; font-weight: normal; }
         
-        /* 管理用ボタンのスタイル */
-        .admin-controls { margin-top: 10px; }
-        .btn-edit { font-size: 0.8em; border-color: blue; color: blue; }
-        .btn-delete { font-size: 0.8em; border-color: red; color: red; }
+        /* 編集エリア */
+        .edit-area { background: #f0f0f0; padding: 10px; border: 1px solid #000; margin-top: 10px; display: none; }
+        
+        /* 名簿テーブル */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        
+        .btn-small { font-size: 0.8em; padding: 4px 8px; }
+        .btn-red { color: red; border-color: red; }
     </style>
 </head>
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1>Class 3-3 Portal</h1>
+        <h1>学級管理システム ログイン</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
         <button type="button" id="login-btn">ログイン</button>
@@ -60,6 +70,15 @@
 
         <main>
             <section>
+                <h2>設定</h2>
+                <div class="flex-row">
+                    <input type="password" id="new-password" placeholder="新しいパスワード" style="max-width:200px; margin-bottom:0;">
+                    <button id="change-pw-btn">パスワードを変更する</button>
+                </div>
+                <p id="pw-msg" style="font-size:0.8em; margin:0;"></p>
+            </section>
+
+            <section>
                 <h2>今週の予定 <span id="last-update-time" class="update-stamp"></span></h2>
                 <div id="schedule-display"><p id="schedule-text" style="white-space: pre-wrap;"></p></div>
                 <div id="schedule-edit" style="display: none;">
@@ -69,7 +88,7 @@
             </section>
 
             <section>
-                <h2>担任日誌</h2>
+                <h2>担任ブログ</h2>
                 <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 15px; margin-bottom: 15px; border: 1px solid #000;">
                     <textarea id="blog-input" placeholder="投稿内容を入力してください"></textarea><br>
                     <button id="post-blog-btn">ブログを投稿する</button>
@@ -79,15 +98,22 @@
 
             <section id="admin-section" style="display: none; border: 3px double #000;">
                 <h2 style="background: #000; color: #fff; padding: 5px;">管理者専用メニュー</h2>
+                
                 <h3>名簿管理</h3>
-                <input type="file" id="csv-file" accept=".csv">
-                <button id="import-csv-btn">名簿インポート(CSV)</button>
-                <button id="export-student-btn">名簿エクスポート(CSV)</button>
+                <input type="file" id="csv-file" accept=".csv" style="display:block;">
+                <div class="flex-row">
+                    <button id="import-csv-btn">名簿インポート(CSV)</button>
+                    <button id="export-student-btn">名簿エクスポート(CSV)</button>
+                </div>
+
+                <h3>登録状況一覧</h3>
+                <div id="student-list-area"></div>
+
                 <h3>アクセスログ</h3>
                 <button id="load-log-btn">ログを表示/更新</button>
                 <div id="log-area" style="margin-top:10px;">
-                    <table style="width:100%; border-collapse:collapse; font-size:0.9em; border:1px solid black;">
-                        <thead><tr style="background:#f2f2f2;"><th>日時</th><th>メール</th></tr></thead>
+                    <table id="log-table">
+                        <thead><tr><th>日時</th><th>メール</th></tr></thead>
                         <tbody id="log-table-body"></tbody>
                     </table>
                 </div>
@@ -151,13 +177,18 @@
                     
                     let html = `<div class="post-item" id="post-${id}">
                         <div class="post-date">${date}</div>
-                        <div class="post-content">${data.content.replace(/\n/g, '<br>')}</div>`;
+                        <div id="content-${id}" class="post-content">${data.content.replace(/\n/g, '<br>')}</div>`;
                     
-                    // 管理者用操作ボタン
                     if (user.email === TEACHER_EMAIL) {
-                        html += `<div class="admin-controls">
-                            <button class="btn-edit" onclick="editBlog('${id}')">編集</button>
-                            <button class="btn-delete" onclick="deleteBlog('${id}')">削除</button>
+                        html += `
+                        <div id="edit-area-${id}" class="edit-area">
+                            <textarea id="edit-input-${id}" style="width:100%">${data.content}</textarea>
+                            <button class="btn-small" onclick="saveBlogEdit('${id}')">更新</button>
+                            <button class="btn-small" onclick="toggleEdit('${id}')">キャンセル</button>
+                        </div>
+                        <div class="flex-row" style="margin-top:10px;">
+                            <button class="btn-small" onclick="toggleEdit('${id}')">編集</button>
+                            <button class="btn-small btn-red" onclick="deleteBlog('${id}')">削除</button>
                         </div>`;
                     }
                     html += `</div>`;
@@ -170,61 +201,66 @@
                 document.getElementById('schedule-edit').style.display = 'block';
                 document.getElementById('blog-admin-form').style.display = 'block';
                 document.getElementById('load-log-btn').onclick = loadLogs;
+                loadStudentList();
             }
 
             db.collection("access_logs").add({ email: user.email, loginTime: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
-        // ブログ編集機能
-        async function editBlog(id) {
-            const doc = await db.collection("blogs").doc(id).get();
-            if(!doc.exists) return;
-            const newContent = prompt("ブログの内容を編集してください:", doc.data().content);
-            if(newContent !== null && newContent !== "") {
-                await db.collection("blogs").doc(id).update({
-                    content: newContent,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("編集しました");
-            }
+        // パスワード変更機能
+        document.getElementById('change-pw-btn').onclick = () => {
+            const newPw = document.getElementById('new-password').value;
+            const msg = document.getElementById('pw-msg');
+            if (newPw.length < 6) { alert("パスワードは6文字以上で入力してください。"); return; }
+            
+            firebase.auth().currentUser.updatePassword(newPw).then(() => {
+                msg.style.color = "blue";
+                msg.innerText = "パスワードを正常に変更しました。";
+                document.getElementById('new-password').value = "";
+            }).catch(err => {
+                msg.style.color = "red";
+                msg.innerText = "エラー：再ログインが必要な場合があります。";
+            });
+        };
+
+        // ブログ編集（インライン）
+        function toggleEdit(id) {
+            const area = document.getElementById(`edit-area-${id}`);
+            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
         }
 
-        // ブログ削除機能
-        async function deleteBlog(id) {
-            if(confirm("この投稿を完全に削除してもよろしいですか？")) {
-                await db.collection("blogs").doc(id).delete();
-                alert("削除しました");
-            }
-        }
-
-        document.getElementById('update-schedule-btn').onclick = () => {
-            db.collection("config").doc("weekly_schedule").set({
-                text: document.getElementById('schedule-input').value,
+        async function saveBlogEdit(id) {
+            const newContent = document.getElementById(`edit-input-${id}`).value;
+            await db.collection("blogs").doc(id).update({
+                content: newContent,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("保存しました"));
-        };
-
-        document.getElementById('post-blog-btn').onclick = () => {
-            const content = document.getElementById('blog-input').value;
-            if(!content) return;
-            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
-                document.getElementById('blog-input').value = "";
-                alert("投稿しました");
             });
-        };
-
-        async function loadLogs() {
-            const tbody = document.getElementById('log-table-body');
-            tbody.innerHTML = "<tr><td colspan='2'>読み込み中...</td></tr>";
-            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(50).get();
-            tbody.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                const time = d.loginTime ? d.loginTime.toDate().toLocaleString() : "---";
-                tbody.innerHTML += `<tr style="border-bottom:1px solid black;"><td>${time}</td><td>${d.email}</td></tr>`;
-            });
+            alert("更新しました");
         }
 
+        async function deleteBlog(id) {
+            if(confirm("削除しますか？")) await db.collection("blogs").doc(id).delete();
+        }
+
+        // 名簿状況の表示
+        async function loadStudentList() {
+            const snap = await db.collection("students").get();
+            let html = "<table><tr><th>名前</th><th>メール</th><th>操作</th></tr>";
+            snap.forEach(doc => {
+                html += `<tr><td>${doc.data().name}</td><td>${doc.id}</td>
+                <td><button class="btn-small btn-red" onclick="deleteStudent('${doc.id}')">削除</button></td></tr>`;
+            });
+            document.getElementById('student-list-area').innerHTML = html + "</table>";
+        }
+
+        async function deleteStudent(email) {
+            if(confirm(email + " を名簿から削除しますか？")) {
+                await db.collection("students").doc(email).delete();
+                loadStudentList();
+            }
+        }
+
+        // ボタン並列化済みのCSV処理
         document.getElementById('export-student-btn').onclick = async () => {
             const snap = await db.collection("students").get();
             let csv = "メールアドレス,名前\n";
@@ -249,9 +285,37 @@
                     }
                 }
                 alert("インポート完了");
+                loadStudentList();
             };
             reader.readAsText(file);
         };
+
+        document.getElementById('update-schedule-btn').onclick = () => {
+            db.collection("config").doc("weekly_schedule").set({
+                text: document.getElementById('schedule-input').value,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("保存しました"));
+        };
+
+        document.getElementById('post-blog-btn').onclick = () => {
+            const content = document.getElementById('blog-input').value;
+            if(!content) return;
+            db.collection("blogs").add({ content: content, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
+                document.getElementById('blog-input').value = "";
+                alert("投稿しました");
+            });
+        };
+
+        async function loadLogs() {
+            const tbody = document.getElementById('log-table-body');
+            tbody.innerHTML = "<tr><td colspan='2'>読み込み中...</td></tr>";
+            const snap = await db.collection("access_logs").orderBy("loginTime", "desc").limit(30).get();
+            tbody.innerHTML = "";
+            snap.forEach(doc => {
+                const time = doc.data().loginTime ? doc.data().loginTime.toDate().toLocaleString() : "---";
+                tbody.innerHTML += `<tr><td>${time}</td><td>${doc.data().email}</td></tr>`;
+            });
+        }
 
         document.getElementById('logout-btn').onclick = () => { location.reload(); };
     </script>
