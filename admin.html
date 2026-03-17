@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>【管理者用】ログイン履歴確認</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; color: #333; }
+        h1 { border-left: 5px solid #333; padding-left: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+        .refresh-btn { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; }
+        .refresh-btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <h1>学級ページ 閲覧ログ確認</h1>
+    <p>最近ログインした生徒の履歴（最大50件）を表示します。</p>
+    <button class="refresh-btn" onclick="loadLogs()">データを更新する</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ログイン日時</th>
+                <th>生徒ID (Email)</th>
+                <th>アクセス環境 (ブラウザ等)</th>
+            </tr>
+        </thead>
+        <tbody id="log-table-body">
+            <tr><td colspan="3">データを読み込んでいます...</td></tr>
+        </tbody>
+    </table>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
+            authDomain: "my-class-site.firebaseapp.com",
+            projectId: "my-class-site",
+            storageBucket: "my-class-site.firebasestorage.app",
+            messagingSenderId: "125594983188",
+            appId: "1:125594983188:web:129aa54e9d3a39ca700001",
+            measurementId: "G-4EQ3Z9Q4NT"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function loadLogs() {
+            const tbody = document.getElementById('log-table-body');
+            
+            db.collection("access_logs")
+              .orderBy("loginTime", "desc")
+              .limit(50)
+              .get()
+              .then((querySnapshot) => {
+                  tbody.innerHTML = ""; 
+                  if (querySnapshot.empty) {
+                      tbody.innerHTML = "<tr><td colspan='3'>履歴はまだありません。</td></tr>";
+                      return;
+                  }
+                  querySnapshot.forEach((doc) => {
+                      const log = doc.data();
+                      const date = log.loginTime ? log.loginTime.toDate().toLocaleString('ja-JP') : "記録中...";
+                      const row = `
+                          <tr>
+                              <td>${date}</td>
+                              <td><b>${log.email}</b></td>
+                              <td style="font-size: 0.8em; color: #777;">${log.userAgent}</td>
+                          </tr>
+                      `;
+                      tbody.innerHTML += row;
+                  });
+              })
+              .catch((error) => {
+                  console.error(error);
+                  tbody.innerHTML = "<tr><td colspan='3' style='color:red;'>エラー：Firestoreの権限設定（ルール）を確認してください。</td></tr>";
+              });
+        }
+
+        window.onload = loadLogs;
+    </script>
+</body>
+</html>
