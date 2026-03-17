@@ -405,7 +405,6 @@
             while (foundDays.length < 2) {
                 let dateStr = getLocalDateStr(checkDate);
                 if (isSchoolDay(dateStr)) {
-                    // 日付の差分からgap（何日後か）を計算
                     let diffMs = new Date(dateStr) - new Date(todayStr);
                     let gap = Math.round(diffMs / (1000*60*60*24));
                     foundDays.push({ date: dateStr, gap: gap });
@@ -450,7 +449,7 @@
             el.innerHTML = html;
         }
 
-        // --- 週予定（横書き・行事予定と提出物を表示） ---
+        // --- 週予定（行事予定と提出物を統合表示） ---
         async function displayWeeklySchedule() {
             let d = new Date();
             let currentDay = d.getDay();
@@ -482,12 +481,12 @@
 
             const weekNames = ["月", "火", "水", "木", "金"];
 
+            // 提出物の列を統合し、行事予定の列にまとめる
             let html = `<table style="width: 100%; min-width: 400px;">
                         <tr>
                             <th style="width:15%;">日付</th>
                             <th style="width:10%;">曜日</th>
-                            <th style="width:40%;">主な行事予定</th>
-                            <th style="width:35%;">提出物（締切）</th>
+                            <th style="width:75%;">主な行事予定・提出物</th>
                         </tr>`;
             
             for(let i=0; i<5; i++) {
@@ -499,9 +498,9 @@
 
                 let bgStyle = (!isSchoolDayBool) ? "background-color: #f2f2f2;" : "";
                 
-                // 該当日の提出物をリストアップ
+                // 該当日の提出物をリストアップ（【締切】をつけて目立たせる）
                 let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
-                let subsHtml = subsForDay.map(s => `・${s.title}`).join("<br>") || "---";
+                let subsHtml = subsForDay.map(s => `【締切】${s.title}`).join("<br>");
 
                 html += `<tr style="${bgStyle}">
                             <td style="text-align:center;">${dateObj.getMonth()+1}/${dateObj.getDate()}</td>
@@ -509,12 +508,16 @@
                 
                 if (!isSchoolDayBool) {
                     let reason = holidayName ? `<span style="color:red; font-weight:bold;">${holidayName}</span>` : (isVacation ? "長期休業等" : "休み");
-                    html += `<td style="text-align:center; font-weight:bold; letter-spacing: 1px;">${reason}</td>
-                             <td style="text-align:left; font-size:0.9em; padding-left:10px;">${subsHtml}</td>`;
+                    let cellContent = reason;
+                    if (subsHtml) cellContent += `<br><span style="font-size:0.9em; font-weight:bold; color: #d9534f;">${subsHtml}</span>`;
+                    html += `<td style="text-align:left; padding-left:10px; font-weight:bold; letter-spacing: 1px;">${cellContent}</td>`;
                 } else {
                     let eventText = weekData[i].event || "---";
-                    html += `<td style="text-align:center;">${eventText}</td>
-                             <td style="text-align:left; font-size:0.9em; padding-left:10px;">${subsHtml}</td>`;
+                    let cellContent = eventText;
+                    if (subsHtml) {
+                        cellContent = (eventText === "---" ? "" : eventText + "<br>") + `<span style="font-size:0.9em; font-weight:bold; color: #d9534f;">${subsHtml}</span>`;
+                    }
+                    html += `<td style="text-align:left; padding-left:10px;">${cellContent || "---"}</td>`;
                 }
                 html += `</tr>`;
             }
