@@ -205,7 +205,7 @@
             }
             
             const userName = studentMaster[user.email]?.name || "先生";
-            document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん ３年３組のポータルへようこそ`;
+            document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん！ ３年３組のポータルへようこそ！`;
 
             // ログイン時刻の更新
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
