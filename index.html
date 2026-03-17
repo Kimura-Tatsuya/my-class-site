@@ -1,8 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>３年３組 学級のページ</title>
+    <style>
+        body {
+            background-color: white;
+            color: black;
+            font-family: sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { border-bottom: 2px solid black; padding-bottom: 10px; }
+        section { margin-bottom: 30px; }
+        input { width: 80%; max-width: 300px; }
+        .admin-link { margin-top: 50px; font-size: 0.8em; color: #ccc; text-decoration: none; }
+    </style>
+</head>
 <body>
+
     <div id="login-section" style="text-align: center; margin-top: 50px;">
         <h1>Class Portal</h1>
-        <p>Please enter your ID and password.</p>
-        <input type="email" id="email" placeholder="ID" style="padding: 8px;"><br><br>
+        <p>ID（メール形式）とパスワードを入力してください。</p>
+        <input type="email" id="email" placeholder="s01@class.jp" style="padding: 8px;"><br><br>
         <input type="password" id="password" placeholder="Password" style="padding: 8px;"><br><br>
         <button onclick="login()" style="padding: 10px 20px; cursor: pointer;">Login</button>
         <p id="error-message" style="color: red;"></p>
@@ -11,32 +34,46 @@
     <div id="main-content" style="display: none;">
         <header>
             <h1>３年３組 学級のページ</h1>
-            <button onclick="logout()">Logout</button>
+            <div style="text-align: right;">
+                <button onclick="logout()">Logout</button>
+            </div>
         </header>
         <main>
             <section>
                 <h2>今週の予定</h2>
                 <p>ここはログインした生徒だけが閲覧できるページです。</p>
+                <ul>
+                    <li>月曜：宿題提出</li>
+                    <li>水曜：移動教室あり</li>
+                </ul>
+            </section>
+            
+            <section style="background: #f9f9f9; padding: 15px; border: 1px solid #ddd;">
+                <h3>設定</h3>
+                <p>パスワードを忘れた場合や変更したい場合は、以下のボタンを押して再設定メールを送信してください。</p>
+                <button onclick="resetPassword()">パスワード再設定メールを送る</button>
             </section>
         </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- ここにあなたの firebaseConfig を貼り付けます ---
+        // --- Firebaseの設定 ---
         const firebaseConfig = {
-    	   apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
-    	   authDomain: "my-class-site.firebaseapp.com",
-    	   projectId: "my-class-site",
-    	   storageBucket: "my-class-site.firebasestorage.app",
-    	   messagingSenderId: "125594983188",
-    	   appId: "1:125594983188:web:129aa54e9d3a39ca700001",
-    	   measurementId: "G-4EQ3Z9Q4NT"
+            apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
+            authDomain: "my-class-site.firebaseapp.com",
+            projectId: "my-class-site",
+            storageBucket: "my-class-site.firebasestorage.app",
+            messagingSenderId: "125594983188",
+            appId: "1:125594983188:web:129aa54e9d3a39ca700001",
+            measurementId: "G-4EQ3Z9Q4NT"
         };
         firebase.initializeApp(firebaseConfig);
-        // -----------------------------------------------
+        const db = firebase.firestore();
+        // -----------------------
 
         // ログインボタンを押した時の動き
         function login() {
@@ -46,22 +83,43 @@
 
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // ログイン成功
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'block';
-                    alert("クラスルームへようこそ！");
+                    // 1. ログインログをFirestoreに記録
+                    db.collection("access_logs").add({
+                        email: email,
+                        loginTime: firebase.firestore.FieldValue.serverTimestamp(),
+                        userAgent: navigator.userAgent
+                    }).then(() => {
+                        // 2. 画面切り替え
+                        document.getElementById('login-section').style.display = 'none';
+                        document.getElementById('main-content').style.display = 'block';
+                        alert("クラスルームへようこそ！");
+                    });
                 })
                 .catch((error) => {
-                    // ログイン失敗
                     errorMsg.innerText = "IDまたはパスワードが違います。";
                 });
+        }
+
+        // パスワード再設定メールの送信
+        function resetPassword() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                firebase.auth().sendPasswordResetEmail(user.email)
+                    .then(() => {
+                        alert("登録されているメールアドレス宛に再設定メールを送信しました。メールを確認してください。");
+                    })
+                    .catch((error) => {
+                        alert("エラーが発生しました: " + error.message);
+                    });
+            }
         }
 
         // ログアウトの動き
         function logout() {
             firebase.auth().signOut().then(() => {
-                location.reload(); // ページを再読み込みしてログイン画面に戻す
+                location.reload();
             });
         }
     </script>
 </body>
+</html>
