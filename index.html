@@ -3,62 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>３年３組 学級のページ</title>
+    <title>学級管理システム</title>
     <style>
         body { background-color: white; color: black; font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
-        h1 { border-bottom: 2px solid black; padding-bottom: 10px; }
-        section { margin-bottom: 30px; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
-        input { width: 100%; max-width: 300px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; cursor: pointer; background: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; }
-        button:hover { background: #555; }
-        .error { color: red; font-size: 0.9em; min-height: 1.5em; }
-        
-        /* 管理者用ログテーブルのスタイル */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #eee; }
-        #admin-log-section { background: #fff9f9; border: 2px solid #f44336; }
+        h1, h2, h3 { border-bottom: 1px solid black; padding-bottom: 5px; }
+        section { margin-bottom: 40px; border: 1px solid #ccc; padding: 15px; border-radius: 4px; }
+        input, textarea { width: 100%; max-width: 500px; padding: 10px; margin-bottom: 10px; border: 1px solid #999; box-sizing: border-box; }
+        textarea { height: 120px; }
+        button { padding: 10px 20px; cursor: pointer; background: white; color: black; border: 1px solid black; font-weight: bold; margin-right: 5px; }
+        button:hover { background: #eee; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        .post-item { border-bottom: 1px dashed #ccc; padding: 15px 0; }
+        .post-date { font-size: 0.8em; color: #666; margin-bottom: 5px; }
+        .pagination { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+        .info-text { font-size: 0.8em; color: #555; }
     </style>
 </head>
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
         <h1>Class Portal</h1>
-        <p>ID（メール形式）とパスワードを入力してください。</p>
-        <input type="email" id="email" placeholder="s01@class.jp"><br>
-        <input type="password" id="password" placeholder="Password"><br>
-        <button type="button" onclick="login()">Login</button>
-        <p id="error-message" class="error"></p>
+        <input type="email" id="email" placeholder="メールアドレス"><br>
+        <input type="password" id="password" placeholder="パスワード"><br>
+        <button onclick="login()">ログイン</button>
+        <p id="error-message" style="color:red;"></p>
     </div>
 
     <div id="main-content" style="display: none;">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1>３年３組 学級のページ</h1>
-            <button onclick="logout()" style="background:#f44336;">Logout</button>
+        <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid black; margin-bottom: 20px;">
+            <h2 id="welcome-msg">読み込み中...</h2>
+            <button onclick="logout()" style="border: 1px solid red; color: red;">ログアウト</button>
         </header>
 
         <main>
-            <section>
+            <section id="schedule-section">
                 <h2>📢 今週の予定</h2>
-                <p>月曜：移動教室あり（理科室）</p>
-                <p>火曜：漢字小テスト</p>
-                <p>金曜：学級会</p>
+                <div id="schedule-display"><p id="schedule-text" style="white-space: pre-wrap; font-size: 1.1em;"></p></div>
+                <div id="schedule-edit" style="display: none;">
+                    <textarea id="schedule-input"></textarea><br>
+                    <button onclick="updateSchedule()">予定を更新保存</button>
+                </div>
+                <p id="last-updated" style="font-size: 0.75em; color: #666; margin-top: 10px;"></p>
             </section>
 
-            <section id="admin-log-section" style="display: none;">
-                <h2>📊 【管理者用】アクセスログ</h2>
-                <p style="font-size: 0.8em; color: #666;">最新の20件を表示しています。</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ログイン日時</th>
-                            <th>ユーザーID</th>
-                        </tr>
-                    </thead>
-                    <tbody id="log-table-body">
-                        <tr><td colspan="2" style="text-align:center;">読み込み中...</td></tr>
-                    </tbody>
-                </table>
+            <section id="blog-section">
+                <h2>📝 担任ブログ</h2>
+                
+                <div id="blog-admin-form" style="display: none; background: #f9f9f9; padding: 15px; border: 1px solid #000; margin-bottom: 20px;">
+                    <h3>新規投稿</h3>
+                    <textarea id="blog-input" placeholder="ブログ本文を入力..."></textarea><br>
+                    <label class="info-text">日時指定（空欄で現在時刻投稿）:</label><br>
+                    <input type="datetime-local" id="blog-datetime" style="max-width: 250px;"><br>
+                    <button onclick="postBlog()">ブログを投稿する</button>
+                </div>
+
+                <div id="blog-list">投稿を取得しています...</div>
+                
+                <div class="pagination">
+                    <button id="blog-prev" onclick="fetchBlogs('prev')" style="display:none;">前の20件</button>
+                    <button id="blog-next" onclick="fetchBlogs('next')" style="display:none;">次の20件</button>
+                </div>
+            </section>
+
+            <section>
+                <h3>🔑 パスワード変更</h3>
+                <input type="password" id="new-password" placeholder="新しいパスワード(6文字以上)" style="max-width:250px;">
+                <button onclick="changePassword()">パスワード更新</button>
+            </section>
+
+            <section id="admin-section" style="display: none; border: 2px solid red;">
+                <h2 style="color: red;">🛠️ 管理者メニュー</h2>
+                
+                <div>
+                    <h3>👥 名簿管理 (CSV)</h3>
+                    <p class="info-text">CSV形式: メールアドレス,氏名,クラス,番号</p>
+                    <input type="file" id="csv-file" accept=".csv"><br>
+                    <button onclick="importCSV()">CSVから名簿インポート</button>
+                    <button onclick="exportCSV()">現在の名簿を出力</button>
+                    <p id="import-status" style="font-weight:bold; color:blue;"></p>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3>📊 最近のアクセスログ</h3>
+                    <div id="log-list"></div>
+                    <button onclick="downloadLogCSV()" style="margin-top: 10px;">全ログをCSV保存</button>
+                </div>
             </section>
         </main>
     </div>
@@ -68,97 +98,49 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- Firebase 設定値 ---
+        // --- 設定エリア ---
         const firebaseConfig = {
             apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
             authDomain: "my-class-site.firebaseapp.com",
             projectId: "my-class-site",
             storageBucket: "my-class-site.firebasestorage.app",
             messagingSenderId: "125594983188",
-            appId: "1:125594983188:web:129aa54e9d3a39ca700001",
-            measurementId: "G-4EQ3Z9Q4NT"
+            appId: "1:125594983188:web:129aa54e9d3a39ca700001"
         };
+        const TEACHER_EMAIL = "teacher@example.com"; // 先生のアドレス
 
-        // --- 管理者（先生）のメールアドレス ---
-        const TEACHER_EMAIL = "administrator@class.jp"; // ★ここを自分のアドレスに変更
-
-        // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        let studentMaster = {};
+        let blogCursorFirst = null;
+        let blogCursorLast = null;
 
-        // ログイン処理
+        // ログイン
         function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('error-message');
-
-            errorMsg.innerText = "認証中...";
-
             firebase.auth().signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    
-                    // 画面表示の切り替え
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'block';
-
-                    // 先生ならログを表示
-                    if (user.email === TEACHER_EMAIL) {
-                        document.getElementById('admin-log-section').style.display = 'block';
-                        loadLogs();
-                    }
-
-                    // ログを保存（バックグラウンド）
-                    db.collection("access_logs").add({
-                        email: user.email,
-                        loginTime: firebase.firestore.FieldValue.serverTimestamp(),
-                        userAgent: navigator.userAgent
-                    }).catch(err => console.error("Log save error:", err));
-                })
-                .catch((error) => {
-                    console.error("Login Error:", error.code);
-                    errorMsg.innerText = "IDまたはパスワードが違います。";
-                });
+                .then(res => initApp(res.user))
+                .catch(err => document.getElementById('error-message').innerText = "ログインに失敗しました。");
         }
 
-        // ログデータを取得して表示する関数
-        function loadLogs() {
-            const tbody = document.getElementById('log-table-body');
-            
-            db.collection("access_logs")
-                .orderBy("loginTime", "desc")
-                .limit(20)
-                .get()
-                .then(snap => {
-                    tbody.innerHTML = "";
-                    if (snap.empty) {
-                        tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>データがありません</td></tr>";
-                        return;
-                    }
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        const date = d.loginTime ? d.loginTime.toDate().toLocaleString() : "記録中...";
-                        tbody.innerHTML += `<tr>
-                            <td>${date}</td>
-                            <td>${d.email}</td>
-                        </tr>`;
-                    });
-                })
-                .catch(err => {
-                    console.error("Load Logs Error:", err);
-                    tbody.innerHTML = `<tr><td colspan="2" style="color:red;">
-                        エラー：権限がないか、インデックスが未作成です。<br>
-                        ${err.message}
-                    </td></tr>`;
-                });
-        }
+        async function initApp(user) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
 
-        // ログアウト処理
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                location.reload();
-            });
-        }
-    </script>
-</body>
-</html>
+            // 名簿取得
+            const snap = await db.collection("students").get();
+            snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
+
+            // 氏名表示
+            const name = studentMaster[user.email] ? studentMaster[user.email].name : "ゲスト";
+            document.getElementById('welcome-msg').innerText = `${name} さん、おかえりなさい！`;
+
+            fetchSchedule();
+            fetchBlogs();
+
+            if (user.email === TEACHER_EMAIL) {
+                document.getElementById('admin-section').style.display = 'block';
+                document.getElementById('schedule-edit').style.display = 'block';
+                document.getElementById('schedule-display').style.display = 'none';
+                document.getElementById('blog-admin-form').style.display = 'block';
