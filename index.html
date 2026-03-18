@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Class Portal</title>
     <style>
+        /* ★レスポンシブの基本：すべての要素のパディングを幅に含める */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         /* 白黒・ＭＳゴシック基調のシンプルスタイル */
         body { 
             background-color: white; 
@@ -34,11 +39,13 @@
             padding: 0;
         }
         section { margin-bottom: 40px; border: 1px solid black; padding: 20px; }
+        
         input, textarea, select { 
             width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; 
-            border: 1px solid black; box-sizing: border-box; font-family: inherit;
+            border: 1px solid black; font-family: inherit;
             background: white; color: black;
         }
+        
         button { 
             padding: 8px 15px; cursor: pointer; background: white; color: black; 
             border: 1px solid black; font-weight: bold; font-family: inherit;
@@ -47,7 +54,7 @@
         button:hover { background: black; color: white; }
         
         .day-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
-        .day-box { flex: 1; border: 1px solid black; padding: 15px; min-width: 320px; }
+        .day-box { flex: 1; border: 1px solid black; padding: 15px; min-width: 300px; }
         .day-label { font-weight: bold; font-size: 1.1em; border-bottom: 2px solid black; display: block; margin-bottom: 10px; padding-bottom: 5px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; }
@@ -58,12 +65,51 @@
         .col-subject { width: 75px; white-space: nowrap; } 
         .col-note { width: auto; text-align: left !important; word-break: break-all; } 
 
-        .admin-form-box { background: white; padding: 15px; border: 1px solid black; margin-bottom: 20px; }
+        .admin-form-box { background: white; padding: 15px; border: 1px solid black; margin-bottom: 20px; overflow-x: auto; }
         .post-item { border-bottom: 1px dashed black; padding: 15px 0; }
         .post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; }
         
         .admin-actions { margin-top: 10px; text-align: right; }
         .admin-actions button { padding: 4px 10px; font-size: 0.85em; }
+
+        /* スマホなどの横スクロールを滑らかにする */
+        .scroll-area {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+
+        /* ★スマホ・タブレット向け（横幅650px以下）のレイアウト調整 */
+        @media screen and (max-width: 650px) {
+            body { 
+                padding: 10px; 
+            }
+            section { 
+                padding: 15px; 
+            }
+            .section-header {
+                flex-direction: column; /* 見出しとボタンを縦並びに */
+                gap: 10px;
+            }
+            .section-header div {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+            .day-box { 
+                min-width: 100%; /* 予定の箱を画面幅いっぱいに */
+                padding: 10px;
+            }
+            table {
+                font-size: 0.85em; /* 文字を少し小さくして見やすく */
+            }
+            th, td {
+                padding: 5px; /* 表の余白を狭める */
+            }
+            input[type="text"], input[type="email"], input[type="date"], input[type="password"] {
+                width: 100% !important; /* 強制的に画面幅に収める */
+            }
+        }
     </style>
 </head>
 <body>
@@ -77,7 +123,7 @@
 
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 id="welcome-msg" style="border:none; margin:0;">確認中...</h2>
+            <h2 id="welcome-msg" style="border:none; margin:0; font-size:1.1em;">確認中...</h2>
             <button type="button" onclick="logout()">ログアウト</button>
         </header>
 
@@ -92,8 +138,8 @@
                     </div>
                 </div>
                 <div class="day-container" id="schedule-display">
-                    <div id="area-1" class="day-box">確認中...</div>
-                    <div id="area-2" class="day-box">確認中...</div>
+                    <div id="area-1" class="day-box scroll-area">確認中...</div>
+                    <div id="area-2" class="day-box scroll-area">確認中...</div>
                 </div>
             </section>
 
@@ -101,13 +147,13 @@
                 <div class="section-header">
                     <h2>週予定</h2>
                     <div>
-                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">表を編集</button>
+                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">表を直接編集</button>
                         <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
                         <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
                         <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
                     </div>
                 </div>
-                <div id="weekly-schedule-display" style="overflow-x: auto; margin-top: 10px;">
+                <div id="weekly-schedule-display" class="scroll-area" style="margin-top: 10px;">
                     確認中...
                 </div>
             </section>
@@ -117,7 +163,7 @@
                     <h2>回収物・提出物</h2>
                 </div>
                 <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したら、左のチェックボックスを押してください。</p>
-                <div id="submission-list" style="overflow-x: auto;">確認中...</div>
+                <div id="submission-list" class="scroll-area">確認中...</div>
             </section>
 
             <section>
@@ -163,13 +209,13 @@
                 <details class="admin-form-box">
                     <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
                     <div style="margin-top:10px;">
-                        提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書">
-                        締め切り：<input type="date" id="subm-deadline" style="width:150px;">
+                        提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
+                        締め切り：<input type="date" id="subm-deadline" style="width:150px;"><br>
                         <button type="button" id="subm-add-btn" onclick="addSubmission()">追加</button>
                         <button type="button" id="subm-update-btn" style="display:none;" onclick="updateSubmission()">更新する</button>
                         <button type="button" id="subm-cancel-btn" style="display:none;" onclick="cancelSubmEdit()">キャンセル</button>
                     </div>
-                    <div id="admin-submission-table" style="margin-top:15px; overflow-x: auto;"></div>
+                    <div id="admin-submission-table" class="scroll-area" style="margin-top:15px;"></div>
                 </details>
 
                 <details class="admin-form-box">
@@ -179,7 +225,9 @@
                         <option value="wed">水曜日</option><option value="thu">木曜日</option>
                         <option value="fri">金曜日</option>
                     </select>
-                    <table id="reg-table"></table>
+                    <div class="scroll-area">
+                        <table id="reg-table"></table>
+                    </div>
                     <button type="button" onclick="saveRegularSetting()" style="margin-top:10px;">標準設定を保存</button>
                 </details>
 
@@ -195,7 +243,7 @@
                     日付：<input type="date" id="edit-date-select" style="width:200px;">
                     <button type="button" onclick="loadScheduleEdit()">編集データ呼出</button>
                     <div id="edit-form" style="display:none; margin-top:15px;">
-                        <div id="edit-table-container"></div>
+                        <div id="edit-table-container" class="scroll-area"></div>
                         <div style="margin-top:10px;">
                             最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
                         </div>
@@ -220,7 +268,7 @@
                     <input type="date" id="log-date-input" style="width:150px;">
                     <button type="button" onclick="loadAccessLogsByDate()">指定日のログを表示</button>
                     <button type="button" onclick="loadAccessLogs()">最新50件を表示</button>
-                    <div id="access-log-list" style="margin-top: 10px; max-height: 250px; overflow-y: auto; display: none;"></div>
+                    <div id="access-log-list" class="scroll-area" style="margin-top: 10px; max-height: 250px;"></div>
                 </div>
 
                 <div class="admin-form-box">
@@ -239,8 +287,8 @@
                     <button type="button" onclick="exportCSV()">エクスポート（ダウンロード）</button>
                 </div>
 
-                <h3>登録済み一覧（編集可能）</h3>
-                <div id="student-list-area"></div>
+                <h3>登録済み一覧（名前の直接編集が可能）</h3>
+                <div id="student-list-area" class="scroll-area"></div>
             </section>
 
             <section>
@@ -287,10 +335,9 @@
         let editingBlogId = null;
         let editingSubmId = null;
 
-        // ★ ナビゲーション用の基準日保持変数
         let currentScheduleBaseDate = new Date();
         let currentWeekBaseDate = new Date();
-        let currentWeeklyDates = []; // 週予定の保存用
+        let currentWeeklyDates = [];
 
         let inactivityTimer;
         const TIMEOUT_MS = 60 * 60 * 1000; 
@@ -309,6 +356,7 @@
         document.addEventListener('keydown', resetInactivityTimer);
         document.addEventListener('click', resetInactivityTimer);
         document.addEventListener('scroll', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer);
 
         function getLocalDateStr(dateObj) {
             const y = dateObj.getFullYear();
@@ -380,7 +428,7 @@
                 const userName = studentMaster[currentUserEmail]?.name || "先生";
                 const hour = new Date().getHours();
                 let greeting = (hour >= 17 || hour < 6) ? "こんばんは" : (hour >= 6 && hour < 11) ? "おはようございます" : "こんにちは";
-                document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん！ ３年３組のポータルへようこそ！`;
+                document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん！`;
 
                 renderSubmissionsUI(); 
                 if (isAdmin) {
@@ -477,11 +525,9 @@
             return true;
         }
 
-        // --- 直近の予定のナビゲーション ---
         function changeScheduleDate(direction) {
             let d = new Date(currentScheduleBaseDate);
             d.setDate(d.getDate() + direction);
-            // 登校日になるまでスキップ
             while(!isSchoolDay(getLocalDateStr(d))) {
                 d.setDate(d.getDate() + direction);
             }
@@ -496,7 +542,6 @@
 
         async function displayNextSchoolDays() {
             let foundDays = [];
-            // 時刻をリセットした Date オブジェクトで処理
             let checkDate = new Date(getLocalDateStr(currentScheduleBaseDate));
             const todayStr = getLocalDateStr(new Date());
 
@@ -545,15 +590,16 @@
             let html = `<div class="day-label" style="display:flex; justify-content:space-between; align-items:center;">
                             <span>${displayLabel}</span>`;
             if (isAdmin) {
-                html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">編集</button>`;
+                html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">直接編集</button>`;
             }
             html += `</div>
+            <div class="scroll-area">
             <table>
                 <tr><th class="col-period">校時</th><th class="col-subject">科目</th><th class="col-note">備考</th></tr>`;
             data.lessons.forEach((l, i) => {
                 html += `<tr><td>${i+1}</td><td>${l.sub || "---"}</td><td class="col-note">${l.note || ""}</td></tr>`;
             });
-            html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px; margin-bottom:5px;">最終下校：${data.exitTime}</p>`;
+            html += `</table></div><p style="text-align:right; font-weight:bold; margin-top:10px; margin-bottom:5px;">最終下校：${data.exitTime}</p>`;
             
             let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
             let subsHtml = subsForDay.map(s => `・${s.title}`).join("<br>");
@@ -574,7 +620,6 @@
             el.innerHTML = html;
         }
 
-        // --- 直近の予定（デイリー）のインライン編集処理 ---
         async function startInlineEditDay(dateStr, elId) {
             const el = document.getElementById(elId);
             
@@ -588,11 +633,11 @@
             }
 
             let html = `<div style="background:#fff3cd; padding:10px; border:2px solid #ffc107;">`;
-            html += `<h4 style="margin-top:0;">${dateStr} の予定を編集</h4>`;
+            html += `<h4 style="margin-top:0;">${dateStr} の予定を直接編集</h4>`;
             html += `<div style="margin-bottom:5px; font-size:0.9em;">主な行事予定：<input type="text" id="inline-event-${elId}" value="${data.event || ""}" style="width:100%; padding:4px;"></div>`;
             html += `<div style="margin-bottom:5px; font-size:0.9em;">全体備考：<textarea id="inline-daynote-${elId}" style="width:100%; height:60px; padding:4px;">${data.dayNote || ""}</textarea></div>`;
             
-            html += `<table style="width:100%; font-size:0.85em;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
+            html += `<div class="scroll-area"><table style="width:100%; font-size:0.85em;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
                 let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
                 html += `<tr>
@@ -601,7 +646,7 @@
                             <td><input type="text" id="inline-note-${elId}-${i}" value="${l.note}" style="width:100%; padding:2px; margin:0;"></td>
                          </tr>`;
             });
-            html += `</table>`;
+            html += `</table></div>`;
             
             let timeOpts = "";
             for(let h=13; h<=19; h++) {
@@ -612,7 +657,7 @@
                 }
             }
             
-            html += `<div style="margin-top:5px; text-align:right; font-size:0.9em;">最終下校：<select id="inline-exit-${elId}" style="padding:2px;">${timeOpts}</select></div>`;
+            html += `<div style="margin-top:5px; text-align:right; font-size:0.9em;">最終下校：<select id="inline-exit-${elId}" style="padding:2px; width:120px;">${timeOpts}</select></div>`;
             html += `<div style="margin-top:10px; text-align:right;">
                         <button onclick="saveInlineEditDay('${dateStr}', '${elId}')">保存して戻る</button>
                         <button onclick="displayNextSchoolDays()">キャンセル</button>
@@ -645,7 +690,6 @@
             recordSystemUpdate(); 
         }
 
-        // --- 週予定のナビゲーション ---
         function changeWeek(weeks) {
             currentWeekBaseDate.setDate(currentWeekBaseDate.getDate() + weeks * 7);
             displayWeeklySchedule();
@@ -731,7 +775,6 @@
             document.getElementById('weekly-schedule-display').innerHTML = html;
         }
 
-        // --- 週予定の編集（インライン編集） ---
         async function startInlineEditWeek() {
             if (!isAdmin) return;
 
@@ -753,7 +796,7 @@
                         <tr style="background:#fff3cd;">
                             <th style="width:15%;">日付</th>
                             <th style="width:10%;">曜日</th>
-                            <th style="width:75%;">主な行事予定 (編集)</th>
+                            <th style="width:75%;">主な行事予定 (直接編集)</th>
                         </tr>`;
             
             for(let i=0; i<5; i++) {
@@ -800,7 +843,6 @@
             recordSystemUpdate();
         }
 
-        // --- 提出物（インライン編集対応） ---
         function renderSubmissionsUI() {
             const listEl = document.getElementById('submission-list');
             const adminTable = document.getElementById('admin-submission-table');
@@ -811,7 +853,7 @@
                 return;
             }
 
-            let listHtml = `<table style="width:100%;">
+            let listHtml = `<table style="width:100%; min-width:300px;">
                                 <tr><th style="width:50px;">完了</th><th>提出物名</th><th>締め切り</th></tr>`;
             let adminHtml = `<table style="width:100%; min-width:500px;">
                                 <tr><th>提出物名</th><th>締め切り</th><th>未提出者</th><th>操作</th></tr>`;
@@ -825,7 +867,7 @@
                 
                 listHtml += `<tr>
                                 <td style="text-align:center;">
-                                    <input type="checkbox" onchange="toggleSubm('${sub.id}', this.checked)" style="transform: scale(1.5);" ${isChecked}>
+                                    <input type="checkbox" onchange="toggleSubm('${sub.id}', this.checked)" style="transform: scale(1.5); margin:0;" ${isChecked}>
                                 </td>
                                 <td style="text-align:left; font-weight:bold;">${sub.title}</td>
                                 <td>${dateStr}</td>
@@ -915,7 +957,6 @@
             }
         }
 
-        // --- ブログ機能 ---
         document.getElementById('post-blog-btn').onclick = async () => {
             const content = document.getElementById('blog-input').value; 
             if(!content) return;
@@ -959,7 +1000,6 @@
             }
         }
 
-        // --- ダイレクトメッセージ機能 ---
         async function sendDirectMessage() {
             if(!currentUserEmail) return;
             const content = document.getElementById('dm-input').value.trim();
@@ -981,7 +1021,6 @@
             }
         }
 
-        // --- 未確認者チェック機能 ---
         async function loadUnreadStudents() {
             const sysDoc = await db.collection("config").doc("system").get();
             let lastUpdate = sysDoc.exists ? sysDoc.data().lastUpdatedAt?.toDate() : null;
@@ -1009,7 +1048,6 @@
             }
         }
 
-        // --- アクセスログ ---
         async function loadAccessLogs() {
             const logBox = document.getElementById('access-log-list');
             logBox.style.display = 'block';
@@ -1063,7 +1101,6 @@
             }
         }
 
-        // --- 名簿一覧 ---
         function renderStudentListUI() {
             const area = document.getElementById('student-list-area');
             if(!area) return;
@@ -1114,7 +1151,6 @@
             }
         }
 
-        // --- CSV エクスポート・インポート機能 ---
         async function exportCSV() {
             let csv = "メールアドレス,氏名\n";
             for(let email in studentMaster) {
@@ -1158,7 +1194,6 @@
             reader.readAsText(file);
         }
 
-        // --- 予定・休業期間 ---
         async function loadRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const doc = await db.collection("config").doc("regular_schedule").get();
