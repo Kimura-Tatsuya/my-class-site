@@ -36,6 +36,23 @@
         .student-edit-btn:hover { background: black; color: white; }
         .weather-info { font-size: 0.85em; font-weight: normal; margin-left: 10px; color: #555; display: inline-block; }
 
+        /* カウントダウン表示用スタイル */
+        .countdown-card {
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: bold;
+            color: #333; 
+            min-width: 140px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
         body.dark-mode { background-color: #121212; color: #e0e0e0; }
         body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .day-label, body.dark-mode .post-item { border-color: #555 !important; }
         body.dark-mode section, body.dark-mode .day-box, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box, body.dark-mode .student-edit-btn { border-color: #555 !important; }
@@ -51,6 +68,7 @@
         body.dark-mode #committee-form-area { background-color: #1e1e1e !important; border-color: #555 !important; }
         body.dark-mode div[style*="background: #fafafa;"], body.dark-mode div[style*="background:#fafafa;"] { background-color: #1e1e1e !important; border-color: #555 !important; }
         body.dark-mode .weather-info { color: #bbb; }
+        body.dark-mode .countdown-card { color: #000 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         
         .edit-box { background:#f9f9f9; padding:10px; border:2px solid #ffc107; border-radius:5px; color:inherit; }
         body.dark-mode .edit-box { background:#333 !important; border-color:#d39e00 !important; color:#e0e0e0 !important; }
@@ -93,6 +111,8 @@
         </header>
 
         <main>
+            <div id="countdown-display-area" style="display:none; flex-wrap:wrap; gap:10px; margin-bottom:20px;"></div>
+
             <section>
                 <div class="section-header">
                     <h2>直近の予定</h2>
@@ -134,7 +154,7 @@
                     <h2>◆ 係・委員会より連絡</h2>
                 </div>
                 <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #ccc; margin-top:10px;">
-                    <h3 style="margin-top:0; border:none; font-size:1em;">連絡を投稿する（<span id="my-role-name"></span>）</h3>
+                    <h3 style="margin-top:0; border:none; font-size:1em;">連絡を投稿する（<span id="my-role-name-container"></span>）</h3>
                     <textarea id="committee-input" placeholder="連絡内容を入力してください..." style="transition: background-color 0.3s;"></textarea>
                     
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items:center; font-size:0.9em;">
@@ -243,6 +263,13 @@
                 </details>
 
                 <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］カウントダウン表示</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※チェックを入れた項目が、トップ画面に表示されます。</p>
+                    <div id="admin-countdown-list" class="scroll-area" style="margin-top:10px;"></div>
+                    <button type="button" onclick="saveCountdowns()" style="margin-top:10px;">カウントダウン設定を保存</button>
+                </details>
+
+                <details class="admin-form-box">
                     <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
@@ -262,6 +289,14 @@
                         <button type="button" onclick="addExitTimePeriod()">追加</button>
                     </div>
                     <div id="exit-period-list" style="margin-top:10px; line-height: 1.8;"></div>
+                    
+                    <hr style="border-top:1px dashed black; margin:15px 0;">
+                    <p style="font-size:0.85em; margin-top:5px; font-weight:bold; color:#d9534f;">【重要】設定がカレンダーに反映されない場合</p>
+                    <p style="font-size:0.85em; margin-top:0;">すでに過去に予定を保存した日は、当時の個別時刻（16:30等）が優先して残ってしまいます。<br>以下のボタンで指定期間の「過去の個別時刻データ」をリセットし、期間設定に連動させることができます。</p>
+                    <div style="background:#fdf0f0; padding:10px; border:1px solid #d9534f; border-radius:5px;">
+                        リセット期間：<input type="date" id="reset-exit-start" style="width:130px; margin-bottom:0;"> 〜 <input type="date" id="reset-exit-end" style="width:130px; margin-bottom:0;">
+                        <button type="button" onclick="resetExitTimes()" style="background:#d9534f; color:white; border-color:#d43f3a; margin-top:5px;">この期間の個別時刻をリセット</button>
+                    </div>
                 </details>
 
                 <details class="admin-form-box">
@@ -305,6 +340,24 @@
                 </div>
                 
                 <div class="admin-form-box" style="margin-top:15px;">
+                    <h3 style="margin-top:0;">係・委員会の種類設定（手動登録）</h3>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:200px;">
+                            <p style="font-weight:bold; margin-bottom:5px;">係の登録</p>
+                            <input type="text" id="new-role-input" placeholder="係名（例: 国語係）" style="width:150px; display:inline-block;">
+                            <button type="button" onclick="addRole()">追加</button>
+                            <div id="role-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <p style="font-weight:bold; margin-bottom:5px;">委員会の登録</p>
+                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書）" style="width:150px; display:inline-block;">
+                            <button type="button" onclick="addCommittee()">追加</button>
+                            <div id="comm-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-box" style="margin-top:15px;">
                     <h3 style="margin-top:0;">生徒の新規登録 (1件ずつ)</h3>
                     <input type="email" id="direct-email" placeholder="メールアドレス" style="width:200px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
@@ -318,18 +371,27 @@
                 <div id="student-list-area" class="scroll-area"></div>
             </section>
 
-            <section>
-                <div class="section-header">
-                    <h2>パスワード変更</h2>
-                </div>
-                <div style="max-width:400px; margin-top:15px;">
-                    <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
-                    <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
-                    <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用）" onpaste="return false;"><br>
-                    <button type="button" id="change-pw-btn">パスワードを変更する</button>
-                </div>
+            <section style="padding-bottom:10px;">
+                <details>
+                    <summary class="section-header" style="cursor: pointer; outline: none; border-bottom: 1px solid black;">
+                        <h2 style="border:none; margin:0;">パスワード変更</h2>
+                    </summary>
+                    <div style="max-width:400px; margin-top:15px;">
+                        <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
+                        <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
+                        <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用）" onpaste="return false;"><br>
+                        <button type="button" id="change-pw-btn">パスワードを変更する</button>
+                    </div>
+                </details>
             </section>
         </main>
+    </div>
+
+    <div id="event-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+        <div id="event-modal-content" style="background:white; padding:20px; border-radius:10px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black;">
+            <button onclick="closeEventModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer;">✖</button>
+            <div id="event-modal-body"></div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -384,6 +446,46 @@
         let weatherData = {};
         let pendingExcelData = {}; 
 
+        // ★カウントダウン用のプリセット（修学旅行等追加）
+        const COUNTDOWN_PRESETS = [
+            { id: "kenritsu", defaultLabel: "県立入試" },
+            { id: "shiritsu", defaultLabel: "私立入試" },
+            { id: "exam", defaultLabel: "定期試験" },
+            { id: "sports", defaultLabel: "体育祭" },
+            { id: "chorus", defaultLabel: "合唱祭" },
+            { id: "soutai", defaultLabel: "学校総合体育大会" },
+            { id: "shinjin", defaultLabel: "新人戦" },
+            { id: "school_trip", defaultLabel: "修学旅行" },
+            { id: "camp", defaultLabel: "宿泊学習" },
+            { id: "field_trip", defaultLabel: "校外学習" },
+            { id: "term2_start", defaultLabel: "2学期始業式" },
+            { id: "term3_start", defaultLabel: "3学期始業式" },
+            { id: "graduation", defaultLabel: "卒業式" },
+            { id: "summer", defaultLabel: "夏休み" },
+            { id: "winter", defaultLabel: "冬休み" },
+            { id: "custom1", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名1" },
+            { id: "custom2", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名2" },
+            { id: "custom3", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名3" }
+        ];
+        let countdownSettings = {};
+
+        // ★おみくじデータ（ポジティブのみ）
+        const OMIKUJI_DATA = {
+            ranks: [
+                { name: "大吉", prob: 10 },
+                { name: "吉", prob: 25 },
+                { name: "中吉", prob: 35 },
+                { name: "小吉", prob: 20 },
+                { name: "末吉", prob: 10 }
+            ],
+            studies: ["今までの努力が花開く時。自信を持って！", "焦りは禁物。一つ一つ確実に理解を深めよう。", "苦手を克服するチャンス。新しい視点で取り組んでみて。", "毎日の継続が大きな力に。コツコツ進めよう。", "リフレッシュも大切。メリハリをつけて効率アップ！"],
+            loves: ["笑顔が幸運を引き寄せる鍵。", "素直な気持ちを伝えるのが吉。", "新しい出会いの予感。いつもより少しだけ積極的になってみて。", "相手を思いやる心が絆を深めます。", "まずは自分を磨く時期。魅力がアップします。"],
+            moneys: ["無駄遣いに注意。計画的な使い方を心がけて。", "思わぬところから臨時収入があるかも。", "自己投資には惜しまずお金を使ってOK。", "小さな節約が後々大きな余裕を生みます。", "お世話になった人へちょっとしたプレゼントをすると運気アップ。"],
+            healths: ["睡眠をしっかりとることで活力が湧きます。", "軽い運動を取り入れると心も体もスッキリ。", "バランスの取れた食事が運気のベースに。", "無理は禁物。疲れを感じたら早めに休息を。", "水分補給をこまめに。乾燥対策も忘れずに。"],
+            relations: ["感謝の言葉「ありがとう」が人間関係をスムーズにします。", "聞き上手になることで信頼が深まります。", "時には一歩引いてみることも大切。", "共通の趣味を持つ人と意気投合しそう。", "思い切って自分から話しかけてみて。良い展開が待っています。"],
+            items: ["お気に入りの文房具", "温かい飲み物", "青色の小物", "新しい靴下", "星型のアクセサリー", "読みかけの本", "手帳", "ハンカチ"]
+        };
+
         // -------------------------------------
         // 2. 基本・ユーティリティ関数
         // -------------------------------------
@@ -410,7 +512,6 @@
             return true;
         }
         
-        // ★修正: 下校時刻の選択肢に「（期間設定に従う）」を追加できるようにする
         function initExitTimeOptions(targetEl, includeDefault = false) {
             if (!targetEl) return;
             let html = includeDefault ? `<option value="">（期間設定に従う）</option>` : "";
@@ -436,31 +537,325 @@
             await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
         }
 
-        // 天気情報の取得（Open-Meteo API 川越市）
         async function fetchWeather() {
             try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.9251&longitude=139.4858&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo');
-                const data = await res.json();
+                const omRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.9251&longitude=139.4858&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo');
+                const omData = await omRes.json();
+                
+                let jmaData = {};
+                try {
+                    const jmaRes = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/110000.json');
+                    const jmaRaw = await jmaRes.json();
+                    
+                    const weathers = jmaRaw[0].timeSeries[0];
+                    const pops = jmaRaw[0].timeSeries[1];
+                    
+                    weathers.timeDefines.forEach((t, i) => {
+                        let dStr = t.substring(0, 10);
+                        if (!jmaData[dStr]) jmaData[dStr] = { pop: 0 };
+                        jmaData[dStr].desc = weathers.areas[0].weathers[i].replace(/　/g, ' ').replace(/\n/g, '');
+                    });
+                    
+                    let dailyPops = {};
+                    pops.timeDefines.forEach((t, i) => {
+                        let dStr = t.substring(0, 10);
+                        let p = parseInt(pops.areas[0].pops[i], 10);
+                        if (!isNaN(p)) {
+                            if (!dailyPops[dStr]) dailyPops[dStr] = [];
+                            dailyPops[dStr].push(p);
+                        }
+                    });
+                    for (let d in dailyPops) {
+                        if (jmaData[d]) jmaData[d].pop = Math.max(...dailyPops[d]);
+                    }
+                } catch(e) { console.warn("気象庁APIの取得に失敗しました", e); }
+                
                 const wmoDesc = (code) => {
-                    if (code === 0) return "☀️晴れ";
-                    if (code <= 3) return "☁️曇り";
-                    if (code <= 48) return "🌫霧";
-                    if (code <= 67 || (code >= 80 && code <= 82)) return "☔雨";
-                    if (code <= 77 || code === 85 || code === 86) return "⛄雪";
-                    if (code >= 95) return "⛈雷雨";
-                    return "❓不明";
+                    if (code === 0) return "快晴";
+                    if (code === 1 || code === 2) return "晴れ";
+                    if (code === 3) return "曇り";
+                    if (code <= 48) return "霧";
+                    if (code <= 57) return "霧雨";
+                    if (code <= 67) return "雨";
+                    if (code <= 77) return "雪";
+                    if (code <= 82) return "にわか雨";
+                    if (code <= 86) return "雪";
+                    if (code >= 95) return "雷雨";
+                    return "晴れ";
                 };
-                for (let i = 0; i < data.daily.time.length; i++) {
-                    weatherData[data.daily.time[i]] = {
-                        code: data.daily.weathercode[i],
-                        desc: wmoDesc(data.daily.weathercode[i]),
-                        max: data.daily.temperature_2m_max[i],
-                        min: data.daily.temperature_2m_min[i],
-                        pop: data.daily.precipitation_probability_max[i]
+                
+                for (let i = 0; i < omData.daily.time.length; i++) {
+                    let dStr = omData.daily.time[i];
+                    let desc = jmaData[dStr] && jmaData[dStr].desc ? jmaData[dStr].desc : wmoDesc(omData.daily.weathercode[i]);
+                    let pop = jmaData[dStr] && jmaData[dStr].pop !== undefined ? jmaData[dStr].pop : omData.daily.precipitation_probability_max[i];
+                    
+                    weatherData[dStr] = {
+                        desc: desc,
+                        max: omData.daily.temperature_2m_max[i],
+                        min: omData.daily.temperature_2m_min[i],
+                        pop: pop
                     };
                 }
             } catch (e) { console.error("Weather API Error:", e); }
         }
+
+        // -------------------------------------
+        // ★ カウントダウン機能の表示と管理
+        // -------------------------------------
+        function renderAdminCountdowns() {
+            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;">
+                <tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
+            
+            let colorOpts = `
+                <option value="#e3f2fd">青</option>
+                <option value="#ffebee">赤</option>
+                <option value="#e8f5e9">緑</option>
+                <option value="#fff8e1">黄</option>
+                <option value="#fff3e0">橙</option>
+                <option value="#fce4ec">桃</option>
+                <option value="#f3e5f5">紫</option>
+            `;
+            let iconOpts = `
+                <option value="">(なし)</option>
+                <option value="🎯">🎯的/だるま</option>
+                <option value="🌸">🌸桜/合格</option>
+                <option value="🎄">🎄ツリー</option>
+                <option value="🏃">🏃運動</option>
+                <option value="⚽">⚽球技</option>
+                <option value="🎵">🎵音楽</option>
+                <option value="🎓">🎓卒業</option>
+                <option value="🎒">🎒カバン</option>
+                <option value="🚌">🚌バス</option>
+                <option value="🔥">🔥炎/気合</option>
+            `;
+            
+            COUNTDOWN_PRESETS.forEach(p => {
+                let d = countdownSettings[p.id] || { isEnabled: false, label: p.defaultLabel, date: "", mode: "calendar", bgColor: "#e3f2fd", icon: "" };
+                
+                let labelInput = p.isCustom 
+                    ? `<input type="text" id="cd-label-${p.id}" value="${d.label||''}" placeholder="${p.placeholder}" style="width:100%; margin:0; padding:2px;">` 
+                    : `<input type="hidden" id="cd-label-${p.id}" value="${p.defaultLabel}">${p.defaultLabel}`;
+
+                html += `<tr>
+                    <td style="text-align:center; vertical-align:middle;"><input type="checkbox" id="cd-en-${p.id}" ${d.isEnabled ? 'checked' : ''} style="transform:scale(1.2); margin:0;"></td>
+                    <td style="vertical-align:middle;">${labelInput}</td>
+                    <td style="vertical-align:middle;"><input type="date" id="cd-date-${p.id}" value="${d.date||''}" style="margin:0; padding:2px; width:110px;"></td>
+                    <td style="vertical-align:middle;">
+                        <select id="cd-mode-${p.id}" style="margin:0; padding:2px; width:80px;">
+                            <option value="calendar" ${d.mode==='calendar'?'selected':''}>暦日</option>
+                            <option value="school" ${d.mode==='school'?'selected':''}>登校日</option>
+                        </select>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <select id="cd-bg-${p.id}" style="margin:0; padding:2px; width:55px;">
+                            ${colorOpts.replace(`value="${d.bgColor||'#e3f2fd'}"`, `value="${d.bgColor||'#e3f2fd'}" selected`)}
+                        </select>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <select id="cd-icon-${p.id}" style="margin:0; padding:2px; width:65px;">
+                            ${iconOpts.replace(`value="${d.icon||''}"`, `value="${d.icon||''}" selected`)}
+                        </select>
+                    </td>
+                </tr>`;
+            });
+            html += `</table>`;
+            document.getElementById('admin-countdown-list').innerHTML = html;
+        }
+
+        async function saveCountdowns() {
+            let newData = {};
+            COUNTDOWN_PRESETS.forEach(p => {
+                newData[p.id] = {
+                    isEnabled: document.getElementById(`cd-en-${p.id}`).checked,
+                    label: document.getElementById(`cd-label-${p.id}`).value,
+                    date: document.getElementById(`cd-date-${p.id}`).value,
+                    mode: document.getElementById(`cd-mode-${p.id}`).value,
+                    bgColor: document.getElementById(`cd-bg-${p.id}`).value,
+                    icon: document.getElementById(`cd-icon-${p.id}`).value
+                };
+            });
+            await db.collection("config").doc("countdowns").set(newData);
+            alert("カウントダウン設定を保存しました。");
+            recordSystemUpdate();
+        }
+
+        function renderCountdownsUI() {
+            let container = document.getElementById('countdown-display-area');
+            if (!container) return;
+            
+            let todayStr = getLocalDateStr(new Date());
+            let todayMs = new Date(todayStr).getTime();
+            let html = "";
+
+            COUNTDOWN_PRESETS.forEach(p => {
+                let d = countdownSettings[p.id];
+                if (!d || !d.isEnabled || !d.date) return;
+                if (p.isCustom && !d.label) return;
+
+                let targetMs = new Date(d.date).getTime();
+                if (targetMs < todayMs) return;
+
+                let diffDays = 0;
+                let modeLabel = "";
+                if (d.mode === "school") {
+                    diffDays = getSchoolDaysDiff(d.date);
+                    modeLabel = "<span style='font-size:0.7em; font-weight:normal;'>(登校日)</span>";
+                } else {
+                    diffDays = Math.round((targetMs - todayMs) / 86400000);
+                }
+
+                if (diffDays >= 0) {
+                    let bg = d.bgColor || "#e3f2fd";
+                    let iconStr = d.icon ? `<span style="font-size:1.6em; vertical-align:middle; margin-right:8px;">${d.icon}</span>` : "";
+                    
+                    let dayText = diffDays === 0 ? "本日！" : `あと <span style="font-size:1.8em; margin:0 3px;">${diffDays}</span> 日`;
+                    
+                    // ★ 隠し機能のクリックイベント追加 (2学期・3学期始業式 当日限定)
+                    let isActionable = (diffDays === 0 && !isAdmin && (p.id === 'term2_start' || p.id === 'term3_start'));
+                    let onClickAttr = isActionable ? `onclick="openEventModal('${p.id}')" style="cursor:pointer;"` : '';
+                    let actionHint = isActionable ? `<div style="font-size:0.75em; color:#d32f2f; margin-top:2px; animation: blink 1.5s infinite;">ここをクリック！</div>` : "";
+
+                    html += `<div class="countdown-card" style="background-color: ${bg}; border-color: rgba(0,0,0,0.1);" ${onClickAttr}>
+                                <div style="display:flex; align-items:center; justify-content:center;">
+                                    ${iconStr}
+                                    <div style="text-align:center;">
+                                        <div style="font-size:0.85em; margin-bottom:2px;">${d.label} まで ${modeLabel}</div>
+                                        <div>${dayText}</div>
+                                        ${actionHint}
+                                    </div>
+                                </div>
+                             </div>`;
+                }
+            });
+
+            if (html) {
+                container.innerHTML = html;
+                container.style.display = "flex";
+            } else {
+                container.innerHTML = "";
+                container.style.display = "none";
+            }
+        }
+
+        // -------------------------------------
+        // ★ 隠し機能（おみくじ・ビンゴ）ロジック
+        // -------------------------------------
+        function drawOmikuji() {
+            let rand = Math.random() * 100;
+            let sum = 0; let rank = "中吉";
+            for (let r of OMIKUJI_DATA.ranks) {
+                sum += r.prob;
+                if (rand <= sum) { rank = r.name; break; }
+            }
+            return {
+                rank: rank,
+                study: OMIKUJI_DATA.studies[Math.floor(Math.random() * OMIKUJI_DATA.studies.length)],
+                love: OMIKUJI_DATA.loves[Math.floor(Math.random() * OMIKUJI_DATA.loves.length)],
+                money: OMIKUJI_DATA.moneys[Math.floor(Math.random() * OMIKUJI_DATA.moneys.length)],
+                health: OMIKUJI_DATA.healths[Math.floor(Math.random() * OMIKUJI_DATA.healths.length)],
+                relation: OMIKUJI_DATA.relations[Math.floor(Math.random() * OMIKUJI_DATA.relations.length)],
+                item: OMIKUJI_DATA.items[Math.floor(Math.random() * OMIKUJI_DATA.items.length)]
+            };
+        }
+
+        function generateBingoCard() {
+            let card = [];
+            for (let col = 0; col < 5; col++) {
+                let nums = [];
+                let min = col * 15 + 1;
+                let max = min + 14;
+                while (nums.length < 5) {
+                    let n = Math.floor(Math.random() * (max - min + 1)) + min;
+                    if (!nums.includes(n)) nums.push(n);
+                }
+                card.push(nums);
+            }
+            card[2][2] = "FREE";
+            return card;
+        }
+
+        async function openEventModal(eventId) {
+            if (!currentUserEmail) return;
+            document.getElementById('event-modal-overlay').style.display = 'flex';
+            document.getElementById('event-modal-body').innerHTML = '<p style="text-align:center; font-weight:bold;">読み込み中...</p>';
+
+            let studentDoc = await db.collection("students").doc(currentUserEmail).get();
+            let sData = studentDoc.exists ? studentDoc.data() : {};
+
+            if (eventId === 'term3_start') {
+                if (!sData.omikuji) {
+                    sData.omikuji = drawOmikuji();
+                    await db.collection("students").doc(currentUserEmail).update({ omikuji: sData.omikuji });
+                }
+                renderOmikuji(sData.omikuji);
+            } else if (eventId === 'term2_start') {
+                if (!sData.bingo) {
+                    sData.bingo = { card: generateBingoCard(), opened: ["FREE"] };
+                    await db.collection("students").doc(currentUserEmail).update({ bingo: sData.bingo });
+                }
+                renderBingo(sData.bingo);
+            }
+        }
+
+        function closeEventModal() {
+            document.getElementById('event-modal-overlay').style.display = 'none';
+        }
+
+        function renderOmikuji(data) {
+            document.getElementById('event-modal-body').innerHTML = `
+                <h2 style="text-align:center; color:#d32f2f; margin-top:10px;">⛩️ 新春 おみくじ ⛩️</h2>
+                <div style="text-align:center; font-size:3em; font-weight:bold; color:#d32f2f; margin:15px 0;">${data.rank}</div>
+                <table style="width:100%; border:none; text-align:left; font-size:1.1em; line-height:1.6;">
+                    <tr><td style="border:none; padding:8px; white-space:nowrap; border-bottom:1px dashed #ccc;"><b>✏️勉強</b></td><td style="border:none; padding:8px; border-bottom:1px dashed #ccc;">${data.study}</td></tr>
+                    <tr><td style="border:none; padding:8px; white-space:nowrap; border-bottom:1px dashed #ccc;"><b>💖恋愛</b></td><td style="border:none; padding:8px; border-bottom:1px dashed #ccc;">${data.love}</td></tr>
+                    <tr><td style="border:none; padding:8px; white-space:nowrap; border-bottom:1px dashed #ccc;"><b>💰金運</b></td><td style="border:none; padding:8px; border-bottom:1px dashed #ccc;">${data.money}</td></tr>
+                    <tr><td style="border:none; padding:8px; white-space:nowrap; border-bottom:1px dashed #ccc;"><b>💪健康</b></td><td style="border:none; padding:8px; border-bottom:1px dashed #ccc;">${data.health}</td></tr>
+                    <tr><td style="border:none; padding:8px; white-space:nowrap; border-bottom:1px dashed #ccc;"><b>🤝対人</b></td><td style="border:none; padding:8px; border-bottom:1px dashed #ccc;">${data.relation}</td></tr>
+                    <tr><td style="border:none; padding:8px; white-space:nowrap;"><b>🍀ﾗｯｷｰｱｲﾃﾑ</b></td><td style="border:none; padding:8px;">${data.item}</td></tr>
+                </table>
+            `;
+        }
+
+        function renderBingo(bingoData) {
+            let html = `<h2 style="text-align:center; color:#1976d2; margin-top:10px;">🎉 BINGO 🎉</h2>`;
+            html += `<p style="text-align:center; font-size:0.85em; color:#666;">出た数字をタップして穴を開けよう！</p>`;
+            html += `<table style="width:100%; text-align:center; table-layout:fixed; font-size:1.3em; border:2px solid #1976d2; background:#fff;">
+                     <tr style="background:#1976d2; color:white;"><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>`;
+            for(let r=0; r<5; r++) {
+                html += `<tr>`;
+                for(let c=0; c<5; c++) {
+                    let num = bingoData.card[c][r];
+                    let isOpened = bingoData.opened.includes(num);
+                    let bg = isOpened ? '#ffcdd2' : 'transparent';
+                    let cursor = 'pointer';
+                    let textDeco = isOpened ? 'line-through' : 'none';
+                    let style = `background-color:${bg}; cursor:${cursor}; height:50px; font-weight:bold; border:1px solid #ccc; text-decoration:${textDeco}; color:#333;`;
+                    html += `<td style="${style}" onclick="toggleBingo('${num}')">${num}</td>`;
+                }
+                html += `</tr>`;
+            }
+            html += `</table>`;
+            document.getElementById('event-modal-body').innerHTML = html;
+        }
+
+        async function toggleBingo(num) {
+            if (num === "FREE" || num === "undefined") return;
+            let studentDoc = await db.collection("students").doc(currentUserEmail).get();
+            let sData = studentDoc.data();
+            if (!sData.bingo) return;
+            
+            let opened = sData.bingo.opened || [];
+            if (opened.includes(num)) {
+                opened = opened.filter(n => n !== num);
+            } else {
+                opened.push(num);
+            }
+            sData.bingo.opened = opened;
+            
+            renderBingo(sData.bingo);
+            db.collection("students").doc(currentUserEmail).update({ bingo: sData.bingo });
+        }
+
 
         // -------------------------------------
         // 3. テーマ・タイムアウト管理
@@ -540,7 +935,7 @@
                             }
                             if (unsubmittedNames.length > 0) {
                                 let dayStr = diffDays === 0 ? "【本日締切】" : `【あと${diffDays}日】`;
-                                msgs.push(`🚨 ${dayStr}「${sub.title}」 ${unsubmittedNames.join("、")}`);
+                                msgs.push(`🚨 ${dayStr}「${sub.title}」 未提出：${unsubmittedNames.join("、")}`);
                             }
                         }
                     });
@@ -572,7 +967,6 @@
                 document.getElementById('btn-edit-week').style.display = 'inline-block';
                 const now = new Date();
                 document.getElementById('excel-month-input').value = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
-                // 管理者用の期間設定枠には「標準に従う」は不要なのでfalse
                 initExitTimeOptions(document.getElementById('exit-period-time'), false);
             }
 
@@ -580,6 +974,12 @@
             document.getElementById('committee-start').value = getLocalDateStr(today);
             let nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
             document.getElementById('committee-end').value = getLocalDateStr(nextWeek);
+
+            db.collection("config").doc("countdowns").onSnapshot(snap => {
+                countdownSettings = snap.exists ? snap.data() : {};
+                if (isAdmin) renderAdminCountdowns();
+                renderCountdownsUI();
+            });
 
             db.collection("config").doc("exit_times").onSnapshot(snap => {
                 exitTimePeriods = snap.exists ? (snap.data().periods || []) : [];
@@ -603,6 +1003,7 @@
                 ]);
                 holidays = hRes || {}; 
                 vacationData = (vSnap.exists && vSnap.data().periods) ? vSnap.data().periods : [];
+                renderCountdownsUI();
             } catch (e) { holidays = {}; vacationData = []; }
 
             db.collection("students").onSnapshot(snap => {
@@ -610,10 +1011,16 @@
                 let myData = studentMaster[currentUserEmail] || {};
                 let userName = myData.name || (isAdmin ? "先生" : "生徒");
                 
-                let myRoles = [myData.role, myData.committee].filter(Boolean).join("・");
-                if (!isAdmin && myRoles) {
+                let myRoles = [myData.role, myData.committee].filter(Boolean);
+                if (!isAdmin && myRoles.length > 0) {
                     document.getElementById('committee-form-area').style.display = 'block';
-                    document.getElementById('my-role-name').innerText = myRoles;
+                    let container = document.getElementById('my-role-name-container');
+                    if (myRoles.length > 1) {
+                        let opts = myRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+                        container.innerHTML = `<select id="post-role-select" style="width:auto; padding:2px; margin:0; font-size:0.9em;">${opts}</select>`;
+                    } else {
+                        container.innerHTML = `<span id="post-role-fixed" data-role="${myRoles[0]}">${myRoles[0]}</span>`;
+                    }
                 }
                 
                 const hour = new Date().getHours();
@@ -621,8 +1028,7 @@
                 document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん！`;
 
                 renderSubmissionsUI(); 
-                if (isAdmin) { renderStudentListUI(); loadUnreadStudents(); }
-                updateTopReminder(); 
+                if (isAdmin) { renderStudentListUI(); loadUnreadStudents(); updateAdminReminder(); }
             });
 
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
@@ -708,16 +1114,23 @@
             const el = document.getElementById(elId);
             const d = new Date(dateStr); const week = ["日", "月", "火", "水", "木", "金", "土"];
             
-            // ★ 天気情報の生成（雨予報のときだけ降水確率を表示）
             let weatherHtml = "";
             let wInfo = weatherData[dateStr];
             if (wInfo) {
                 let popStr = "";
-                let isRainy = (wInfo.code >= 50 && wInfo.code <= 67) || (wInfo.code >= 80 && wInfo.code <= 86) || wInfo.code >= 95;
+                let isRainy = wInfo.desc.includes("雨") || wInfo.desc.includes("雪") || wInfo.pop > 0;
                 if (isRainy && wInfo.pop > 0) {
-                    popStr = ` <span style="color:#0d47a1;">☂${wInfo.pop}%</span>`;
+                    popStr = ` <span style="color:#0d47a1; font-weight:bold;">☂${wInfo.pop}%</span>`;
                 }
-                weatherHtml = `<div class="weather-info">${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃${popStr}</div>`;
+                
+                let mainIcon = "🌤";
+                if(wInfo.desc.includes("晴") || wInfo.desc.includes("快晴")) mainIcon = "☀️";
+                else if(wInfo.desc.includes("曇")) mainIcon = "☁️";
+                else if(wInfo.desc.includes("雨")) mainIcon = "☔";
+                else if(wInfo.desc.includes("雪")) mainIcon = "⛄";
+                else if(wInfo.desc.includes("雷")) mainIcon = "⛈";
+
+                weatherHtml = `<div class="weather-info">${mainIcon}${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃${popStr}</div>`;
             }
 
             let displayLabel = holidays[dateStr] ? `${prefix} ${d.getMonth()+1}月${d.getDate()}日（${week[d.getDay()]}） <span style="color:red; font-size:0.9em;">${holidays[dateStr]}</span>` : `${prefix} ${d.getMonth()+1}月${d.getDate()}日（${week[d.getDay()]}）`;
@@ -735,7 +1148,6 @@
                     }
                 }
                 
-                // ★修正: data.exitTime が未設定または空文字("")の場合は、標準時刻を表示する
                 let displayExitTime = data.exitTime ? data.exitTime : getStandardExitTime(dateStr);
                 
                 if (!data.dayNote) data.dayNote = "";
@@ -816,7 +1228,6 @@
                          <td><input type="text" id="inline-note-${elId}-${i}" value="${l.note||""}" style="width:100%; padding:2px; margin:0;"></td></tr>`;
             });
             
-            // ★修正: 空文字("")の選択肢を「（期間設定に従う）」として一番上に追加
             let timeOpts = `<option value="">（期間設定に従う）</option>`;
             for(let h=13; h<=19; h++) {
                 for(let m=0; m<60; m+=10) { 
@@ -837,7 +1248,7 @@
                 event: document.getElementById(`inline-event-${elId}`).value, 
                 dayNote: document.getElementById(`inline-daynote-${elId}`).value,
                 lessons: lessons, 
-                exitTime: document.getElementById(`inline-exit-${elId}`).value, // 「期間設定に従う」を選んだ場合は空文字("")が保存される
+                exitTime: document.getElementById(`inline-exit-${elId}`).value, 
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
             }, { merge: true });
             displayAllSchedules(); recordSystemUpdate(); 
@@ -1055,8 +1466,12 @@
 
             const content = document.getElementById('committee-input').value.trim();
             if(!content) return alert("内容を入力してください");
+            
+            let roleSelect = document.getElementById('post-role-select');
+            let roleFixed = document.getElementById('post-role-fixed');
+            let roleName = roleSelect ? roleSelect.value : (roleFixed ? roleFixed.getAttribute('data-role') : "生徒");
+            
             let myData = studentMaster[currentUserEmail];
-            let roleName = [myData.role, myData.committee].filter(Boolean).join("・");
             
             await db.collection("committee_posts").add({
                 authorEmail: currentUserEmail,
@@ -1208,7 +1623,7 @@
         }
 
         // -------------------------------------
-        // 10. 名簿・係・委員会管理 (一部直接登録用)
+        // 10. 名簿・係・委員会管理 (手動入力機能あり)
         // -------------------------------------
         function getRoleOptions(selectedValue) {
             let opts = `<option value="">（なし）</option>`; let found = false;
@@ -1285,25 +1700,18 @@
 
 
         // -------------------------------------
-        // 11. Excel一括管理 (インポート / エクスポート)
+        // 11. Excel一括管理 & その他の管理者機能
         // -------------------------------------
         function formatExcelDate(v) {
             if(!v) return "";
-            if(typeof v === 'number') {
-                let t = new Date((v - (25567 + 2)) * 86400 * 1000); 
-                return getLocalDateStr(t);
-            }
-            if(typeof v === 'string') {
-                let m = v.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
-                if(m) return `${m[1]}-${('0'+m[2]).slice(-2)}-${('0'+m[3]).slice(-2)}`;
-            }
+            if(typeof v === 'number') { let t = new Date((v - (25567 + 2)) * 86400 * 1000); return getLocalDateStr(t); }
+            if(typeof v === 'string') { let m = v.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/); if(m) return `${m[1]}-${('0'+m[2]).slice(-2)}-${('0'+m[3]).slice(-2)}`; }
             return v.toString();
         }
 
         async function exportExcel() {
             const wb = XLSX.utils.book_new();
 
-            // 1. 名簿
             let studentsData = [];
             for(let em in studentMaster) {
                 if(em === TEACHER_EMAIL) continue;
@@ -1311,13 +1719,11 @@
             }
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(studentsData), "名簿");
 
-            // 2. 係・委員会
             let mastersData = [];
             rolesList.forEach(r => mastersData.push({"区分": "係", "名称": r}));
             committeesList.forEach(c => mastersData.push({"区分": "委員会", "名称": c}));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mastersData), "係・委員会");
 
-            // 3. スケジュール (指定月)
             const mVal = document.getElementById('excel-month-input').value;
             if(!mVal) return alert("スケジュール出力用の年月を選択してください。");
             const [y, m] = mVal.split('-'); const endDate = new Date(y, m, 0).getDate();
@@ -1332,7 +1738,6 @@
                 let dateStr = `${y}-${m}-${('0'+d).slice(-2)}`;
                 let dObj = new Date(y, m-1, d); let dNum = dObj.getDay();
                 let defaultTime = getStandardExitTime(dateStr);
-                // 出力時にDBに値があればそれ、無ければ空にする(Excel上で空なら標準扱い)
                 let exitT = ext[dateStr]?.exitTime !== undefined ? ext[dateStr].exitTime : "";
                 let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, lessons:Array.from({length:6}, (_,i)=>({sub:regData[["sun","mon","tue","wed","thu","fri","sat"][dNum]]?.[i]||"", note:""})) };
                 
@@ -1344,11 +1749,9 @@
             }
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedData), "スケジュール");
 
-            // 4. 長期休業
             let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end}));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
 
-            // 5. 下校時刻設定
             let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time}));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
 
@@ -1408,7 +1811,6 @@
             try {
                 let d = pendingExcelData;
                 
-                // 1. マスター類 (係・委員会)
                 if (d.masters) {
                     let r = [], c = [];
                     d.masters.forEach(m => {
@@ -1419,19 +1821,16 @@
                     await db.collection("config").doc("committees").set({ items: c });
                 }
                 
-                // 2. 長期休業
                 if (d.vacations) {
                     let v = d.vacations.map(x => ({start: formatExcelDate(x["開始日"]), end: formatExcelDate(x["終了日"])})).filter(x => x.start && x.end);
                     await db.collection("config").doc("vacations").set({ periods: v });
                 }
                 
-                // 3. 下校時刻
                 if (d.exits) {
                     let ex = d.exits.map(x => ({start: formatExcelDate(x["開始日"]), end: formatExcelDate(x["終了日"]), time: x["時刻"]?.toString()})).filter(x => x.start && x.end && x.time);
                     await db.collection("config").doc("exit_times").set({ periods: ex });
                 }
                 
-                // 4. 名簿 (Batch)
                 if (d.students) {
                     let batch = db.batch();
                     d.students.forEach(s => {
@@ -1447,13 +1846,11 @@
                     await batch.commit();
                 }
                 
-                // 5. スケジュール (Batch)
                 if (d.schedules) {
                     let batch = db.batch();
                     d.schedules.forEach(s => {
                         let ds = formatExcelDate(s["日付"]);
                         if(ds && /^\d{4}-\d{2}-\d{2}$/.test(ds)) {
-                            // Excelで空文字ならそのまま保存。表示時に標準時刻にフォールバックする
                             batch.set(db.collection("schedules").doc(ds), {
                                 event: s["行事予定"]?.toString() || "",
                                 lessons: [
@@ -1485,8 +1882,7 @@
             document.getElementById('excel-file-input').value = "";
         }
 
-        // --- その他の管理者機能 ---
-        async function addExitTimePeriod() {
+        async function addExitTimePeriod() { 
             const s = document.getElementById('exit-period-start').value;
             const e = document.getElementById('exit-period-end').value;
             const t = document.getElementById('exit-period-time').value;
@@ -1495,10 +1891,8 @@
             
             exitTimePeriods.push({ start: s, end: e, time: t });
             await db.collection("config").doc("exit_times").set({ periods: exitTimePeriods });
-            document.getElementById('exit-period-start').value = "";
-            document.getElementById('exit-period-end').value = "";
-            alert("期間を追加しました！");
-            recordSystemUpdate();
+            document.getElementById('exit-period-start').value = ""; document.getElementById('exit-period-end').value = "";
+            alert("期間を追加しました！"); recordSystemUpdate();
         }
         function renderExitTimePeriods() {
             document.getElementById('exit-period-list').innerHTML = exitTimePeriods.map((p, i) => 
@@ -1509,6 +1903,25 @@
             exitTimePeriods.splice(i, 1);
             await db.collection("config").doc("exit_times").set({ periods: exitTimePeriods });
             recordSystemUpdate();
+        }
+        
+        async function resetExitTimes() {
+            const startStr = document.getElementById('reset-exit-start').value;
+            const endStr = document.getElementById('reset-exit-end').value;
+            if(!startStr || !endStr) return alert("リセットする期間の開始と終了を指定してください。");
+            if(startStr > endStr) return alert("終了日は開始日以降にしてください。");
+            if(!confirm(`${startStr} から ${endStr} までの個別に設定された下校時刻をすべてリセットし、標準の期間設定に従うようにしますか？`)) return;
+
+            try {
+                const snap = await db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", startStr).where(firebase.firestore.FieldPath.documentId(), "<=", endStr).get();
+                if (snap.empty) return alert("指定期間内に保存された予定データはありませんでした。（標準設定がそのまま適用されています）");
+
+                let batch = db.batch(); let count = 0;
+                snap.forEach(doc => { batch.set(doc.ref, { exitTime: "" }, { merge: true }); count++; });
+                await batch.commit();
+                alert(`${count}日分の個別下校時刻をリセットし、標準設定と連携させました！`);
+                displayAllSchedules(); recordSystemUpdate();
+            } catch(e) { alert("リセット中にエラーが発生しました。"); console.error(e); }
         }
 
         async function loadUnreadStudents() {
@@ -1544,7 +1957,6 @@
         }
         async function deleteAccessLog(id) { if(confirm("削除しますか？")) { await db.collection("access_logs").doc(id).delete(); document.getElementById(`log-row-${id}`)?.remove(); } }
 
-        // ※ Excel一括に切り替えたため古いCSVエクスポート/インポート関数は内部に保持してありますがUIからは呼び出されません
         async function loadRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const doc = await db.collection("config").doc("regular_schedule").get();
@@ -1564,7 +1976,6 @@
         function renderVacationList() { document.getElementById('vacation-list').innerHTML = vacationData.map((v,i)=>`${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>'); }
         async function deleteVac(i) { vacationData.splice(i,1); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); displayAllSchedules(); recordSystemUpdate(); }
 
-        // 旧・個別編集用
         async function loadScheduleEdit() {
             const date = document.getElementById('edit-date-select').value; if(!date) return;
             const doc = await db.collection("schedules").doc(date).get();
@@ -1573,7 +1984,6 @@
             document.getElementById('edit-table-container').innerHTML = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event||""}"></div><div style="margin-bottom:10px;">全体備考：<textarea id="edit-daynote" style="height:60px;">${data.dayNote||""}</textarea></div><table style="width:100%;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>` + 
                 data.lessons.map((l,i)=>`<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0;padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note||""}" style="margin:0;padding:4px;"></td></tr>`).join('') + `</table>`;
             
-            // ★ 個別編集のドロップダウンにも「期間設定に従う」を追加
             initExitTimeOptions(document.getElementById('edit-exit-time'), true); 
             document.getElementById('edit-exit-time').value = data.exitTime || "";
             document.getElementById('edit-form').style.display = "block";
@@ -1583,7 +1993,7 @@
                 event: document.getElementById('edit-event').value, dayNote: document.getElementById('edit-daynote').value,
                 lessons: Array.from({length:6},(_,i)=>({sub:document.getElementById(`edit-sub-${i}`).value, note:document.getElementById(`edit-note-${i}`).value})),
                 exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
-            });
+            }, { merge: true });
             displayAllSchedules(); recordSystemUpdate(); 
         }
 
