@@ -5,112 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Class Portal</title>
     <style>
-        /* ★レスポンシブの基本：すべての要素のパディングを幅に含める */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        /* 白黒・ＭＳゴシック基調のシンプルスタイル */
-        body { 
-            background-color: white; 
-            color: black; 
-            font-family: "MS UI Gothic", "MS Gothic", sans-serif; 
-            line-height: 1.5; 
-            padding: 20px; 
-            max-width: 850px; 
-            margin: 0 auto; 
-        }
+        *, *::before, *::after { box-sizing: border-box; }
         
-        /* ★タイトルの上の余白を 25px → 10px に縮小 */
-        h1, h2, h3 { 
-            font-weight: bold;
-            margin-top: 10px; 
-            padding-bottom: 5px;
-        }
-        
-        /* ★ボタン付きタイトルの上の余白を 0 にして枠内の無駄な空きをなくす */
-        .section-header {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: baseline; 
-            border-bottom: 1px solid black; 
-            margin-top: 0; 
-            padding-bottom: 5px;
-        }
-        .section-header h2 {
-            border: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        section { margin-bottom: 40px; border: 1px solid black; padding: 20px; }
-        
-        input:not([type="checkbox"]), textarea, select { 
-            width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; 
-            border: 1px solid black; font-family: inherit; box-sizing: border-box;
-            background: white; color: black;
-        }
-        
-        input[type="checkbox"] {
-            width: auto;
-            cursor: pointer;
-            margin: 0 auto;
-            display: block;
-        }
-        
-        button { 
-            padding: 8px 15px; cursor: pointer; background: white; color: black; 
-            border: 1px solid black; font-weight: bold; font-family: inherit;
-            margin-right: 5px; margin-bottom: 5px;
-        }
+        /* ★基本スタイル（ライトモード） */
+        body { background-color: white; color: black; font-family: "MS UI Gothic", "MS Gothic", sans-serif; line-height: 1.5; padding: 20px; max-width: 850px; margin: 0 auto; transition: background-color 0.3s, color 0.3s; }
+        h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid black; }
+        .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid black; margin-top: 0; padding-bottom: 5px; }
+        .section-header h2 { border: none; margin: 0; padding: 0; }
+        section { margin-bottom: 40px; border: 1px solid black; padding: 20px; transition: border-color 0.3s; }
+        input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid black; font-family: inherit; box-sizing: border-box; background: white; color: black; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        input[type="checkbox"] { width: auto; cursor: pointer; margin: 0 auto; display: block; }
+        button { padding: 8px 15px; cursor: pointer; background: white; color: black; border: 1px solid black; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; }
         button:hover { background: black; color: white; }
-        
         .day-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
-        .day-box { flex: 1; border: 1px solid black; padding: 15px; min-width: 300px; }
+        .day-box { flex: 1; border: 1px solid black; padding: 15px; min-width: 300px; transition: border-color 0.3s; }
         .day-label { font-weight: bold; font-size: 1.1em; border-bottom: 2px solid black; display: block; margin-bottom: 10px; padding-bottom: 5px; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; }
-        th { background: white; } 
-        
+        th, td { border: 1px solid black; padding: 8px; text-align: center; transition: border-color 0.3s; }
+        th { background-color: #f2f2f2 !important; } 
         .col-period { width: 45px; white-space: nowrap; } 
         .col-subject { width: 75px; white-space: nowrap; } 
-        .col-note { width: auto; text-align: left !important; word-break: break-all; } 
-
-        .admin-form-box { background: white; padding: 15px; border: 1px solid black; margin-bottom: 20px; overflow-x: auto; }
-        .post-item { border-bottom: 1px dashed black; padding: 15px 0; }
+        .col-note { width: auto; word-break: break-all; text-align: center !important; } 
+        .admin-form-box { background: white; padding: 15px; border: 1px solid black; margin-bottom: 20px; overflow-x: auto; transition: background-color 0.3s, border-color 0.3s; }
+        .post-item { border-bottom: 1px dashed black; padding: 15px; margin-bottom: 10px; }
         .post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; }
+        .scroll-area { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+        .checked-item { background-color: #e0e0e0 !important; opacity: 0.5; } 
+        .deadline-warning { color: #d9534f; font-weight: bold; } 
+        .student-edit-btn { padding: 2px 6px; font-size: 0.75em; margin-left: 5px; background: white; color: black; border: 1px solid black; cursor: pointer; }
+        .student-edit-btn:hover { background: black; color: white; }
+
+        /* ★ダークモード用スタイル */
+        body.dark-mode { background-color: #121212; color: #e0e0e0; }
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .day-label, body.dark-mode .post-item { border-color: #555 !important; }
+        body.dark-mode section, body.dark-mode .day-box, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box, body.dark-mode .student-edit-btn { border-color: #555 !important; }
         
-        .admin-actions { margin-top: 10px; text-align: right; }
-        .admin-actions button { padding: 4px 10px; font-size: 0.85em; }
-
-        .scroll-area {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-        }
-
+        /* プレビュー色が適用されていない（.has-bgがない）入力枠のみダークにする */
+        body.dark-mode input:not([type="checkbox"]), 
+        body.dark-mode textarea:not(.has-bg), 
+        body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
+        
+        body.dark-mode button, body.dark-mode .student-edit-btn { background-color: #333 !important; color: #e0e0e0 !important; }
+        body.dark-mode button:hover, body.dark-mode .student-edit-btn:hover { background-color: #555 !important; color: #fff !important; }
+        body.dark-mode th { background-color: #2a2a2a !important; color: #e0e0e0 !important; }
+        body.dark-mode .admin-form-box { background-color: #1e1e1e !important; }
+        
+        body.dark-mode tr[style*="background-color: #f2f2f2;"] { background-color: #2a2a2a !important; }
+        body.dark-mode div[style*="background:#fff3cd;"], body.dark-mode tr[style*="background:#fff3cd;"], body.dark-mode td[style*="background:#fff3cd;"] { background-color: #333 !important; color: #e0e0e0 !important; border-color: #555 !important; }
+        body.dark-mode .checked-item { background-color: #222 !important; opacity: 0.6; }
+        body.dark-mode #committee-form-area { background-color: #1e1e1e !important; border-color: #555 !important; }
+        body.dark-mode div[style*="background: #fafafa;"], body.dark-mode div[style*="background:#fafafa;"] { background-color: #1e1e1e !important; border-color: #555 !important; }
+        
+        /* 再編集ボックスのスタイル */
+        .edit-box { background:#f9f9f9; padding:10px; border:2px solid #ffc107; border-radius:5px; color:inherit; }
+        body.dark-mode .edit-box { background:#333 !important; border-color:#d39e00 !important; color:#e0e0e0 !important; }
+        
+        /* メッセージ背景色 ダークモード調整 */
+        body.dark-mode .msg-unread { background-color: #0d47a1 !important; }
+        body.dark-mode .msg-protected { background-color: #4a401c !important; }
+        body.dark-mode .msg-read { background-color: #1e1e1e !important; }
+        
         @media screen and (max-width: 650px) {
             body { padding: 10px; }
             section { padding: 15px; }
-            .section-header {
-                flex-direction: column; 
-                gap: 10px;
-            }
-            .section-header div {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-            }
-            .day-box { 
-                min-width: 100%; 
-                padding: 10px;
-            }
+            .section-header { flex-direction: column; gap: 10px; }
+            .section-header div { width: 100%; display: flex; justify-content: space-between; }
+            .day-box { min-width: 100%; padding: 10px; }
             table { font-size: 0.85em; }
             th, td { padding: 5px; }
-            input[type="text"], input[type="email"], input[type="date"], input[type="month"], input[type="password"] {
-                width: 100% !important; 
-            }
+            input[type="text"], input[type="email"], input[type="date"], input[type="month"], input[type="password"] { width: 100% !important; }
         }
     </style>
 </head>
@@ -124,9 +87,15 @@
     </div>
 
     <div id="main-content" style="display: none;">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 id="welcome-msg" style="border:none; margin:0; font-size:1.1em;">確認中...</h2>
-            <button type="button" onclick="logout()">ログアウト</button>
+        <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+                <h2 id="welcome-msg" style="border:none; margin:0; font-size:1.1em;">確認中...</h2>
+                <div id="admin-reminder" style="color: #d9534f; font-weight: bold; font-size: 0.9em; margin-top: 5px; line-height: 1.6;"></div>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="button" id="theme-toggle-btn" onclick="toggleTheme()" style="margin-top:0;">🌙 ダーク</button>
+                <button type="button" onclick="logout()" style="margin-top:0;">ログアウト</button>
+            </div>
         </header>
 
         <main>
@@ -147,9 +116,9 @@
 
             <section>
                 <div class="section-header">
-                    <h2>今週の予定</h2>
+                    <h2>週予定</h2>
                     <div>
-                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">編集</button>
+                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="startInlineEditWeek()">表を直接編集</button>
                         <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
                         <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
                         <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
@@ -162,20 +131,59 @@
 
             <section>
                 <div class="section-header">
-                    <h2>提出物や課題等</h2>
+                    <h2>回収物・提出物</h2>
                 </div>
-                <p style="font-size: 0.85em; margin-top: 10px;">※木村に提出したら、□にチェックしてください。</p>
+                <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したら、左のチェックボックスを押してください。</p>
                 <div id="submission-list" class="scroll-area">確認中...</div>
             </section>
 
             <section>
                 <div class="section-header">
-                    <h2>担任のやつ</h2>
+                    <h2>◆ 係・委員会より連絡</h2>
+                </div>
+                <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #ccc; margin-top:10px;">
+                    <h3 style="margin-top:0; border:none; font-size:1em;">連絡を投稿する（<span id="my-role-name"></span>）</h3>
+                    <textarea id="committee-input" placeholder="連絡内容を入力してください..." style="transition: background-color 0.3s;"></textarea>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items:center; font-size:0.9em;">
+                        <div>
+                            背景色：<select id="committee-color" style="width:120px; margin-bottom:0;" onchange="updateCommitteeInputColor(this.value)">
+                                <option value="#ffffff">白（標準）</option>
+                                <option value="#ffebee">薄い赤</option>
+                                <option value="#e8f5e9">薄い緑</option>
+                                <option value="#e3f2fd">薄い青</option>
+                                <option value="#fff8e1">薄い黄色</option>
+                                <option value="#fff3e0">薄いオレンジ</option>
+                                <option value="#f3e5f5">薄い紫</option>
+                            </select>
+                        </div>
+                        <div>
+                            重要度：<select id="committee-priority" style="width:90px; margin-bottom:0;">
+                                <option value="3">★★★</option>
+                                <option value="2" selected>★★</option>
+                                <option value="1">★</option>
+                            </select>
+                        </div>
+                        <div>
+                            公開期間：<input type="date" id="committee-start" style="width:130px; margin-bottom:0;"> 〜 
+                            <input type="date" id="committee-end" style="width:130px; margin-bottom:0;">
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <button type="button" onclick="postCommitteeMessage()">投稿する（先生の承認後に公開）</button>
+                    </div>
+                </div>
+                <div id="committee-posts-display" style="margin-top: 10px;"></div>
+            </section>
+
+            <section>
+                <div class="section-header">
+                    <h2>◆ 担任のやつ</h2>
                 </div>
                 
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box" style="margin-top:10px;">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
-                    <button type="button" id="post-blog-btn">新規投稿する</button>
+                    <button type="button" onclick="postBlog()">新規投稿する</button>
                 </div>
 
                 <div id="blog-edit-form" style="display: none; border: 2px dashed black;" class="admin-form-box">
@@ -187,55 +195,57 @@
                 </div>
 
                 <div id="blog-list" style="margin-top:10px;"></div>
+                <div id="blog-pagination" style="text-align: center; margin-top: 15px;"></div>
             </section>
 
             <section>
                 <div class="section-header">
-                    <h2>担任へのメッセージ</h2>
+                    <h2>担任へのメッセージ（非公開）</h2>
                 </div>
-                <p style="font-size: 0.85em; margin-top: 10px;">※書いた内容は、他の生徒には見えません。木村に直接届きます。</p>
+                <p style="font-size: 0.85em; margin-top: 10px;">※ここで送信した内容は、他の生徒には見えません。先生に直接届きます。</p>
                 <textarea id="dm-input" placeholder="連絡や相談事などを書いてください..." style="height: 100px;"></textarea><br>
                 <button type="button" onclick="sendDirectMessage()">送信する</button>
             </section>
 
             <section id="admin-area" style="display: none; border: 2px solid black;">
                 <div class="section-header">
-                    <h2 style="border-bottom:none;">管理者用メニュー</h2>
+                    <h2 style="border-bottom:none;">管理者用メニュー：予定・提出物・メッセージ</h2>
                 </div>
+
+                <details class="admin-form-box" open style="margin-top:15px; border-color: red;">
+                    <summary style="cursor:pointer; font-weight:bold; color:red;">［要確認］生徒からの「係・委員会」連絡（承認待ち・差戻し）</summary>
+                    <div id="admin-pending-committee" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
+                </details>
                 
-                <details class="admin-form-box" open style="margin-top:15px;">
-                    <summary style="cursor:pointer; font-weight:bold;">［確認］受信メッセージ</summary>
-                    <div id="admin-message-list" style="margin-top:10px; max-height: 300px; overflow-y: auto;">確認中...</div>
+                <details class="admin-form-box" open>
+                    <summary style="cursor:pointer; font-weight:bold;">［確認］受信したメッセージ（ダイレクトメッセージ）</summary>
+                    <p style="font-size: 0.85em; margin-top: 5px;">※メッセージにマウスを合わせる（またはタップする）と自動で「既読」になります。</p>
+                    <div id="admin-message-list" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］提出物・課題の管理</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
                         締め切り：<input type="date" id="subm-deadline" style="width:150px;"><br>
-                        <button type="button" id="subm-add-btn" onclick="addSubmission()">追加</button>
-                        <button type="button" id="subm-update-btn" style="display:none;" onclick="updateSubmission()">更新する</button>
-                        <button type="button" id="subm-cancel-btn" style="display:none;" onclick="cancelSubmEdit()">キャンセル</button>
+                        <button type="button" onclick="addSubmission()">追加</button>
                     </div>
                     <div id="admin-submission-table" class="scroll-area" style="margin-top:15px;"></div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］予定のCSV一括管理</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］予定のCSV一括管理（月間）</summary>
                     <div style="margin-top:10px;">
-                        <p style="font-size:0.85em; margin-bottom:5px;">※対象月を選んで「エクスポート」すると、その月の予定データをダウンロードできる。「インポート」で一括上書きできる。</p>
                         年月：<input type="month" id="schedule-month-input" style="width:150px;">
                         <button type="button" onclick="exportScheduleCSV()">エクスポート（ダウンロード）</button>
-
                         <hr style="border-top:1px dashed black; margin:15px 0;">
-                        <p style="font-size:0.85em; margin-bottom:5px;">※編集済みのCSVファイルを選択してインポートしてください。</p>
                         <input type="file" id="schedule-csv-file" accept=".csv" style="width:250px; border:none; padding:0;">
                         <button type="button" onclick="importScheduleCSV()">インポート（一括登録）</button>
                     </div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準時間割</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割</summary>
                     曜日：<select id="reg-day-select" onchange="loadRegularSetting()" style="width:150px;">
                         <option value="mon">月曜日</option><option value="tue">火曜日</option>
                         <option value="wed">水曜日</option><option value="thu">木曜日</option>
@@ -253,19 +263,6 @@
                     <button type="button" onclick="saveVacation()">期間を登録</button>
                     <div id="vacation-list" style="margin-top:10px;"></div>
                 </details>
-
-                <div class="admin-form-box">
-                    <h3 style="margin-top:0;">予定の個別設定</h3>
-                    日付：<input type="date" id="edit-date-select" style="width:200px;">
-                    <button type="button" onclick="loadScheduleEdit()">編集データ呼出</button>
-                    <div id="edit-form" style="display:none; margin-top:15px;">
-                        <div id="edit-table-container" class="scroll-area"></div>
-                        <div style="margin-top:10px;">
-                            最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
-                        </div>
-                        <button type="button" onclick="saveSchedule()" style="margin-top:10px;">この内容で保存・公開</button>
-                    </div>
-                </div>
             </section>
 
             <section id="student-admin-area" style="display: none; border: 2px solid black;">
@@ -274,13 +271,28 @@
                 </div>
                 
                 <div class="admin-form-box" style="margin-top:15px;">
+                    <h3 style="margin-top:0;">係・委員会の種類設定（リスト登録）</h3>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:200px;">
+                            <p style="font-weight:bold; margin-bottom:5px;">係の登録</p>
+                            <input type="text" id="new-role-input" placeholder="係名（例: 国語係）" style="width:150px; display:inline-block;">
+                            <button type="button" onclick="addRole()">追加</button>
+                            <div id="role-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <p style="font-weight:bold; margin-bottom:5px;">委員会の登録</p>
+                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書）" style="width:150px; display:inline-block;">
+                            <button type="button" onclick="addCommittee()">追加</button>
+                            <div id="comm-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-box">
                     <h3 style="margin-top:0;">アクセス状況・未確認者チェック</h3>
                     <p style="margin-bottom:5px;">最終情報更新日時：<span id="last-update-time">---</span></p>
                     <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
-                    
                     <hr style="border-top:1px dashed black; margin:15px 0;">
-                    
-                    <p style="margin-bottom:5px; font-weight:bold;">【アクセスログの確認】</p>
                     <input type="date" id="log-date-input" style="width:150px;">
                     <button type="button" onclick="loadAccessLogsByDate()">指定日のログを表示</button>
                     <button type="button" onclick="loadAccessLogs()">最新50件を表示</button>
@@ -290,20 +302,21 @@
                 <div class="admin-form-box">
                     <h3>新規登録 / CSV一括操作</h3>
                     <p style="margin-bottom:5px; font-weight:bold;">【1件ずつ個別登録】</p>
-                    <input type="email" id="direct-email" placeholder="メールアドレス" style="width:250px;">
-                    <input type="text" id="direct-name" placeholder="氏名" style="width:150px;">
+                    <input type="email" id="direct-email" placeholder="メールアドレス" style="width:200px;">
+                    <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
+                    <select id="direct-role" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">係</option></select>
+                    <select id="direct-committee" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">委員会</option></select>
                     <button type="button" onclick="registerDirect()">新規登録</button>
 
                     <hr style="border-top:1px dashed black; margin:15px 0;">
-                    
                     <p style="margin-bottom:5px; font-weight:bold;">【CSV一括登録・出力】</p>
-                    <p style="font-size:0.85em; margin-top:0;">※形式：「メールアドレス,氏名」の2列で作成してください。</p>
+                    <p style="font-size:0.85em; margin-top:0;">※形式：「メールアドレス,氏名,係,委員会」の4列で作成してください。</p>
                     <input type="file" id="csv-file" accept=".csv" style="width:250px; border:none; padding:0;">
-                    <button type="button" onclick="importCSV()">インポート（一括登録）</button>
-                    <button type="button" onclick="exportCSV()">エクスポート（ダウンロード）</button>
+                    <button type="button" onclick="importCSV()">インポート</button>
+                    <button type="button" onclick="exportCSV()">エクスポート</button>
                 </div>
 
-                <h3>登録済み一覧（編集可能）</h3>
+                <h3>登録済み一覧（直接編集可能）</h3>
                 <div id="student-list-area" class="scroll-area"></div>
             </section>
 
@@ -314,6 +327,7 @@
                 <div style="max-width:400px; margin-top:15px;">
                     <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
                     <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
+                    <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用）" onpaste="return false;"><br>
                     <button type="button" id="change-pw-btn">パスワードを変更する</button>
                 </div>
             </section>
@@ -332,8 +346,7 @@
             projectId: "my-class-site",
             storageBucket: "my-class-site.firebasestorage.app",
             messagingSenderId: "125594983188",
-            appId: "1:125594983188:web:129aa54e9d3a39ca700001",
-            measurementId: "G-4EQ3Z9Q4NT"
+            appId: "1:125594983188:web:129aa54e9d3a39ca700001"
         };
         
         const TEACHER_EMAIL = "administrator@class.jp";
@@ -347,17 +360,68 @@
         let isAdmin = false;
         let currentUserEmail = null;
         let submissionsList = [];
+        
+        let allBlogs = [];
+        let currentBlogPage = 1;
+        const BLOGS_PER_PAGE = 5;
+        
+        let allCommitteePosts = [];
+        let rolesList = [];
+        let committeesList = [];
 
-        let editingBlogId = null;
-        let editingSubmId = null;
+        let pendingCommitteeCount = 0;
+        let unreadMessageCount = 0;
 
         let currentScheduleBaseDate = new Date();
         let currentWeekBaseDate = new Date();
         let currentWeeklyDates = [];
 
-        let inactivityTimer;
-        const TIMEOUT_MS = 60 * 60 * 1000; 
+        // ★ テーマ管理とプレビュー枠の色制御
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-toggle-btn').innerText = '☀️ ライト';
+            }
+        });
 
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-toggle-btn').innerText = isDark ? '☀️ ライト' : '🌙 ダーク';
+        }
+
+        // 投稿フォームの色プレビュー反映
+        function updateCommitteeInputColor(color) {
+            const input = document.getElementById('committee-input');
+            if (color === '#ffffff' || !color) {
+                input.classList.remove('has-bg');
+                input.style.backgroundColor = '';
+                input.style.color = '';
+            } else {
+                input.classList.add('has-bg');
+                input.style.backgroundColor = color;
+                input.style.color = '#000'; // 明るい背景なので文字は黒に固定
+            }
+        }
+        
+        // 再編集フォームの色プレビュー反映
+        function updateInlineEditColor(id, color) {
+            const input = document.getElementById(`edit-comm-input-${id}`);
+            if (color === '#ffffff' || !color) {
+                input.classList.remove('has-bg');
+                input.style.backgroundColor = '';
+                input.style.color = '';
+            } else {
+                input.classList.add('has-bg');
+                input.style.backgroundColor = color;
+                input.style.color = '#000'; // 明るい背景なので文字は黒に固定
+            }
+        }
+
+        let inactivityTimer;
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
@@ -365,20 +429,24 @@
                     alert("安全のため、一定時間操作がなかったため自動的にログアウトしました。");
                     logout();
                 }
-            }, TIMEOUT_MS);
+            }, 60 * 60 * 1000);
         }
-
-        document.addEventListener('mousemove', resetInactivityTimer);
-        document.addEventListener('keydown', resetInactivityTimer);
-        document.addEventListener('click', resetInactivityTimer);
-        document.addEventListener('scroll', resetInactivityTimer);
-        document.addEventListener('touchstart', resetInactivityTimer);
+        ['mousemove','keydown','click','scroll','touchstart'].forEach(e => document.addEventListener(e, resetInactivityTimer));
 
         function getLocalDateStr(dateObj) {
-            const y = dateObj.getFullYear();
-            const m = ('0' + (dateObj.getMonth() + 1)).slice(-2);
-            const d = ('0' + dateObj.getDate()).slice(-2);
-            return `${y}-${m}-${d}`;
+            return `${dateObj.getFullYear()}-${('0' + (dateObj.getMonth() + 1)).slice(-2)}-${('0' + dateObj.getDate()).slice(-2)}`;
+        }
+
+        function getSchoolDaysDiff(targetDateStr) {
+            let today = new Date(); today.setHours(0,0,0,0);
+            let target = new Date(targetDateStr); target.setHours(0,0,0,0);
+            if (target < today) return -1; 
+            let days = 0; let curr = new Date(today);
+            while(curr < target) {
+                curr.setDate(curr.getDate() + 1);
+                if (isSchoolDay(getLocalDateStr(curr))) days++;
+            }
+            return days;
         }
 
         function initExitTimeOptions(targetEl) {
@@ -396,29 +464,27 @@
             await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
         }
 
+        function updateAdminReminder() {
+            if (!isAdmin) return;
+            let reminderEl = document.getElementById('admin-reminder');
+            if (!reminderEl) return;
+            let msgs = [];
+            if (pendingCommitteeCount > 0) msgs.push(`⚠️ 承認待ちの係・委員会連絡が ${pendingCommitteeCount} 件あります`);
+            if (unreadMessageCount > 0) msgs.push(`⚠️ 担任への新着メッセージが ${unreadMessageCount} 件あります`);
+            reminderEl.innerHTML = msgs.join('<br>');
+        }
+
         firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                resetInactivityTimer(); 
-                initApp(user);
-            } else {
-                document.getElementById('main-content').style.display = 'none';
-                document.getElementById('login-section').style.display = 'block';
-                clearTimeout(inactivityTimer); 
-            }
+            if (user) { resetInactivityTimer(); initApp(user); } 
+            else { document.getElementById('main-content').style.display = 'none'; document.getElementById('login-section').style.display = 'block'; clearTimeout(inactivityTimer); }
         });
 
         document.getElementById('login-btn').onclick = () => {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-password').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass)
-                .catch((error) => alert("ログイン失敗\nエラー内容: " + error.message));
+            firebase.auth().signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value)
+                .catch(err => alert("ログイン失敗: " + err.message));
         };
 
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                location.reload(); 
-            });
-        }
+        function logout() { firebase.auth().signOut().then(() => location.reload()); }
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
@@ -429,737 +495,394 @@
             if(isAdmin) {
                 document.getElementById('btn-edit-week').style.display = 'inline-block';
                 const now = new Date();
-                const currentMonthStr = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
-                document.getElementById('schedule-month-input').value = currentMonthStr;
+                document.getElementById('schedule-month-input').value = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
             }
 
-            const [hRes, vSnap] = await Promise.all([
-                fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()).catch(() => ({})),
-                db.collection("config").doc("vacations").get()
-            ]);
-            holidays = hRes;
-            vacationData = vSnap.exists ? vSnap.data().periods : [];
+            const today = new Date();
+            document.getElementById('committee-start').value = getLocalDateStr(today);
+            let nextWeek = new Date(today);
+            nextWeek.setDate(today.getDate() + 7);
+            document.getElementById('committee-end').value = getLocalDateStr(nextWeek);
+
+            db.collection("config").doc("roles").onSnapshot(snap => {
+                rolesList = snap.exists ? snap.data().items || [] : [];
+                if(isAdmin) { renderRoleCommSettings(); renderStudentListUI(); updateDirectInputs(); }
+            });
+            db.collection("config").doc("committees").onSnapshot(snap => {
+                committeesList = snap.exists ? snap.data().items || [] : [];
+                if(isAdmin) { renderRoleCommSettings(); renderStudentListUI(); updateDirectInputs(); }
+            });
+
+            try {
+                const [hRes, vSnap] = await Promise.all([
+                    fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()).catch(() => ({})),
+                    db.collection("config").doc("vacations").get()
+                ]);
+                holidays = hRes || {}; 
+                vacationData = (vSnap.exists && vSnap.data().periods) ? vSnap.data().periods : [];
+            } catch (e) {
+                holidays = {};
+                vacationData = [];
+            }
 
             db.collection("students").onSnapshot(snap => {
-                studentMaster = {};
-                snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
+                studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
+                let myData = studentMaster[currentUserEmail] || {};
+                let userName = myData.name || (isAdmin ? "先生" : "生徒");
                 
-                const userName = studentMaster[currentUserEmail]?.name || "先生";
+                let myRoles = [myData.role, myData.committee].filter(Boolean).join("・");
+                if (!isAdmin && myRoles) {
+                    document.getElementById('committee-form-area').style.display = 'block';
+                    document.getElementById('my-role-name').innerText = myRoles;
+                }
+                
                 const hour = new Date().getHours();
                 let greeting = (hour >= 17 || hour < 6) ? "こんばんは" : (hour >= 6 && hour < 11) ? "おはようございます" : "こんにちは";
                 document.getElementById('welcome-msg').innerText = `${greeting}、${userName}さん！`;
 
                 renderSubmissionsUI(); 
-                if (isAdmin) {
-                    renderStudentListUI(); 
-                    loadUnreadStudents();  
-                }
+                if (isAdmin) { renderStudentListUI(); loadUnreadStudents(); }
             });
 
             await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
-            db.collection("access_logs").add({
-                email: user.email,
-                name: studentMaster[user.email]?.name || "先生",
-                accessedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(()=>{});
+            db.collection("access_logs").add({ email: user.email, name: studentMaster[user.email]?.name || "先生", accessedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
             db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
-                submissionsList = [];
-                snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
-                renderSubmissionsUI();
-                displayAllSchedules(); 
+                submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
+                renderSubmissionsUI(); displayAllSchedules(); 
             });
 
-            db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
-                const list = document.getElementById('blog-list'); list.innerHTML = "";
-                snap.forEach(d => {
-                    const data = d.data();
-                    let dateStr = "";
-                    let isoDate = "";
-                    if (data.createdAt) {
-                        const dateObj = data.createdAt.toDate();
-                        dateStr = dateObj.toLocaleString();
-                        dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset());
-                        isoDate = dateObj.toISOString().slice(0, 16);
-                    }
+            db.collection("blogs").orderBy("createdAt", "desc").onSnapshot(snap => {
+                allBlogs = []; snap.forEach(d => allBlogs.push({id: d.id, ...d.data()}));
+                currentBlogPage = 1;
+                renderBlogs();
+            }, err => console.error(err));
 
-                    let adminBtns = "";
-                    if (isAdmin) {
-                        const escapedContent = data.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
-                        adminBtns = `<div class="admin-actions">
-                                        <button type="button" onclick="startEditBlog('${d.id}', '${escapedContent}', '${isoDate}')">編集</button>
-                                        <button type="button" onclick="deleteBlog('${d.id}')">削除</button>
-                                     </div>`;
-                    }
-                    list.innerHTML += `<div class="post-item">
-                                        <div class="post-date">${dateStr}</div>
-                                        <div>${data.content.replace(/\n/g, '<br>')}</div>
-                                        ${adminBtns}
-                                       </div>`;
-                });
-            });
+            db.collection("committee_posts").onSnapshot(snap => {
+                allCommitteePosts = [];
+                snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()}));
+                renderCommitteePosts();
+            }, err => console.error(err));
 
             if (isAdmin) {
                 document.getElementById('admin-area').style.display = 'block';
                 document.getElementById('student-admin-area').style.display = 'block';
                 document.getElementById('blog-admin-form').style.display = 'block';
                 initExitTimeOptions(document.getElementById('edit-exit-time'));
-                loadRegularSetting();
-                renderVacationList();
-
+                loadRegularSetting(); renderVacationList();
+                
                 db.collection("messages").orderBy("createdAt", "desc").onSnapshot(snap => {
-                    const listEl = document.getElementById('admin-message-list');
-                    if (snap.empty) {
-                        listEl.innerHTML = "<p>現在、受信したメッセージはありません。</p>";
-                        return;
-                    }
-                    let html = "";
+                    unreadMessageCount = 0; 
+                    let html = snap.empty ? "<p>メッセージはありません。</p>" : "";
                     snap.forEach(doc => {
                         const d = doc.data();
-                        let time = d.createdAt ? d.createdAt.toDate().toLocaleString() : "---";
-                        html += `<div style="border: 1px solid black; padding: 10px; margin-bottom: 10px; background: #fafafa;">
-                                    <div style="font-weight: bold; font-size: 0.9em; margin-bottom: 5px; border-bottom: 1px dashed black;">${time}　送信者：${d.name}</div>
-                                    <div style="margin-bottom: 10px;">${d.content.replace(/\n/g, '<br>')}</div>
-                                    <div style="text-align: right;">
-                                        <button type="button" onclick="deleteMessage('${doc.id}')" style="padding: 2px 8px; font-size: 0.8em;">削除</button>
+                        if (!d.isRead) unreadMessageCount++;
+                        
+                        let bgClass = d.isProtected ? "msg-protected" : (d.isRead ? "msg-read" : "msg-unread");
+                        let bgColor = d.isProtected ? "#fff3cd" : (d.isRead ? "#fafafa" : "#e3f2fd");
+                        
+                        let badge = d.isRead ? "" : `<span style="background:#d9534f; color:white; padding:2px 6px; border-radius:3px; font-size:0.8em; margin-right:5px;">未読</span>`;
+                        let protectBadge = d.isProtected ? `<span style="color:#f39c12; font-weight:bold; margin-right:5px;">⭐保護中</span>` : "";
+                        
+                        html += `<div id="msg-${doc.id}" class="${bgClass}" onmouseenter="markMessageRead('${doc.id}', ${!!d.isRead})" style="border:1px solid black; padding:10px; margin-bottom:10px; background-color:${bgColor}; transition: background-color 0.3s; border-radius:5px;">
+                                    <div style="font-weight:bold; font-size:0.9em; border-bottom:1px dashed black; padding-bottom:5px; margin-bottom:5px; color:inherit;">
+                                        ${badge}${protectBadge}${d.createdAt ? formatDateTime(d.createdAt.toDate()) : ""} 送信者：${d.name}
+                                    </div>
+                                    <div style="margin-bottom: 10px; color:inherit;">${d.content.replace(/\n/g, '<br>')}</div>
+                                    <div style="text-align:right;">
+                                        <button type="button" onclick="toggleProtectMessage('${doc.id}', ${!!d.isProtected})">${d.isProtected ? '保護を解除' : '保護する'}</button>
+                                        <button type="button" onclick="deleteMessage('${doc.id}', ${!!d.isProtected})">削除</button>
                                     </div>
                                  </div>`;
                     });
-                    listEl.innerHTML = html;
+                    document.getElementById('admin-message-list').innerHTML = html;
+                    updateAdminReminder(); 
+                }, err => {
+                    console.error("メッセージ取得エラー:", err);
+                    document.getElementById('admin-message-list').innerHTML = "<p style='color:red;'>メッセージの読み込みに失敗しました。</p>";
                 });
             }
         }
 
-        async function displayAllSchedules() {
-            await displayNextSchoolDays();
-            await displayWeeklySchedule();
+        function markMessageRead(id, isRead) {
+            if (isRead) return;
+            db.collection("messages").doc(id).update({ isRead: true }).catch(e => console.error(e));
         }
 
-        function isSchoolDay(dateStr) {
-            const d = new Date(dateStr);
-            const day = d.getDay();
-            if (day === 0 || day === 6) return false;
-            if (holidays[dateStr]) return false;
-            if (vacationData.find(v => dateStr >= v.start && dateStr <= v.end)) return false;
-            return true;
+        async function toggleProtectMessage(id, currentStatus) {
+            await db.collection("messages").doc(id).update({ isProtected: !currentStatus });
         }
 
-        function changeScheduleDate(direction) {
-            let d = new Date(currentScheduleBaseDate);
-            d.setDate(d.getDate() + direction);
-            while(!isSchoolDay(getLocalDateStr(d))) {
-                d.setDate(d.getDate() + direction);
+        async function deleteMessage(id, isProtected) {
+            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に「保護を解除」してください。");
+            if (confirm("このメッセージを削除しますか？")) {
+                await db.collection("messages").doc(id).delete();
             }
-            currentScheduleBaseDate = d;
-            displayNextSchoolDays();
         }
 
-        function resetScheduleDate() {
-            currentScheduleBaseDate = new Date();
-            displayNextSchoolDays();
-        }
+        // --- 係・委員会 連絡ボード ---
+        function renderCommitteePosts() {
+            let todayStr = getLocalDateStr(new Date());
+            let postsHtml = ""; 
+            let pendingHtml = "";
+            pendingCommitteeCount = 0; 
 
-        async function displayNextSchoolDays() {
-            let foundDays = [];
-            let checkDate = new Date(getLocalDateStr(currentScheduleBaseDate));
-            const todayStr = getLocalDateStr(new Date());
-
-            while (foundDays.length < 2) {
-                let dateStr = getLocalDateStr(checkDate);
-                if (isSchoolDay(dateStr)) {
-                    let diffMs = new Date(dateStr) - new Date(todayStr);
-                    let gap = Math.round(diffMs / (1000*60*60*24));
-                    foundDays.push({ date: dateStr, gap: gap });
-                }
-                checkDate.setDate(checkDate.getDate() + 1);
-            }
-
-            function getLabel(gap) {
-                if(gap === 0) return "[本日]";
-                if(gap === 1) return "[明日]";
-                if(gap === -1) return "[昨日]";
-                if(gap > 1) return `[${gap}日後]`;
-                if(gap < -1) return `[${Math.abs(gap)}日前]`;
-                return "";
-            }
-
-            await renderDay(foundDays[0].date, "area-1", getLabel(foundDays[0].gap));
-            await renderDay(foundDays[1].date, "area-2", getLabel(foundDays[1].gap));
-        }
-
-        async function renderDay(dateStr, elId, prefix) {
-            const el = document.getElementById(elId);
-            const d = new Date(dateStr);
-            const week = ["日", "月", "火", "水", "木", "金", "土"];
-            
-            let holidayName = holidays[dateStr];
-            let displayLabel = holidayName ? `${prefix} ${d.getMonth()+1}月${d.getDate()}日（${week[d.getDay()]}） <span style="color:red; font-size:0.9em;">${holidayName}</span>` 
-                                           : `${prefix} ${d.getMonth()+1}月${d.getDate()}日（${week[d.getDay()]}）`;
-
-            const doc = await db.collection("schedules").doc(dateStr).get();
-            let data = doc.exists ? doc.data() : null;
-
-            if (!data) {
-                const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-                const regDoc = await db.collection("config").doc("regular_schedule").get();
-                const regWeek = regDoc.exists ? regDoc.data()[dayKeys[d.getDay()]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
-            }
-
-            let html = `<div class="day-label" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>${displayLabel}</span>`;
-            if (isAdmin) {
-                html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">編集</button>`;
-            }
-            html += `</div>
-            <div class="scroll-area">
-            <table>
-                <tr><th class="col-period">校時</th><th class="col-subject">科目</th><th class="col-note">備考</th></tr>`;
-            data.lessons.forEach((l, i) => {
-                html += `<tr><td>${i+1}</td><td>${l.sub || "---"}</td><td class="col-note">${l.note || ""}</td></tr>`;
+            let sortedPosts = [...allCommitteePosts].sort((a, b) => {
+                let pA = a.priority || 1; let pB = b.priority || 1;
+                if (pA !== pB) return pB - pA;
+                let tA = a.createdAt ? a.createdAt.toMillis() : 0; let tB = b.createdAt ? b.createdAt.toMillis() : 0;
+                return tB - tA;
             });
-            html += `</table></div><p style="text-align:right; font-weight:bold; margin-top:10px; margin-bottom:5px;">最終下校：${data.exitTime}</p>`;
-            
-            let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
-            let subsHtml = subsForDay.map(s => `・${s.title}`).join("<br>");
-            
-            let dayNoteText = data.dayNote || "";
-            let combinedNote = "";
-            if (dayNoteText) combinedNote += dayNoteText.replace(/\n/g, '<br>');
-            if (subsHtml) {
-                if (combinedNote) combinedNote += "<br><br>";
-                combinedNote += `<span style="font-weight:bold; color: #d9534f;">【提出物締切】<br>${subsHtml}</span>`;
-            }
-            
-            html += `<div style="margin-top: 10px; padding: 10px; border: 1px solid #333; background: #fafafa; font-size: 0.9em;">
-                        <strong style="display:block; border-bottom: 1px solid #ccc; margin-bottom: 5px; padding-bottom: 2px;">■ 備考・連絡事項</strong>
-                        ${combinedNote || "特になし"}
-                     </div>`;
-            
-            el.innerHTML = html;
-        }
 
-        async function startInlineEditDay(dateStr, elId) {
-            const el = document.getElementById(elId);
-            
-            const doc = await db.collection("schedules").doc(dateStr).get();
-            let data = doc.exists ? doc.data() : null;
-            if (!data) {
-                const dayNum = new Date(dateStr).getDay();
-                const regDoc = await db.collection("config").doc("regular_schedule").get();
-                const regData = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayNum]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
-            }
-
-            let html = `<div style="background:#fff3cd; padding:10px; border:2px solid #ffc107;">`;
-            html += `<h4 style="margin-top:0;">${dateStr} の予定を編集</h4>`;
-            html += `<div style="margin-bottom:5px; font-size:0.9em;">主な行事予定：<input type="text" id="inline-event-${elId}" value="${data.event || ""}" style="width:100%; padding:4px;"></div>`;
-            html += `<div style="margin-bottom:5px; font-size:0.9em;">備考：<textarea id="inline-daynote-${elId}" style="width:100%; height:60px; padding:4px;">${data.dayNote || ""}</textarea></div>`;
-            
-            html += `<div class="scroll-area"><table style="width:100%; font-size:0.85em;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
-            data.lessons.forEach((l, i) => {
-                let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"　"}</option>`).join('');
-                html += `<tr>
-                            <td>${i+1}</td>
-                            <td><select id="inline-sub-${elId}-${i}" style="padding:2px; margin:0;">${opts}</select></td>
-                            <td><input type="text" id="inline-note-${elId}-${i}" value="${l.note}" style="width:100%; padding:2px; margin:0;"></td>
-                         </tr>`;
-            });
-            html += `</table></div>`;
-            
-            let timeOpts = "";
-            for(let h=13; h<=19; h++) {
-                for(let m=0; m<60; m+=10) {
-                    let time = `${h}:${m===0?'00':m}`;
-                    let sel = (time === data.exitTime) ? "selected" : "";
-                    timeOpts += `<option value="${time}" ${sel}>${time}</option>`;
-                }
-            }
-            
-            html += `<div style="margin-top:5px; text-align:right; font-size:0.9em;">最終下校：<select id="inline-exit-${elId}" style="padding:2px; width:120px;">${timeOpts}</select></div>`;
-            html += `<div style="margin-top:10px; text-align:right;">
-                        <button onclick="saveInlineEditDay('${dateStr}', '${elId}')">保存して戻る</button>
-                        <button onclick="displayNextSchoolDays()">キャンセル</button>
-                     </div>`;
-            html += `</div>`;
-            
-            el.innerHTML = html;
-        }
-
-        async function saveInlineEditDay(dateStr, elId) {
-            const eventVal = document.getElementById(`inline-event-${elId}`).value;
-            const dayNoteVal = document.getElementById(`inline-daynote-${elId}`).value;
-            const exitTimeVal = document.getElementById(`inline-exit-${elId}`).value;
-            
-            const lessons = Array.from({length:6}, (_, i) => ({ 
-                sub: document.getElementById(`inline-sub-${elId}-${i}`).value, 
-                note: document.getElementById(`inline-note-${elId}-${i}`).value 
-            }));
-            
-            await db.collection("schedules").doc(dateStr).set({ 
-                event: eventVal, 
-                dayNote: dayNoteVal,
-                lessons: lessons, 
-                exitTime: exitTimeVal, 
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
-            });
-            
-            alert("保存しました"); 
-            displayAllSchedules();
-            recordSystemUpdate(); 
-        }
-
-        function changeWeek(weeks) {
-            currentWeekBaseDate.setDate(currentWeekBaseDate.getDate() + weeks * 7);
-            displayWeeklySchedule();
-        }
-
-        function resetWeek() {
-            currentWeekBaseDate = new Date();
-            displayWeeklySchedule();
-        }
-
-        async function displayWeeklySchedule() {
-            let d = new Date(currentWeekBaseDate);
-            let currentDay = d.getDay();
-            if (currentDay === 6) d.setDate(d.getDate() + 2);
-            if (currentDay === 0) d.setDate(d.getDate() + 1);
-            
-            let diff = d.getDay() - 1;
-            d.setDate(d.getDate() - diff);
-
-            let weekDates = [];
-            for(let i=0; i<5; i++) {
-                let tempD = new Date(d);
-                tempD.setDate(d.getDate() + i);
-                weekDates.push(getLocalDateStr(tempD));
-            }
-            currentWeeklyDates = weekDates; 
-
-            let docPromises = weekDates.map(dateStr => db.collection("schedules").doc(dateStr).get());
-            let docs = await Promise.all(docPromises);
-
-            let weekData = [];
-            for(let i=0; i<5; i++) {
-                let doc = docs[i];
-                if(doc.exists) {
-                    weekData.push(doc.data());
-                } else {
-                    weekData.push({ event: "" });
-                }
-            }
-
-            const weekNames = ["月", "火", "水", "木", "金"];
-
-            let html = `<table style="width: 100%; min-width: 400px;">
-                        <tr>
-                            <th style="width:15%;">日付</th>
-                            <th style="width:10%;">曜日</th>
-                            <th style="width:75%;">主な行事予定・提出物</th>
-                        </tr>`;
-            
-            for(let i=0; i<5; i++) {
-                let dateStr = weekDates[i];
-                let dateObj = new Date(dateStr);
-                let holidayName = holidays[dateStr];
-                let isVacation = vacationData.find(v => dateStr >= v.start && dateStr <= v.end);
-                let isSchoolDayBool = isSchoolDay(dateStr);
-
-                let bgStyle = (!isSchoolDayBool) ? "background-color: #f2f2f2;" : "";
+            sortedPosts.forEach(d => {
+                let dateStr = d.createdAt ? formatDateTime(d.createdAt.toDate()) : "";
                 
-                let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
-                let subsHtml = subsForDay.map(s => `【締切】${s.title}`).join("<br>");
-
-                html += `<tr style="${bgStyle}">
-                            <td style="text-align:center;">${dateObj.getMonth()+1}/${dateObj.getDate()}</td>
-                            <td style="text-align:center; font-weight:bold;">${weekNames[i]}</td>`;
+                let pLabel = d.priority == 3 ? "★★★" : d.priority == 2 ? "★★" : "★";
                 
-                if (!isSchoolDayBool) {
-                    let reason = holidayName ? `<span style="color:red; font-weight:bold;">${holidayName}</span>` : (isVacation ? "長期休業等" : "休み");
-                    let cellContent = reason;
-                    if (subsHtml) cellContent += `<br><span style="font-size:0.9em; font-weight:bold; color: #d9534f;">${subsHtml}</span>`;
-                    html += `<td style="text-align:left; padding-left:10px; font-weight:bold; letter-spacing: 1px;">${cellContent}</td>`;
-                } else {
-                    let eventText = weekData[i].event || "---";
-                    let cellContent = eventText;
-                    if (subsHtml) {
-                        cellContent = (eventText === "---" ? "" : eventText + "<br>") + `<span style="font-size:0.9em; font-weight:bold; color: #d9534f;">${subsHtml}</span>`;
+                // ★ 背景色と文字色の設定
+                let isColored = d.bgColor && d.bgColor !== '#ffffff';
+                let bgStyle = isColored ? `background-color:${d.bgColor}; color:#000;` : "";
+                let hasBgClass = isColored ? 'has-bg' : '';
+                
+                let contentHtml = `<div id="committee-post-${d.id}" class="post-item ${hasBgClass}" style="${bgStyle} border:1px solid #ccc; border-radius:5px; margin-bottom:10px;">
+                    <div class="post-date" style="border-bottom: 1px dashed #999; padding-bottom: 5px; margin-bottom: 5px; color:inherit;">
+                        ${dateStr} 【${d.roleName}】${d.authorName} 
+                        <span style="margin-left:10px; font-weight:normal; font-size:0.9em;">(重要度:${pLabel}) (公開:${d.startDate}〜${d.endDate})</span>
+                    </div>
+                    <div style="white-space:pre-wrap; padding: 5px 0; color:inherit;">${d.content}</div>`;
+
+                if (d.status === 'approved') {
+                    if (d.startDate <= todayStr && d.endDate >= todayStr) {
+                        let btnHtml = "";
+                        if (isAdmin) btnHtml = `<button onclick="deleteCommitteePost('${d.id}')">削除</button>`;
+                        else if (d.authorEmail === currentUserEmail) btnHtml = `<button onclick="startInlineEditCommitteePost('${d.id}')">再編集</button> <button onclick="deleteCommitteePost('${d.id}')">削除</button>`;
+                        postsHtml += contentHtml + (btnHtml ? `<div class="admin-actions">${btnHtml}</div>` : "") + `</div>`;
                     }
-                    html += `<td style="text-align:left; padding-left:10px;">${cellContent || "---"}</td>`;
-                }
-                html += `</tr>`;
-            }
-            html += `</table>`;
-
-            document.getElementById('weekly-schedule-display').innerHTML = html;
-        }
-
-        async function startInlineEditWeek() {
-            if (!isAdmin) return;
-
-            let docPromises = currentWeeklyDates.map(dateStr => db.collection("schedules").doc(dateStr).get());
-            let docs = await Promise.all(docPromises);
-            
-            let weekData = [];
-            for(let i=0; i<5; i++) {
-                let doc = docs[i];
-                if(doc.exists) {
-                    weekData.push(doc.data());
-                } else {
-                    weekData.push({ event: "" });
-                }
-            }
-
-            const weekNames = ["月", "火", "水", "木", "金"];
-            let html = `<table style="width: 100%; min-width: 400px; border:2px solid #ffc107;">
-                        <tr style="background:#fff3cd;">
-                            <th style="width:15%;">日付</th>
-                            <th style="width:10%;">曜日</th>
-                            <th style="width:75%;">主な行事予定 (編集)</th>
-                        </tr>`;
-            
-            for(let i=0; i<5; i++) {
-                let dateStr = currentWeeklyDates[i];
-                let dateObj = new Date(dateStr);
-                let eventText = weekData[i].event || "";
-                
-                html += `<tr>
-                            <td style="text-align:center; background:#fff3cd;">${dateObj.getMonth()+1}/${dateObj.getDate()}</td>
-                            <td style="text-align:center; font-weight:bold; background:#fff3cd;">${weekNames[i]}</td>
-                            <td style="padding:5px; background:#fff3cd;">
-                                <input type="text" id="week-edit-event-${i}" value="${eventText.replace(/"/g, '&quot;')}" style="width:100%; margin:0; padding:4px;">
-                            </td>
-                         </tr>`;
-            }
-            html += `</table>`;
-            html += `<div style="text-align:right; margin-top:10px;">
-                        <button onclick="saveInlineEditWeek()">保存して戻る</button>
-                        <button onclick="displayWeeklySchedule()">キャンセル</button>
-                     </div>`;
-                     
-            document.getElementById('weekly-schedule-display').innerHTML = html;
-        }
-
-        async function saveInlineEditWeek() {
-            for (let i = 0; i < 5; i++) {
-                let dateStr = currentWeeklyDates[i];
-                let eventVal = document.getElementById(`week-edit-event-${i}`).value;
-                
-                let doc = await db.collection("schedules").doc(dateStr).get();
-                if(doc.exists) {
-                    await db.collection("schedules").doc(dateStr).update({ event: eventVal, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-                } else {
-                    const dayNum = new Date(dateStr).getDay();
-                    const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-                    const regDoc = await db.collection("config").doc("regular_schedule").get();
-                    const regWeek = regDoc.exists ? regDoc.data()[dayKeys[dayNum]] : null;
-                    let lessons = Array.from({length:6}, (_, idx) => ({ sub: regWeek?.[idx] || "", note: "" }));
-                    await db.collection("schedules").doc(dateStr).set({ event: eventVal, lessons: lessons, exitTime: "16:30", dayNote: "", updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-                }
-            }
-            alert("保存しました");
-            displayAllSchedules(); 
-            recordSystemUpdate();
-        }
-
-        function parseCSVString(str) {
-            const result = [];
-            let row = [];
-            let curr = '';
-            let inQuotes = false;
-            for (let i = 0; i < str.length; i++) {
-                let char = str[i];
-                if (inQuotes) {
-                    if (char === '"') {
-                        if (i + 1 < str.length && str[i + 1] === '"') {
-                            curr += '"';
-                            i++;
-                        } else {
-                            inQuotes = false;
-                        }
-                    } else {
-                        curr += char;
+                } else if (d.status === 'pending') {
+                    pendingCommitteeCount++; 
+                    if (isAdmin) {
+                        pendingHtml += contentHtml + `<div style="color:red; font-weight:bold; margin-bottom:5px;">承認待ち</div>
+                            <div class="admin-actions"><button onclick="approveCommitteePost('${d.id}')">承認(公開)</button> <button onclick="rejectCommitteePost('${d.id}')">不許可(差戻し)</button> <button onclick="deleteCommitteePost('${d.id}')">削除</button></div></div>`;
+                    } else if (d.authorEmail === currentUserEmail) {
+                        postsHtml += contentHtml + `<div style="color:red; font-weight:bold; margin-top:5px;">※先生の承認待ちです</div>
+                            <div class="admin-actions"><button onclick="startInlineEditCommitteePost('${d.id}')">再編集</button> <button onclick="deleteCommitteePost('${d.id}')">削除</button></div></div>`;
                     }
-                } else {
-                    if (char === '"') {
-                        inQuotes = true;
-                    } else if (char === ',') {
-                        row.push(curr);
-                        curr = '';
-                    } else if (char === '\n' || char === '\r') {
-                        row.push(curr);
-                        result.push(row);
-                        row = [];
-                        curr = '';
-                        if (char === '\r' && i + 1 < str.length && str[i+1] === '\n') i++; 
-                    } else {
-                        curr += char;
+                } else if (d.status === 'rejected') {
+                    if (isAdmin) {
+                        pendingHtml += contentHtml + `<div style="color:gray; font-weight:bold; margin-bottom:5px;">差戻し済み</div>
+                            <div class="admin-actions"><button onclick="deleteCommitteePost('${d.id}')">削除</button></div></div>`;
+                    } else if (d.authorEmail === currentUserEmail) {
+                        postsHtml += contentHtml + `<div style="color:blue; font-weight:bold; margin-top:5px;">※先生から不許可（差し戻し）されました。修正して再申請してください。</div>
+                            <div class="admin-actions"><button onclick="startInlineEditCommitteePost('${d.id}')">再編集</button> <button onclick="deleteCommitteePost('${d.id}')">削除</button></div></div>`;
                     }
                 }
-            }
-            if (curr !== '' || row.length > 0) {
-                row.push(curr);
-                result.push(row);
-            }
-            return result.filter(r => r.length > 1); 
-        }
-
-        async function exportScheduleCSV() {
-            const monthVal = document.getElementById('schedule-month-input').value;
-            if(!monthVal) return alert("出力する年月を選択してください");
-
-            const [yearStr, monthStr] = monthVal.split('-');
-            const year = parseInt(yearStr, 10);
-            const month = parseInt(monthStr, 10);
-            const endDate = new Date(year, month, 0); 
-
-            const regDoc = await db.collection("config").doc("regular_schedule").get();
-            const regData = regDoc.exists ? regDoc.data() : {};
-            const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-            const weekNames = ["日", "月", "火", "水", "木", "金", "土"];
-
-            const startStr = `${year}-${('0'+month).slice(-2)}-01`;
-            const endStr = `${year}-${('0'+month).slice(-2)}-${('0'+endDate.getDate()).slice(-2)}`;
-            
-            const snap = await db.collection("schedules")
-                .where(firebase.firestore.FieldPath.documentId(), ">=", startStr)
-                .where(firebase.firestore.FieldPath.documentId(), "<=", endStr)
-                .get();
-
-            let existingSchedules = {};
-            snap.forEach(doc => { existingSchedules[doc.id] = doc.data(); });
-
-            let csv = "日付,曜日,主な行事予定,1限,2限,3限,4限,5限,6限,下校時刻,備考\n";
-
-            const esc = (str) => {
-                if(!str) return "";
-                str = str.toString().replace(/"/g, '""');
-                if(str.includes(',') || str.includes('\n') || str.includes('"')) {
-                    return `"${str}"`;
-                }
-                return str;
-            };
-
-            for(let d = 1; d <= endDate.getDate(); d++) {
-                let currDate = new Date(year, month - 1, d);
-                let dateStr = getLocalDateStr(currDate);
-                let dayNum = currDate.getDay();
-                let dayName = weekNames[dayNum];
-
-                let data = existingSchedules[dateStr];
-                if(!data) {
-                    let regWeek = regData[dayKeys[dayNum]];
-                    data = {
-                        event: "",
-                        dayNote: "",
-                        exitTime: (dayNum === 0 || dayNum === 6) ? "" : "16:30",
-                        lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" }))
-                    };
-                }
-
-                let row = [
-                    dateStr,
-                    dayName,
-                    esc(data.event || ""),
-                    esc(data.lessons[0]?.sub || ""),
-                    esc(data.lessons[1]?.sub || ""),
-                    esc(data.lessons[2]?.sub || ""),
-                    esc(data.lessons[3]?.sub || ""),
-                    esc(data.lessons[4]?.sub || ""),
-                    esc(data.lessons[5]?.sub || ""),
-                    esc(data.exitTime || ""),
-                    esc(data.dayNote || "")
-                ];
-                csv += row.join(",") + "\n";
-            }
-
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], {type: 'text/csv'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `schedules_${year}_${month}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        async function importScheduleCSV() {
-            const fileInput = document.getElementById('schedule-csv-file');
-            const file = fileInput.files[0];
-            if (!file) return alert("インポートするCSVファイルを選択してください");
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const rows = parseCSVString(text);
-                let count = 0;
-
-                let batch = db.batch();
-
-                for (let i = 1; i < rows.length; i++) { 
-                    let cols = rows[i];
-                    if (cols.length < 10) continue; 
-
-                    let dateStr = cols[0].trim();
-                    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue; 
-
-                    let event = cols[2] || "";
-                    let lessons = [
-                        { sub: cols[3] || "", note: "" },
-                        { sub: cols[4] || "", note: "" },
-                        { sub: cols[5] || "", note: "" },
-                        { sub: cols[6] || "", note: "" },
-                        { sub: cols[7] || "", note: "" },
-                        { sub: cols[8] || "", note: "" }
-                    ];
-                    let exitTime = cols[9] || "";
-                    let dayNote = cols[10] || "";
-
-                    let docRef = db.collection("schedules").doc(dateStr);
-                    batch.set(docRef, {
-                        event: event,
-                        lessons: lessons,
-                        exitTime: exitTime,
-                        dayNote: dayNote,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                    count++;
-                }
-
-                try {
-                    await batch.commit();
-                    alert(`${count}日分の予定をインポートしました`);
-                    fileInput.value = "";
-                    displayAllSchedules();
-                    recordSystemUpdate();
-                } catch(error) {
-                    alert("インポート中にエラーが発生しました: " + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function renderSubmissionsUI() {
-            const listEl = document.getElementById('submission-list');
-            const adminTable = document.getElementById('admin-submission-table');
-            
-            if (submissionsList.length === 0) {
-                listEl.innerHTML = "<p>現在、回収している提出物はありません。</p>";
-                if(adminTable) adminTable.innerHTML = "";
-                return;
-            }
-
-            let listHtml = `<table style="width:100%; min-width:300px;">
-                                <tr><th style="width:50px;">完了</th><th>提出物名</th><th>締め切り</th></tr>`;
-            let adminHtml = `<table style="width:100%; min-width:500px;">
-                                <tr><th>提出物名</th><th>締め切り</th><th>未提出者</th><th>操作</th></tr>`;
-
-            submissionsList.forEach(sub => {
-                const dObj = new Date(sub.deadline);
-                const week = ["日", "月", "火", "水", "木", "金", "土"];
-                const dateStr = isNaN(dObj) ? sub.deadline : `${dObj.getMonth()+1}月${dObj.getDate()}日（${week[dObj.getDay()]}）`;
-                
-                let isChecked = studentMaster[currentUserEmail]?.checks?.[sub.id] ? "checked" : "";
-                
-                listHtml += `<tr>
-                                <td style="text-align:center; vertical-align:middle;">
-                                    <input type="checkbox" onchange="toggleSubm('${sub.id}', this.checked)" style="transform: scale(1.5); margin: 0 auto; display: block;" ${isChecked}>
-                                </td>
-                                <td style="text-align:left; font-weight:bold; vertical-align:middle;">${sub.title}</td>
-                                <td style="vertical-align:middle;">${dateStr}</td>
-                            </tr>`;
-
-                if (isAdmin) {
-                    let unsubmittedNames = [];
-                    for (let email in studentMaster) {
-                        if (email === TEACHER_EMAIL) continue;
-                        if (!studentMaster[email].checks || !studentMaster[email].checks[sub.id]) {
-                            unsubmittedNames.push(studentMaster[email].name || email);
-                        }
-                    }
-                    
-                    let unsubmittedStr = unsubmittedNames.length > 0 
-                        ? `<span style="color:red; font-size:0.85em;">${unsubmittedNames.join("、 ")}</span>` 
-                        : `<span style="color:green; font-weight:bold;">全員提出済み</span>`;
-
-                    adminHtml += `<tr id="subm-row-${sub.id}">
-                                    <td id="subm-title-td-${sub.id}" style="text-align:left; font-weight:bold;">${sub.title}</td>
-                                    <td id="subm-deadline-td-${sub.id}">${dateStr}</td>
-                                    <td style="text-align:left;">${unsubmittedStr}</td>
-                                    <td id="subm-action-td-${sub.id}">
-                                        <button type="button" onclick="startInlineEditSubm('${sub.id}', '${sub.title.replace(/'/g, "\\'")}', '${sub.deadline}')">編集</button>
-                                        <button type="button" onclick="deleteSubmission('${sub.id}')">削除</button>
-                                    </td>
-                                  </tr>`;
-                }
             });
-            listHtml += "</table>";
-            adminHtml += "</table>";
 
-            listEl.innerHTML = listHtml;
-            if(adminTable && isAdmin) adminTable.innerHTML = adminHtml;
+            document.getElementById('committee-posts-display').innerHTML = postsHtml || "<p>現在、連絡はありません。</p>";
+            if(isAdmin) {
+                let pendingEl = document.getElementById('admin-pending-committee');
+                if(pendingEl) pendingEl.innerHTML = pendingHtml || "確認待ちの連絡はありません。";
+            }
+            
+            updateAdminReminder(); 
         }
 
-        function startInlineEditSubm(id, currentTitle, currentDeadline) {
-            const titleTd = document.getElementById(`subm-title-td-${id}`);
-            const deadlineTd = document.getElementById(`subm-deadline-td-${id}`);
-            const actionTd = document.getElementById(`subm-action-td-${id}`);
+        async function postCommitteeMessage() {
+            const content = document.getElementById('committee-input').value.trim();
+            if(!content) return alert("内容を入力してください");
+            let myData = studentMaster[currentUserEmail];
+            let roleName = [myData.role, myData.committee].filter(Boolean).join("・");
             
-            titleTd.innerHTML = `<input type="text" id="input-subm-title-${id}" value="${currentTitle}" style="width:90%; padding:4px; margin:0; font-weight:normal;">`;
-            deadlineTd.innerHTML = `<input type="date" id="input-subm-deadline-${id}" value="${currentDeadline}" style="padding:4px; margin:0;">`;
+            await db.collection("committee_posts").add({
+                authorEmail: currentUserEmail,
+                authorName: myData.name || "生徒",
+                roleName: roleName,
+                content: content,
+                bgColor: document.getElementById('committee-color').value,
+                priority: parseInt(document.getElementById('committee-priority').value, 10),
+                startDate: document.getElementById('committee-start').value,
+                endDate: document.getElementById('committee-end').value,
+                status: 'pending', 
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            document.getElementById('committee-input').value = "";
+            alert("送信しました。先生の承認後に全体に公開されます。");
+        }
+
+        async function approveCommitteePost(id) { await db.collection("committee_posts").doc(id).update({ status: 'approved' }); }
+        
+        async function rejectCommitteePost(id) { 
+            if(confirm("この連絡を不許可（差し戻し）にしますか？")) {
+                await db.collection("committee_posts").doc(id).update({ status: 'rejected' }); 
+            }
+        }
+
+        async function deleteCommitteePost(id) { if(confirm("この連絡を削除しますか？")) await db.collection("committee_posts").doc(id).delete(); }
+
+        function startInlineEditCommitteePost(id) {
+            const post = allCommitteePosts.find(p => p.id === id);
+            if (!post) return;
+            const container = document.getElementById(`committee-post-${id}`);
             
-            actionTd.innerHTML = `
-                <button type="button" onclick="saveInlineEditSubm('${id}')">保存</button>
-                <button type="button" onclick="renderSubmissionsUI()">キャンセル</button>
+            let colorOpts = `
+                <option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>白（標準）</option>
+                <option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>薄い赤</option>
+                <option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>薄い緑</option>
+                <option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>薄い青</option>
+                <option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>薄い黄色</option>
+                <option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>薄いオレンジ</option>
+                <option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>薄い紫</option>
+            `;
+            
+            let priorityOpts = `<option value="3" ${post.priority==3?'selected':''}>★★★</option><option value="2" ${post.priority==2?'selected':''}>★★</option><option value="1" ${post.priority==1?'selected':''}>★</option>`;
+
+            let isColored = post.bgColor && post.bgColor !== '#ffffff';
+            let bgColorStr = isColored ? post.bgColor : '';
+            let fontColorStr = isColored ? '#000' : '';
+            let hasBgClass = isColored ? 'has-bg' : '';
+
+            container.innerHTML = `
+                <div class="edit-box">
+                    <h4 style="margin-top:0; color:inherit;">連絡の再編集</h4>
+                    <textarea id="edit-comm-input-${id}" class="${hasBgClass}" style="width:100%; height:80px; background-color:${bgColorStr}; color:${fontColorStr}; transition:background-color 0.3s;">${post.content}</textarea>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size:0.9em; align-items:center; color:inherit;">
+                        <div>背景色: <select id="edit-comm-color-${id}" style="width:120px; margin-bottom:0;" onchange="updateInlineEditColor('${id}', this.value)">${colorOpts}</select></div>
+                        <div>重要度: <select id="edit-comm-priority-${id}" style="width:80px; margin-bottom:0;">${priorityOpts}</select></div>
+                        <div>公開: <input type="date" id="edit-comm-start-${id}" value="${post.startDate}" style="width:130px; margin-bottom:0;"> 〜 <input type="date" id="edit-comm-end-${id}" value="${post.endDate}" style="width:130px; margin-bottom:0;"></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <button onclick="saveInlineEditCommitteePost('${id}')">保存して再申請</button>
+                        <button onclick="renderCommitteePosts()">キャンセル</button>
+                    </div>
+                </div>
             `;
         }
 
-        async function saveInlineEditSubm(id) {
-            const newTitle = document.getElementById(`input-subm-title-${id}`).value.trim();
-            const newDeadline = document.getElementById(`input-subm-deadline-${id}`).value;
-            
-            if (!newTitle || !newDeadline) return alert("提出物名と締め切り日を入力してください");
-            
-            await db.collection("submissions").doc(id).update({
-                title: newTitle,
-                deadline: newDeadline
+        async function saveInlineEditCommitteePost(id) {
+            const newContent = document.getElementById(`edit-comm-input-${id}`).value.trim();
+            if (!newContent) return alert("内容を入力してください");
+            await db.collection("committee_posts").doc(id).update({
+                content: newContent,
+                bgColor: document.getElementById(`edit-comm-color-${id}`).value,
+                priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
+                startDate: document.getElementById(`edit-comm-start-${id}`).value,
+                endDate: document.getElementById(`edit-comm-end-${id}`).value,
+                status: 'pending', 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            alert("更新しました");
-            recordSystemUpdate(); 
+            alert("再申請しました。");
         }
 
-        async function toggleSubm(subId, isChecked) {
-            if(!currentUserEmail) return;
-            await db.collection("students").doc(currentUserEmail).set({
-                checks: { [subId]: isChecked }
-            }, { merge: true });
-        }
-
-        async function addSubmission() {
-            const title = document.getElementById('subm-title').value.trim();
-            const deadline = document.getElementById('subm-deadline').value;
-            if(!title || !deadline) return alert("提出物名と締め切り日を入力してください");
-            
-            await db.collection("submissions").add({ title, deadline, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            document.getElementById('subm-title').value = ""; document.getElementById('subm-deadline').value = "";
-            alert("追加しました");
-            recordSystemUpdate();
-        }
-
-        async function deleteSubmission(id) {
-            if(confirm("この提出物を削除しますか？")) {
-                await db.collection("submissions").doc(id).delete();
-                recordSystemUpdate(); 
-            }
-        }
-
-        document.getElementById('post-blog-btn').onclick = async () => {
-            const content = document.getElementById('blog-input').value; 
-            if(!content) return;
+        // --- ブログ送信とDM送信 ---
+        async function postBlog() {
+            const content = document.getElementById('blog-input').value.trim(); 
+            if(!content) return alert("内容を入力してください");
             await db.collection("blogs").add({ content, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             document.getElementById('blog-input').value = ""; 
             alert("投稿しました");
             recordSystemUpdate(); 
-        };
+        }
+
+        async function sendDirectMessage() {
+            if(!currentUserEmail) return;
+            const content = document.getElementById('dm-input').value.trim();
+            if(!content) return alert("メッセージを入力してください");
+            await db.collection("messages").add({
+                email: currentUserEmail,
+                name: studentMaster[currentUserEmail]?.name || "生徒",
+                content: content,
+                isRead: false,
+                isProtected: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            document.getElementById('dm-input').value = "";
+            alert("先生にメッセージを送信しました。");
+        }
+
+        function getRoleOptions(selectedValue) {
+            let opts = `<option value="">（なし）</option>`;
+            let found = false;
+            rolesList.forEach(r => { let sel = (r === selectedValue) ? "selected" : ""; if (r === selectedValue) found = true; opts += `<option value="${r}" ${sel}>${r}</option>`; });
+            if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`;
+            return opts;
+        }
+
+        function getCommOptions(selectedValue) {
+            let opts = `<option value="">（なし）</option>`;
+            let found = false;
+            committeesList.forEach(c => { let sel = (c === selectedValue) ? "selected" : ""; if (c === selectedValue) found = true; opts += `<option value="${c}" ${sel}>${c}</option>`; });
+            if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`;
+            return opts;
+        }
+
+        function renderRoleCommSettings() {
+            document.getElementById('role-list-display').innerHTML = rolesList.map((r, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border-radius:10px; color:black;">${r} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeRole(${i})">×</button></span>`).join('');
+            document.getElementById('comm-list-display').innerHTML = committeesList.map((c, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border-radius:10px; color:black;">${c} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeCommittee(${i})">×</button></span>`).join('');
+        }
+
+        function updateDirectInputs() {
+            document.getElementById('direct-role').innerHTML = getRoleOptions("");
+            document.getElementById('direct-committee').innerHTML = getCommOptions("");
+        }
+
+        async function addRole() {
+            let val = document.getElementById('new-role-input').value.trim(); if(!val) return;
+            if(!rolesList.includes(val)) { rolesList.push(val); await db.collection("config").doc("roles").set({ items: rolesList }); document.getElementById('new-role-input').value = ""; }
+        }
+        async function removeRole(idx) { rolesList.splice(idx, 1); await db.collection("config").doc("roles").set({ items: rolesList }); }
+
+        async function addCommittee() {
+            let val = document.getElementById('new-comm-input').value.trim(); if(!val) return;
+            if(!committeesList.includes(val)) { committeesList.push(val); await db.collection("config").doc("committees").set({ items: committeesList }); document.getElementById('new-comm-input').value = ""; }
+        }
+        async function removeCommittee(idx) { committeesList.splice(idx, 1); await db.collection("config").doc("committees").set({ items: committeesList }); }
+
+        function formatDateTime(dateObj) {
+            return `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${('0'+dateObj.getHours()).slice(-2)}:${('0'+dateObj.getMinutes()).slice(-2)}`;
+        }
+
+        function renderBlogs() {
+            const list = document.getElementById('blog-list'); list.innerHTML = "";
+            let start = (currentBlogPage - 1) * BLOGS_PER_PAGE;
+            let end = start + BLOGS_PER_PAGE;
+            let pagedBlogs = allBlogs.slice(start, end);
+
+            pagedBlogs.forEach(d => {
+                let dateStr = d.createdAt ? formatDateTime(d.createdAt.toDate()) : "";
+                let adminBtns = "";
+                if (isAdmin) {
+                    let isoDate = d.createdAt ? new Date(d.createdAt.toDate().getTime() - d.createdAt.toDate().getTimezoneOffset()*60000).toISOString().slice(0, 16) : "";
+                    adminBtns = `<div class="admin-actions">
+                                    <button type="button" onclick="startEditBlog('${d.id}', '${d.content.replace(/'/g, "\\'").replace(/\n/g, '\\n')}', '${isoDate}')">編集</button>
+                                    <button type="button" onclick="deleteBlog('${d.id}')">削除</button>
+                                 </div>`;
+                }
+                list.innerHTML += `<div class="post-item"><div class="post-date">${dateStr}</div><div>${d.content.replace(/\n/g, '<br>')}</div>${adminBtns}</div>`;
+            });
+
+            let totalPages = Math.ceil(allBlogs.length / BLOGS_PER_PAGE);
+            let pageHtml = "";
+            
+            if (totalPages > 1) {
+                if (currentBlogPage > 1) {
+                    pageHtml += `<button onclick="changeBlogPage(-1)" style="padding:4px 8px; margin:0 2px;">◀ 前</button>`;
+                }
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentBlogPage) {
+                        pageHtml += `<span style="display:inline-block; padding:4px 8px; margin:0 2px; font-weight:bold; border:1px solid #555; background:#555; color:white; border-radius:3px;">${i}</span>`;
+                    } else {
+                        pageHtml += `<button onclick="goToBlogPage(${i})" style="padding:4px 8px; margin:0 2px;">${i}</button>`;
+                    }
+                }
+                if (currentBlogPage < totalPages) {
+                    pageHtml += `<button onclick="changeBlogPage(1)" style="padding:4px 8px; margin:0 2px;">次 ▶</button>`;
+                }
+            }
+            document.getElementById('blog-pagination').innerHTML = pageHtml;
+        }
+
+        function changeBlogPage(dir) { currentBlogPage += dir; renderBlogs(); }
+        function goToBlogPage(pageNum) { currentBlogPage = pageNum; renderBlogs(); }
 
         function startEditBlog(id, content, isoDate) {
             editingBlogId = id;
@@ -1195,196 +918,86 @@
             }
         }
 
-        async function sendDirectMessage() {
-            if(!currentUserEmail) return;
-            const content = document.getElementById('dm-input').value.trim();
-            if(!content) return alert("メッセージを入力してください");
-            
-            await db.collection("messages").add({
-                email: currentUserEmail,
-                name: studentMaster[currentUserEmail]?.name || "生徒",
-                content: content,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            document.getElementById('dm-input').value = "";
-            alert("先生にメッセージを送信しました。");
-        }
-
-        async function deleteMessage(id) {
-            if(confirm("このメッセージを削除しますか？")) {
-                await db.collection("messages").doc(id).delete();
-            }
-        }
-
-        async function loadUnreadStudents() {
-            const sysDoc = await db.collection("config").doc("system").get();
-            let lastUpdate = sysDoc.exists ? sysDoc.data().lastUpdatedAt?.toDate() : null;
-
-            if (!lastUpdate) {
-                document.getElementById('unread-students-list').innerHTML = "まだ情報が一度も更新されていません。";
-                return;
-            }
-            document.getElementById('last-update-time').innerText = lastUpdate.toLocaleString();
-
-            let unread = [];
-            for(let email in studentMaster) {
-                if (email === TEACHER_EMAIL) continue;
-                let d = studentMaster[email];
-                let loginTime = d.lastLogin ? d.lastLogin.toDate() : null;
-                if (!loginTime || loginTime < lastUpdate) {
-                    unread.push(d.name || email);
-                }
-            }
-
-            if (unread.length === 0) {
-                document.getElementById('unread-students-list').innerHTML = "<span style='color:green;'>全員が最新情報を確認済みです。</span>";
-            } else {
-                document.getElementById('unread-students-list').innerHTML = "<span style='color:red;'>未確認： " + unread.join("、 ") + "</span>";
-            }
-        }
-
-        async function loadAccessLogs() {
-            const logBox = document.getElementById('access-log-list');
-            logBox.style.display = 'block';
-            logBox.innerHTML = "読み込み中...";
-            const snap = await db.collection("access_logs").orderBy("accessedAt", "desc").limit(50).get();
-            renderLogs(snap, logBox);
-        }
-
-        async function loadAccessLogsByDate() {
-            const dateStr = document.getElementById('log-date-input').value;
-            if (!dateStr) return alert("日付を選択してください");
-
-            const startDate = new Date(dateStr);
-            startDate.setHours(0, 0, 0, 0);
-            const endDate = new Date(dateStr);
-            endDate.setHours(23, 59, 59, 999);
-
-            const logBox = document.getElementById('access-log-list');
-            logBox.style.display = 'block';
-            logBox.innerHTML = "読み込み中...";
-
-            const snap = await db.collection("access_logs")
-                .where("accessedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
-                .where("accessedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
-                .orderBy("accessedAt", "desc")
-                .get();
-            
-            renderLogs(snap, logBox);
-        }
-
-        function renderLogs(snap, container) {
-            if (snap.empty) {
-                container.innerHTML = "該当するアクセスログはありません。";
-                return;
-            }
-            let html = "<table><tr><th>アクセス日時</th><th>氏名</th><th>操作</th></tr>";
-            snap.forEach(doc => {
-                let d = doc.data();
-                let time = d.accessedAt ? d.accessedAt.toDate().toLocaleString() : "---";
-                html += `<tr id="log-row-${doc.id}"><td>${time}</td><td>${d.name}</td><td><button type="button" onclick="deleteAccessLog('${doc.id}')">削除</button></td></tr>`;
-            });
-            html += "</table>";
-            container.innerHTML = html;
-        }
-
-        async function deleteAccessLog(id) {
-            if (confirm("このアクセスログを削除しますか？")) {
-                await db.collection("access_logs").doc(id).delete();
-                const row = document.getElementById(`log-row-${id}`);
-                if (row) row.remove();
-            }
-        }
-
+        // --- 名簿管理 ---
         function renderStudentListUI() {
             const area = document.getElementById('student-list-area');
             if(!area) return;
-            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>操作</th></tr>";
-            
+            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>操作</th></tr>";
             for(let email in studentMaster) {
-                const d = studentMaster[email];
-                const safeId = email.replace(/[@.]/g, '_');
+                if(email === TEACHER_EMAIL) continue;
+                const d = studentMaster[email]; const safeId = email.replace(/[@.]/g, '_');
                 html += `<tr id="row-${safeId}">
                             <td id="name-td-${safeId}">${d.name || ""}</td>
                             <td>${email}</td>
+                            <td id="role-td-${safeId}">${d.role || ""}</td>
+                            <td id="comm-td-${safeId}">${d.committee || ""}</td>
                             <td id="action-td-${safeId}">
-                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${(d.name||"").replace(/'/g, "\\'")}')">編集</button>
+                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${(d.name||"").replace(/'/g, "\\'")}', '${(d.role||"").replace(/'/g, "\\'")}', '${(d.committee||"").replace(/'/g, "\\'")}')">編集</button>
                                 <button type="button" onclick="deleteStudent('${email}')">削除</button>
                             </td>
                          </tr>`; 
             }
-            html += "</table>";
-            area.innerHTML = html;
+            area.innerHTML = html + "</table>";
         }
 
-        function startInlineEditStudent(safeId, email, currentName) {
-            const nameTd = document.getElementById(`name-td-${safeId}`);
-            const actionTd = document.getElementById(`action-td-${safeId}`);
-            nameTd.innerHTML = `<input type="text" id="input-name-${safeId}" value="${currentName}" style="width:90%; padding:4px; margin:0;">`;
-            actionTd.innerHTML = `<button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')">保存</button> <button type="button" onclick="renderStudentListUI()">キャンセル</button>`;
+        function startInlineEditStudent(safeId, email, name, role, comm) {
+            document.getElementById(`name-td-${safeId}`).innerHTML = `<input type="text" id="input-name-${safeId}" value="${name}" style="width:100%; padding:2px; margin:0;">`;
+            document.getElementById(`role-td-${safeId}`).innerHTML = `<select id="input-role-${safeId}" style="width:100%; padding:2px; margin:0;">${getRoleOptions(role)}</select>`;
+            document.getElementById(`comm-td-${safeId}`).innerHTML = `<select id="input-comm-${safeId}" style="width:100%; padding:2px; margin:0;">${getCommOptions(comm)}</select>`;
+            document.getElementById(`action-td-${safeId}`).innerHTML = `<button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')">保存</button> <button type="button" onclick="renderStudentListUI()">ｷｬﾝｾﾙ</button>`;
         }
 
         async function saveInlineEditStudent(email, safeId) {
-            const newName = document.getElementById(`input-name-${safeId}`).value.trim();
-            if (!newName) return alert("氏名を入力してください");
-            await db.collection("students").doc(email).update({ name: newName });
-            alert("氏名を更新しました");
+            try {
+                await db.collection("students").doc(email).set({ 
+                    name: document.getElementById(`input-name-${safeId}`).value.trim(),
+                    role: document.getElementById(`input-role-${safeId}`).value.trim(),
+                    committee: document.getElementById(`input-comm-${safeId}`).value.trim()
+                }, { merge: true });
+                alert("生徒情報を更新しました。");
+            } catch (err) {
+                alert("更新に失敗しました: " + err.message);
+            }
         }
 
         async function registerDirect() {
             const email = document.getElementById('direct-email').value.trim();
-            const name = document.getElementById('direct-name').value.trim();
-            if(!email || !name) return alert("メールアドレスと氏名を入力してください");
-            await db.collection("students").doc(email).set({ name });
+            if(!email) return alert("メールアドレスを入力");
+            await db.collection("students").doc(email).set({ 
+                name: document.getElementById('direct-name').value.trim(),
+                role: document.getElementById('direct-role').value.trim(),
+                committee: document.getElementById('direct-committee').value.trim()
+            });
             document.getElementById('direct-email').value = ""; document.getElementById('direct-name').value = "";
-            alert("新規登録しました");
+            alert("登録しました");
         }
-
-        async function deleteStudent(id) {
-            if(confirm("この生徒を名簿から削除しますか？")) { 
-                await db.collection("students").doc(id).delete(); 
-            }
-        }
+        async function deleteStudent(id) { if(confirm("削除しますか？")) await db.collection("students").doc(id).delete(); }
 
         async function exportCSV() {
-            let csv = "メールアドレス,氏名\n";
+            let csv = "メールアドレス,氏名,係,委員会\n";
             for(let email in studentMaster) {
-                csv += `${email},${studentMaster[email].name || ""}\n`;
+                if(email===TEACHER_EMAIL) continue;
+                csv += `${email},${studentMaster[email].name || ""},${studentMaster[email].role || ""},${studentMaster[email].committee || ""}\n`;
             }
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], {type: 'text/csv'}); 
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url; a.download = "students_list.csv"; a.click();
-            URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], {type: 'text/csv'}));
+            const a = document.createElement("a"); a.href = url; a.download = "students.csv"; a.click();
         }
 
         async function importCSV() {
-            const fileInput = document.getElementById('csv-file');
-            const file = fileInput.files[0];
-            if (!file) return alert("CSVファイルを選択してください");
-
+            const file = document.getElementById('csv-file').files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const lines = text.split(/\r\n|\n/);
-                let count = 0;
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const parts = line.split(',');
-                    if (parts.length >= 2) {
-                        const email = parts[0].trim();
-                        const name = parts[1].trim();
-                        if (email === "メールアドレス") continue; 
-                        if (email && name) {
-                            await db.collection("students").doc(email).set({ name: name }, { merge: true });
-                            count++;
-                        }
+            reader.onload = async (e) => {
+                const lines = e.target.result.split(/\r\n|\n/); let count = 0;
+                for (let line of lines) {
+                    let p = line.split(','); if (p.length < 2 || p[0].trim() === "メールアドレス") continue;
+                    let email = p[0].trim();
+                    if (email) {
+                        await db.collection("students").doc(email).set({ name: p[1]?.trim()||"", role: p[2]?.trim()||"", committee: p[3]?.trim()||"" }, { merge: true });
+                        count++;
                     }
                 }
-                alert(`${count}件の生徒データをインポートしました`);
-                fileInput.value = "";
+                alert(`${count}件インポートしました`);
+                document.getElementById('csv-file').value = "";
             };
             reader.readAsText(file);
         }
@@ -1392,101 +1005,39 @@
         async function loadRegularSetting() {
             const day = document.getElementById('reg-day-select').value;
             const doc = await db.collection("config").doc("regular_schedule").get();
-            const table = document.getElementById('reg-table'); 
-            table.innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th></tr>";
-            const data = doc.exists ? (doc.data()[day] || []) : [];
-            for (let i = 0; i < 6; i++) {
-                let opts = SUBJECTS.map(s => `<option value="${s}" ${s===(data[i]||"")?'selected':''}>${s||"（空欄）"}</option>`).join('');
-                table.innerHTML += `<tr><td>${i+1}</td><td><select id="reg-sub-${i}" style="margin:0; padding:4px;">${opts}</select></td></tr>`;
-            }
+            document.getElementById('reg-table').innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th></tr>" + 
+                Array.from({length:6}, (_,i) => `<tr><td>${i+1}</td><td><select id="reg-sub-${i}" style="margin:0; padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===((doc.exists?doc.data()[day]:[])[i]||"")?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td></tr>`).join('');
         }
-        
         async function saveRegularSetting() {
-            const day = document.getElementById('reg-day-select').value;
-            const lessons = Array.from({length:6}, (_, i) => document.getElementById(`reg-sub-${i}`).value);
-            await db.collection("config").doc("regular_schedule").set({ [day]: lessons }, { merge: true });
-            alert("保存しました"); displayAllSchedules();
-            recordSystemUpdate(); 
+            await db.collection("config").doc("regular_schedule").set({ [document.getElementById('reg-day-select').value]: Array.from({length:6}, (_,i)=>document.getElementById(`reg-sub-${i}`).value) }, { merge: true });
+            displayAllSchedules(); recordSystemUpdate(); 
         }
-
         async function saveVacation() {
-            const s = document.getElementById('vac-start').value, e = document.getElementById('vac-end').value;
-            if(!s || !e) return;
-            vacationData.push({ start: s, end: e });
+            vacationData.push({ start: document.getElementById('vac-start').value, end: document.getElementById('vac-end').value });
             await db.collection("config").doc("vacations").set({ periods: vacationData });
-            renderVacationList(); displayAllSchedules();
-            recordSystemUpdate(); 
+            renderVacationList(); displayAllSchedules(); recordSystemUpdate(); 
         }
-        function renderVacationList() {
-            document.getElementById('vacation-list').innerHTML = vacationData.map((v, i) => 
-                `${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>');
-        }
-        async function deleteVac(i) { 
-            vacationData.splice(i,1); 
-            await db.collection("config").doc("vacations").set({ periods: vacationData }); 
-            renderVacationList(); displayAllSchedules(); 
-            recordSystemUpdate(); 
-        }
+        function renderVacationList() { document.getElementById('vacation-list').innerHTML = vacationData.map((v,i)=>`${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>'); }
+        async function deleteVac(i) { vacationData.splice(i,1); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); displayAllSchedules(); recordSystemUpdate(); }
 
         async function loadScheduleEdit() {
             const date = document.getElementById('edit-date-select').value; if(!date) return;
             const doc = await db.collection("schedules").doc(date).get();
+            let data = doc.exists ? doc.data() : { event:"", dayNote:"", exitTime:"16:30", lessons:Array.from({length:6},()=>({sub:"",note:""})) };
             
-            let data = doc.exists ? doc.data() : null;
-            if(!data) {
-                const dayNum = new Date(date).getDay();
-                const regDoc = await db.collection("config").doc("regular_schedule").get();
-                const regData = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayNum]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
-            }
-
-            let html = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event || ""}" style="width:100%; box-sizing:border-box;"></div>`;
-            
-            html += `<div style="margin-bottom:10px;">備考・連絡：<textarea id="edit-daynote" style="width:100%; height:60px; box-sizing:border-box;">${data.dayNote || ""}</textarea></div>`;
-
-            html += `<table style="width:100%;"><tr><th class='col-period'>校時</th><th class='col-subject'>科目</th><th class='col-note'>備考</th></tr>`;
-            data.lessons.forEach((l, i) => {
-                let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
-                html += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0; padding:4px;">${opts}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note}" style="margin:0; padding:4px; width:100%; box-sizing:border-box;"></td></tr>`;
-            });
-            html += `</table>`;
-
-            document.getElementById('edit-table-container').innerHTML = html;
-
-            initExitTimeOptions(document.getElementById('edit-exit-time'));
-            document.getElementById('edit-exit-time').value = data.exitTime;
+            document.getElementById('edit-table-container').innerHTML = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event||""}"></div><div style="margin-bottom:10px;">全体備考：<textarea id="edit-daynote" style="height:60px;">${data.dayNote||""}</textarea></div><table style="width:100%;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>` + 
+                data.lessons.map((l,i)=>`<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0;padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note||""}" style="margin:0;padding:4px;"></td></tr>`).join('') + `</table>`;
+            initExitTimeOptions(document.getElementById('edit-exit-time')); document.getElementById('edit-exit-time').value = data.exitTime || "16:30";
             document.getElementById('edit-form').style.display = "block";
         }
-        
         async function saveSchedule() {
-            const date = document.getElementById('edit-date-select').value;
-            const eventVal = document.getElementById('edit-event').value;
-            const dayNoteVal = document.getElementById('edit-daynote').value;
-            
-            const lessons = Array.from({length:6}, (_, i) => ({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }));
-            await db.collection("schedules").doc(date).set({ 
-                event: eventVal, 
-                dayNote: dayNoteVal,
-                lessons: lessons, 
-                exitTime: document.getElementById('edit-exit-time').value, 
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+            await db.collection("schedules").doc(document.getElementById('edit-date-select').value).set({ 
+                event: document.getElementById('edit-event').value, dayNote: document.getElementById('edit-daynote').value,
+                lessons: Array.from({length:6},(_,i)=>({sub:document.getElementById(`edit-sub-${i}`).value, note:document.getElementById(`edit-note-${i}`).value})),
+                exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
             });
-            alert("保存しました"); displayAllSchedules();
-            recordSystemUpdate(); 
+            displayAllSchedules(); recordSystemUpdate(); 
         }
-
-        document.getElementById('change-pw-btn').onclick = async () => {
-            const user = firebase.auth().currentUser;
-            const oldPw = document.getElementById('old-password').value;
-            const newPw = document.getElementById('new-password').value;
-            if(!oldPw || !newPw) return alert("入力してください");
-            try {
-                await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, oldPw));
-                await user.updatePassword(newPw);
-                alert("パスワードを変更しました");
-                document.getElementById('old-password').value = ""; document.getElementById('new-password').value = "";
-            } catch (e) { alert("変更に失敗しました。現在のパスワードを確認してください。"); }
-        };
 
     </script>
 </body>
