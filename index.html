@@ -101,7 +101,7 @@
                 <div class="section-header">
                     <h2>週予定</h2>
                     <div>
-                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">表を直接編集</button>
+                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">表を編集</button>
                         <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
                         <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
                         <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
@@ -239,7 +239,7 @@
                     <button type="button" onclick="exportCSV()">エクスポート（ダウンロード）</button>
                 </div>
 
-                <h3>登録済み一覧（名前の直接編集が可能）</h3>
+                <h3>登録済み一覧（編集可能）</h3>
                 <div id="student-list-area"></div>
             </section>
 
@@ -545,7 +545,7 @@
             let html = `<div class="day-label" style="display:flex; justify-content:space-between; align-items:center;">
                             <span>${displayLabel}</span>`;
             if (isAdmin) {
-                html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">直接編集</button>`;
+                html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">編集</button>`;
             }
             html += `</div>
             <table>
@@ -588,7 +588,7 @@
             }
 
             let html = `<div style="background:#fff3cd; padding:10px; border:2px solid #ffc107;">`;
-            html += `<h4 style="margin-top:0;">${dateStr} の予定を直接編集</h4>`;
+            html += `<h4 style="margin-top:0;">${dateStr} の予定を編集</h4>`;
             html += `<div style="margin-bottom:5px; font-size:0.9em;">主な行事予定：<input type="text" id="inline-event-${elId}" value="${data.event || ""}" style="width:100%; padding:4px;"></div>`;
             html += `<div style="margin-bottom:5px; font-size:0.9em;">全体備考：<textarea id="inline-daynote-${elId}" style="width:100%; height:60px; padding:4px;">${data.dayNote || ""}</textarea></div>`;
             
@@ -731,7 +731,7 @@
             document.getElementById('weekly-schedule-display').innerHTML = html;
         }
 
-        // --- 週予定の直接編集（インライン編集） ---
+        // --- 週予定の編集（インライン編集） ---
         async function startInlineEditWeek() {
             if (!isAdmin) return;
 
@@ -753,7 +753,7 @@
                         <tr style="background:#fff3cd;">
                             <th style="width:15%;">日付</th>
                             <th style="width:10%;">曜日</th>
-                            <th style="width:75%;">主な行事予定 (直接編集)</th>
+                            <th style="width:75%;">主な行事予定 (編集)</th>
                         </tr>`;
             
             for(let i=0; i<5; i++) {
