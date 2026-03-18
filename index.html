@@ -17,9 +17,21 @@
         }
         h1, h2, h3 { 
             font-weight: bold;
-            border-bottom: 1px solid black; 
             margin-top: 25px;
             padding-bottom: 5px;
+        }
+        .section-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: baseline; 
+            border-bottom: 1px solid black; 
+            margin-top: 25px; 
+            padding-bottom: 5px;
+        }
+        .section-header h2 {
+            border: none;
+            margin: 0;
+            padding: 0;
         }
         section { margin-bottom: 40px; border: 1px solid black; padding: 20px; }
         input, textarea, select { 
@@ -71,7 +83,14 @@
 
         <main>
             <section>
-                <h2>直近の予定</h2>
+                <div class="section-header">
+                    <h2>直近の予定</h2>
+                    <div>
+                        <button onclick="changeScheduleDate(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 戻る</button>
+                        <button onclick="resetScheduleDate()" style="padding: 4px 8px; font-size: 0.85em;">今日</button>
+                        <button onclick="changeScheduleDate(1)" style="padding: 4px 8px; font-size: 0.85em;">進む ▶</button>
+                    </div>
+                </div>
                 <div class="day-container" id="schedule-display">
                     <div id="area-1" class="day-box">確認中...</div>
                     <div id="area-2" class="day-box">確認中...</div>
@@ -79,22 +98,34 @@
             </section>
 
             <section>
-                <h2>週予定</h2>
+                <div class="section-header">
+                    <h2>週予定</h2>
+                    <div>
+                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">表を直接編集</button>
+                        <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
+                        <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
+                        <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
+                    </div>
+                </div>
                 <div id="weekly-schedule-display" style="overflow-x: auto; margin-top: 10px;">
                     確認中...
                 </div>
             </section>
 
             <section>
-                <h2>回収物・提出物</h2>
-                <p style="font-size: 0.85em; margin-top: 0;">※木村に提出したら、左のボックスに☑してください。</p>
+                <div class="section-header">
+                    <h2>回収物・提出物</h2>
+                </div>
+                <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したら、左のチェックボックスを押してください。</p>
                 <div id="submission-list" style="overflow-x: auto;">確認中...</div>
             </section>
 
             <section>
-                <h2>担任のやつ</h2>
+                <div class="section-header">
+                    <h2>担任のやつ</h2>
+                </div>
                 
-                <div id="blog-admin-form" style="display: none;" class="admin-form-box">
+                <div id="blog-admin-form" style="display: none;" class="admin-form-box" style="margin-top:10px;">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
                     <button type="button" id="post-blog-btn">新規投稿する</button>
                 </div>
@@ -107,20 +138,24 @@
                     <button type="button" onclick="cancelBlogEdit()">キャンセル</button>
                 </div>
 
-                <div id="blog-list"></div>
+                <div id="blog-list" style="margin-top:10px;"></div>
             </section>
 
             <section>
-                <h2>担任へのメッセージ（非公開）</h2>
-                <p style="font-size: 0.85em; margin-top: 0;">※ここで送信した内容は、他の生徒には見えません。先生に直接届きます。</p>
+                <div class="section-header">
+                    <h2>担任へのメッセージ（非公開）</h2>
+                </div>
+                <p style="font-size: 0.85em; margin-top: 10px;">※ここで送信した内容は、他の生徒には見えません。先生に直接届きます。</p>
                 <textarea id="dm-input" placeholder="連絡や相談事などを書いてください..." style="height: 100px;"></textarea><br>
                 <button type="button" onclick="sendDirectMessage()">送信する</button>
             </section>
 
             <section id="admin-area" style="display: none; border: 2px solid black;">
-                <h2 style="border-bottom: 2px solid black;">管理者用メニュー：予定・提出物・メッセージ</h2>
+                <div class="section-header">
+                    <h2 style="border-bottom:none;">管理者用メニュー：予定・提出物・メッセージ</h2>
+                </div>
                 
-                <details class="admin-form-box" open>
+                <details class="admin-form-box" open style="margin-top:15px;">
                     <summary style="cursor:pointer; font-weight:bold;">［確認］受信したメッセージ（ダイレクトメッセージ）</summary>
                     <div id="admin-message-list" style="margin-top:10px; max-height: 300px; overflow-y: auto;">確認中...</div>
                 </details>
@@ -156,7 +191,7 @@
                 </details>
 
                 <div class="admin-form-box">
-                    <h3>予定の個別編集</h3>
+                    <h3 style="margin-top:0;">予定の個別設定（従来の詳細画面）</h3>
                     日付：<input type="date" id="edit-date-select" style="width:200px;">
                     <button type="button" onclick="loadScheduleEdit()">編集データ呼出</button>
                     <div id="edit-form" style="display:none; margin-top:15px;">
@@ -170,9 +205,11 @@
             </section>
 
             <section id="student-admin-area" style="display: none; border: 2px solid black;">
-                <h2 style="border-bottom: 2px solid black;">管理者用メニュー：名簿管理</h2>
+                <div class="section-header">
+                    <h2 style="border-bottom:none;">管理者用メニュー：名簿管理</h2>
+                </div>
                 
-                <div class="admin-form-box">
+                <div class="admin-form-box" style="margin-top:15px;">
                     <h3 style="margin-top:0;">アクセス状況・未確認者チェック</h3>
                     <p style="margin-bottom:5px;">最終情報更新日時：<span id="last-update-time">---</span></p>
                     <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
@@ -207,8 +244,10 @@
             </section>
 
             <section>
-                <h2>パスワード変更</h2>
-                <div style="max-width:400px;">
+                <div class="section-header">
+                    <h2>パスワード変更</h2>
+                </div>
+                <div style="max-width:400px; margin-top:15px;">
                     <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
                     <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
                     <button type="button" id="change-pw-btn">パスワードを変更する</button>
@@ -248,9 +287,13 @@
         let editingBlogId = null;
         let editingSubmId = null;
 
-        // ★ 自動ログアウト機能（60分無操作でログアウト）
+        // ★ ナビゲーション用の基準日保持変数
+        let currentScheduleBaseDate = new Date();
+        let currentWeekBaseDate = new Date();
+        let currentWeeklyDates = []; // 週予定の保存用
+
         let inactivityTimer;
-        const TIMEOUT_MS = 60 * 60 * 1000; // 60分
+        const TIMEOUT_MS = 60 * 60 * 1000; 
 
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
@@ -262,7 +305,6 @@
             }, TIMEOUT_MS);
         }
 
-        // ユーザーの各種操作を検知してタイマーをリセット
         document.addEventListener('mousemove', resetInactivityTimer);
         document.addEventListener('keydown', resetInactivityTimer);
         document.addEventListener('click', resetInactivityTimer);
@@ -290,19 +332,17 @@
             await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
         }
 
-        // ★ログイン状態の監視
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                resetInactivityTimer(); // ログイン時にタイマースタート
+                resetInactivityTimer(); 
                 initApp(user);
             } else {
                 document.getElementById('main-content').style.display = 'none';
                 document.getElementById('login-section').style.display = 'block';
-                clearTimeout(inactivityTimer); // ログアウト時はタイマー停止
+                clearTimeout(inactivityTimer); 
             }
         });
 
-        // ログインボタンの処理
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
@@ -310,7 +350,6 @@
                 .catch((error) => alert("ログイン失敗\nエラー内容: " + error.message));
         };
 
-        // 安全なログアウト処理
         function logout() {
             firebase.auth().signOut().then(() => {
                 location.reload(); 
@@ -322,6 +361,10 @@
             document.getElementById('main-content').style.display = 'block';
             currentUserEmail = user.email;
             isAdmin = (user.email === TEACHER_EMAIL);
+
+            if(isAdmin) {
+                document.getElementById('btn-edit-week').style.display = 'inline-block';
+            }
 
             const [hRes, vSnap] = await Promise.all([
                 fetch('https://holidays-jp.github.io/api/v1/date.json').then(r => r.json()).catch(() => ({})),
@@ -434,10 +477,28 @@
             return true;
         }
 
+        // --- 直近の予定のナビゲーション ---
+        function changeScheduleDate(direction) {
+            let d = new Date(currentScheduleBaseDate);
+            d.setDate(d.getDate() + direction);
+            // 登校日になるまでスキップ
+            while(!isSchoolDay(getLocalDateStr(d))) {
+                d.setDate(d.getDate() + direction);
+            }
+            currentScheduleBaseDate = d;
+            displayNextSchoolDays();
+        }
+
+        function resetScheduleDate() {
+            currentScheduleBaseDate = new Date();
+            displayNextSchoolDays();
+        }
+
         async function displayNextSchoolDays() {
             let foundDays = [];
-            let checkDate = new Date();
-            const todayStr = getLocalDateStr(checkDate);
+            // 時刻をリセットした Date オブジェクトで処理
+            let checkDate = new Date(getLocalDateStr(currentScheduleBaseDate));
+            const todayStr = getLocalDateStr(new Date());
 
             while (foundDays.length < 2) {
                 let dateStr = getLocalDateStr(checkDate);
@@ -449,12 +510,17 @@
                 checkDate.setDate(checkDate.getDate() + 1);
             }
 
-            let label1 = foundDays[0].gap === 0 ? "[本日]" : "[次回]";
-            await renderDay(foundDays[0].date, "area-1", label1);
+            function getLabel(gap) {
+                if(gap === 0) return "[本日]";
+                if(gap === 1) return "[明日]";
+                if(gap === -1) return "[昨日]";
+                if(gap > 1) return `[${gap}日後]`;
+                if(gap < -1) return `[${Math.abs(gap)}日前]`;
+                return "";
+            }
 
-            const dateDiff = Math.round((new Date(foundDays[1].date) - new Date(foundDays[0].date)) / (1000*60*60*24));
-            let label2 = dateDiff === 1 ? "[明日]" : "[次回]";
-            await renderDay(foundDays[1].date, "area-2", label2);
+            await renderDay(foundDays[0].date, "area-1", getLabel(foundDays[0].gap));
+            await renderDay(foundDays[1].date, "area-2", getLabel(foundDays[1].gap));
         }
 
         async function renderDay(dateStr, elId, prefix) {
@@ -476,7 +542,12 @@
                 data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
             }
 
-            let html = `<span class="day-label">${displayLabel}</span>
+            let html = `<div class="day-label" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>${displayLabel}</span>`;
+            if (isAdmin) {
+                html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">直接編集</button>`;
+            }
+            html += `</div>
             <table>
                 <tr><th class="col-period">校時</th><th class="col-subject">科目</th><th class="col-note">備考</th></tr>`;
             data.lessons.forEach((l, i) => {
@@ -503,8 +574,90 @@
             el.innerHTML = html;
         }
 
+        // --- 直近の予定（デイリー）のインライン編集処理 ---
+        async function startInlineEditDay(dateStr, elId) {
+            const el = document.getElementById(elId);
+            
+            const doc = await db.collection("schedules").doc(dateStr).get();
+            let data = doc.exists ? doc.data() : null;
+            if (!data) {
+                const dayNum = new Date(dateStr).getDay();
+                const regDoc = await db.collection("config").doc("regular_schedule").get();
+                const regData = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayNum]] : null;
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
+            }
+
+            let html = `<div style="background:#fff3cd; padding:10px; border:2px solid #ffc107;">`;
+            html += `<h4 style="margin-top:0;">${dateStr} の予定を直接編集</h4>`;
+            html += `<div style="margin-bottom:5px; font-size:0.9em;">主な行事予定：<input type="text" id="inline-event-${elId}" value="${data.event || ""}" style="width:100%; padding:4px;"></div>`;
+            html += `<div style="margin-bottom:5px; font-size:0.9em;">全体備考：<textarea id="inline-daynote-${elId}" style="width:100%; height:60px; padding:4px;">${data.dayNote || ""}</textarea></div>`;
+            
+            html += `<table style="width:100%; font-size:0.85em;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
+            data.lessons.forEach((l, i) => {
+                let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
+                html += `<tr>
+                            <td>${i+1}</td>
+                            <td><select id="inline-sub-${elId}-${i}" style="padding:2px; margin:0;">${opts}</select></td>
+                            <td><input type="text" id="inline-note-${elId}-${i}" value="${l.note}" style="width:100%; padding:2px; margin:0;"></td>
+                         </tr>`;
+            });
+            html += `</table>`;
+            
+            let timeOpts = "";
+            for(let h=13; h<=19; h++) {
+                for(let m=0; m<60; m+=10) {
+                    let time = `${h}:${m===0?'00':m}`;
+                    let sel = (time === data.exitTime) ? "selected" : "";
+                    timeOpts += `<option value="${time}" ${sel}>${time}</option>`;
+                }
+            }
+            
+            html += `<div style="margin-top:5px; text-align:right; font-size:0.9em;">最終下校：<select id="inline-exit-${elId}" style="padding:2px;">${timeOpts}</select></div>`;
+            html += `<div style="margin-top:10px; text-align:right;">
+                        <button onclick="saveInlineEditDay('${dateStr}', '${elId}')">保存して戻る</button>
+                        <button onclick="displayNextSchoolDays()">キャンセル</button>
+                     </div>`;
+            html += `</div>`;
+            
+            el.innerHTML = html;
+        }
+
+        async function saveInlineEditDay(dateStr, elId) {
+            const eventVal = document.getElementById(`inline-event-${elId}`).value;
+            const dayNoteVal = document.getElementById(`inline-daynote-${elId}`).value;
+            const exitTimeVal = document.getElementById(`inline-exit-${elId}`).value;
+            
+            const lessons = Array.from({length:6}, (_, i) => ({ 
+                sub: document.getElementById(`inline-sub-${elId}-${i}`).value, 
+                note: document.getElementById(`inline-note-${elId}-${i}`).value 
+            }));
+            
+            await db.collection("schedules").doc(dateStr).set({ 
+                event: eventVal, 
+                dayNote: dayNoteVal,
+                lessons: lessons, 
+                exitTime: exitTimeVal, 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+            
+            alert("保存しました"); 
+            displayAllSchedules();
+            recordSystemUpdate(); 
+        }
+
+        // --- 週予定のナビゲーション ---
+        function changeWeek(weeks) {
+            currentWeekBaseDate.setDate(currentWeekBaseDate.getDate() + weeks * 7);
+            displayWeeklySchedule();
+        }
+
+        function resetWeek() {
+            currentWeekBaseDate = new Date();
+            displayWeeklySchedule();
+        }
+
         async function displayWeeklySchedule() {
-            let d = new Date();
+            let d = new Date(currentWeekBaseDate);
             let currentDay = d.getDay();
             if (currentDay === 6) d.setDate(d.getDate() + 2);
             if (currentDay === 0) d.setDate(d.getDate() + 1);
@@ -518,6 +671,7 @@
                 tempD.setDate(d.getDate() + i);
                 weekDates.push(getLocalDateStr(tempD));
             }
+            currentWeeklyDates = weekDates; 
 
             let docPromises = weekDates.map(dateStr => db.collection("schedules").doc(dateStr).get());
             let docs = await Promise.all(docPromises);
@@ -575,6 +729,75 @@
             html += `</table>`;
 
             document.getElementById('weekly-schedule-display').innerHTML = html;
+        }
+
+        // --- 週予定の直接編集（インライン編集） ---
+        async function startInlineEditWeek() {
+            if (!isAdmin) return;
+
+            let docPromises = currentWeeklyDates.map(dateStr => db.collection("schedules").doc(dateStr).get());
+            let docs = await Promise.all(docPromises);
+            
+            let weekData = [];
+            for(let i=0; i<5; i++) {
+                let doc = docs[i];
+                if(doc.exists) {
+                    weekData.push(doc.data());
+                } else {
+                    weekData.push({ event: "" });
+                }
+            }
+
+            const weekNames = ["月", "火", "水", "木", "金"];
+            let html = `<table style="width: 100%; min-width: 400px; border:2px solid #ffc107;">
+                        <tr style="background:#fff3cd;">
+                            <th style="width:15%;">日付</th>
+                            <th style="width:10%;">曜日</th>
+                            <th style="width:75%;">主な行事予定 (直接編集)</th>
+                        </tr>`;
+            
+            for(let i=0; i<5; i++) {
+                let dateStr = currentWeeklyDates[i];
+                let dateObj = new Date(dateStr);
+                let eventText = weekData[i].event || "";
+                
+                html += `<tr>
+                            <td style="text-align:center; background:#fff3cd;">${dateObj.getMonth()+1}/${dateObj.getDate()}</td>
+                            <td style="text-align:center; font-weight:bold; background:#fff3cd;">${weekNames[i]}</td>
+                            <td style="padding:5px; background:#fff3cd;">
+                                <input type="text" id="week-edit-event-${i}" value="${eventText.replace(/"/g, '&quot;')}" style="width:100%; margin:0; padding:4px;">
+                            </td>
+                         </tr>`;
+            }
+            html += `</table>`;
+            html += `<div style="text-align:right; margin-top:10px;">
+                        <button onclick="saveInlineEditWeek()">週予定を保存して戻る</button>
+                        <button onclick="displayWeeklySchedule()">キャンセル</button>
+                     </div>`;
+                     
+            document.getElementById('weekly-schedule-display').innerHTML = html;
+        }
+
+        async function saveInlineEditWeek() {
+            for (let i = 0; i < 5; i++) {
+                let dateStr = currentWeeklyDates[i];
+                let eventVal = document.getElementById(`week-edit-event-${i}`).value;
+                
+                let doc = await db.collection("schedules").doc(dateStr).get();
+                if(doc.exists) {
+                    await db.collection("schedules").doc(dateStr).update({ event: eventVal, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                } else {
+                    const dayNum = new Date(dateStr).getDay();
+                    const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+                    const regDoc = await db.collection("config").doc("regular_schedule").get();
+                    const regWeek = regDoc.exists ? regDoc.data()[dayKeys[dayNum]] : null;
+                    let lessons = Array.from({length:6}, (_, idx) => ({ sub: regWeek?.[idx] || "", note: "" }));
+                    await db.collection("schedules").doc(dateStr).set({ event: eventVal, lessons: lessons, exitTime: "16:30", dayNote: "", updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            }
+            alert("週予定を保存しました");
+            displayAllSchedules(); 
+            recordSystemUpdate();
         }
 
         // --- 提出物（インライン編集対応） ---
@@ -683,34 +906,6 @@
             document.getElementById('subm-title').value = ""; document.getElementById('subm-deadline').value = "";
             alert("追加しました");
             recordSystemUpdate();
-        }
-
-        function startEditSubm(id, title, deadline) {
-            editingSubmId = id;
-            document.getElementById('subm-title').value = title;
-            document.getElementById('subm-deadline').value = deadline;
-            document.getElementById('subm-add-btn').style.display = 'none';
-            document.getElementById('subm-update-btn').style.display = 'inline-block';
-            document.getElementById('subm-cancel-btn').style.display = 'inline-block';
-        }
-
-        async function updateSubmission() {
-            const title = document.getElementById('subm-title').value.trim();
-            const deadline = document.getElementById('subm-deadline').value;
-            if(!title || !deadline) return alert("提出物名と締め切り日を入力してください");
-
-            await db.collection("submissions").doc(editingSubmId).update({ title, deadline });
-            alert("更新しました");
-            cancelSubmEdit();
-            recordSystemUpdate(); 
-        }
-
-        function cancelSubmEdit() {
-            editingSubmId = null;
-            document.getElementById('subm-title').value = ""; document.getElementById('subm-deadline').value = "";
-            document.getElementById('subm-add-btn').style.display = 'inline-block';
-            document.getElementById('subm-update-btn').style.display = 'none';
-            document.getElementById('subm-cancel-btn').style.display = 'none';
         }
 
         async function deleteSubmission(id) {
