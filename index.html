@@ -147,7 +147,7 @@
 
             <section>
                 <div class="section-header">
-                    <h2>週予定</h2>
+                    <h2>今週の予定</h2>
                     <div>
                         <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background-color: #333; color: white;" onclick="startInlineEditWeek()">表を直接編集</button>
                         <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
@@ -162,9 +162,9 @@
 
             <section>
                 <div class="section-header">
-                    <h2>回収物・提出物</h2>
+                    <h2>提出物や課題等</h2>
                 </div>
-                <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したら、左のチェックボックスを押してください。</p>
+                <p style="font-size: 0.85em; margin-top: 10px;">※木村に提出したら、□にチェックしてください。</p>
                 <div id="submission-list" class="scroll-area">確認中...</div>
             </section>
 
@@ -191,25 +191,25 @@
 
             <section>
                 <div class="section-header">
-                    <h2>担任へのメッセージ（非公開）</h2>
+                    <h2>担任へのメッセージ</h2>
                 </div>
-                <p style="font-size: 0.85em; margin-top: 10px;">※ここで送信した内容は、他の生徒には見えません。先生に直接届きます。</p>
+                <p style="font-size: 0.85em; margin-top: 10px;">※書いた内容は、他の生徒には見えません。木村に直接届きます。</p>
                 <textarea id="dm-input" placeholder="連絡や相談事などを書いてください..." style="height: 100px;"></textarea><br>
                 <button type="button" onclick="sendDirectMessage()">送信する</button>
             </section>
 
             <section id="admin-area" style="display: none; border: 2px solid black;">
                 <div class="section-header">
-                    <h2 style="border-bottom:none;">管理者用メニュー：予定・提出物・メッセージ</h2>
+                    <h2 style="border-bottom:none;">管理者用メニュー</h2>
                 </div>
                 
                 <details class="admin-form-box" open style="margin-top:15px;">
-                    <summary style="cursor:pointer; font-weight:bold;">［確認］受信したメッセージ（ダイレクトメッセージ）</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［確認］受信メッセージ</summary>
                     <div id="admin-message-list" style="margin-top:10px; max-height: 300px; overflow-y: auto;">確認中...</div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］提出物・課題の管理</summary>
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
                         締め切り：<input type="date" id="subm-deadline" style="width:150px;"><br>
@@ -221,9 +221,9 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］予定のCSV一括管理（月間）</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］予定のCSV一括管理</summary>
                     <div style="margin-top:10px;">
-                        <p style="font-size:0.85em; margin-bottom:5px;">※対象の年月を選んで「エクスポート」すると、その月の予定データ（または入力用テンプレート）がダウンロードされます。編集後、「インポート」で一括上書きできます。</p>
+                        <p style="font-size:0.85em; margin-bottom:5px;">※対象月を選んで「エクスポート」すると、その月の予定データをダウンロードできる。「インポート」で一括上書きできる。</p>
                         年月：<input type="month" id="schedule-month-input" style="width:150px;">
                         <button type="button" onclick="exportScheduleCSV()">エクスポート（ダウンロード）</button>
 
@@ -235,7 +235,7 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準時間割</summary>
                     曜日：<select id="reg-day-select" onchange="loadRegularSetting()" style="width:150px;">
                         <option value="mon">月曜日</option><option value="tue">火曜日</option>
                         <option value="wed">水曜日</option><option value="thu">木曜日</option>
@@ -255,7 +255,7 @@
                 </details>
 
                 <div class="admin-form-box">
-                    <h3 style="margin-top:0;">予定の個別設定（従来の詳細画面）</h3>
+                    <h3 style="margin-top:0;">予定の個別設定</h3>
                     日付：<input type="date" id="edit-date-select" style="width:200px;">
                     <button type="button" onclick="loadScheduleEdit()">編集データ呼出</button>
                     <div id="edit-form" style="display:none; margin-top:15px;">
@@ -303,7 +303,7 @@
                     <button type="button" onclick="exportCSV()">エクスポート（ダウンロード）</button>
                 </div>
 
-                <h3>登録済み一覧（名前の直接編集が可能）</h3>
+                <h3>登録済み一覧（直接編集可能）</h3>
                 <div id="student-list-area" class="scroll-area"></div>
             </section>
 
@@ -362,7 +362,7 @@
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
                 if (firebase.auth().currentUser) {
-                    alert("安全のため、一定時間（60分間）操作がなかったため自動的にログアウトしました。");
+                    alert("安全のため、一定時間操作がなかったため自動的にログアウトしました。");
                     logout();
                 }
             }, TIMEOUT_MS);
@@ -632,7 +632,7 @@
             }
             
             html += `<div style="margin-top: 10px; padding: 10px; border: 1px solid #333; background: #fafafa; font-size: 0.9em;">
-                        <strong style="display:block; border-bottom: 1px solid #ccc; margin-bottom: 5px; padding-bottom: 2px;">■ 全体備考・連絡事項</strong>
+                        <strong style="display:block; border-bottom: 1px solid #ccc; margin-bottom: 5px; padding-bottom: 2px;">■ 備考・連絡事項</strong>
                         ${combinedNote || "特になし"}
                      </div>`;
             
@@ -654,7 +654,7 @@
             let html = `<div style="background:#fff3cd; padding:10px; border:2px solid #ffc107;">`;
             html += `<h4 style="margin-top:0;">${dateStr} の予定を直接編集</h4>`;
             html += `<div style="margin-bottom:5px; font-size:0.9em;">主な行事予定：<input type="text" id="inline-event-${elId}" value="${data.event || ""}" style="width:100%; padding:4px;"></div>`;
-            html += `<div style="margin-bottom:5px; font-size:0.9em;">全体備考：<textarea id="inline-daynote-${elId}" style="width:100%; height:60px; padding:4px;">${data.dayNote || ""}</textarea></div>`;
+            html += `<div style="margin-bottom:5px; font-size:0.9em;">備考：<textarea id="inline-daynote-${elId}" style="width:100%; height:60px; padding:4px;">${data.dayNote || ""}</textarea></div>`;
             
             html += `<div class="scroll-area"><table style="width:100%; font-size:0.85em;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
@@ -833,7 +833,7 @@
             }
             html += `</table>`;
             html += `<div style="text-align:right; margin-top:10px;">
-                        <button onclick="saveInlineEditWeek()">週予定を保存して戻る</button>
+                        <button onclick="saveInlineEditWeek()">保存して戻る</button>
                         <button onclick="displayWeeklySchedule()">キャンセル</button>
                      </div>`;
                      
@@ -857,7 +857,7 @@
                     await db.collection("schedules").doc(dateStr).set({ event: eventVal, lessons: lessons, exitTime: "16:30", dayNote: "", updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
                 }
             }
-            alert("週予定を保存しました");
+            alert("保存しました");
             displayAllSchedules(); 
             recordSystemUpdate();
         }
@@ -929,7 +929,7 @@
             let existingSchedules = {};
             snap.forEach(doc => { existingSchedules[doc.id] = doc.data(); });
 
-            let csv = "日付,曜日,主な行事予定,1限,2限,3限,4限,5限,6限,下校時刻,全体備考\n";
+            let csv = "日付,曜日,主な行事予定,1限,2限,3限,4限,5限,6限,下校時刻,備考\n";
 
             const esc = (str) => {
                 if(!str) return "";
@@ -1442,7 +1442,7 @@
 
             let html = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event || ""}" style="width:100%; box-sizing:border-box;"></div>`;
             
-            html += `<div style="margin-bottom:10px;">全体備考・連絡：<textarea id="edit-daynote" style="width:100%; height:60px; box-sizing:border-box;">${data.dayNote || ""}</textarea></div>`;
+            html += `<div style="margin-bottom:10px;">備考・連絡：<textarea id="edit-daynote" style="width:100%; height:60px; box-sizing:border-box;">${data.dayNote || ""}</textarea></div>`;
 
             html += `<table style="width:100%;"><tr><th class='col-period'>校時</th><th class='col-subject'>科目</th><th class='col-note'>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
