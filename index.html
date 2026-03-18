@@ -60,13 +60,13 @@
         <h1>My Class Portal</h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
-        <button id="login-btn">ログイン</button>
+        <button type="button" id="login-btn">ログイン</button>
     </div>
 
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 id="welcome-msg" style="border:none; margin:0;">確認中...</h2>
-            <button onclick="location.reload()">ログアウト</button>
+            <button type="button" onclick="logout()">ログアウト</button>
         </header>
 
         <main>
@@ -87,7 +87,7 @@
 
             <section>
                 <h2>回収物・提出物</h2>
-                <p style="font-size: 0.85em; margin-top: 0;">※提出が完了したら、左のチェックボックスを押してください。</p>
+                <p style="font-size: 0.85em; margin-top: 0;">※木村に提出したら、左のボックスに☑してください。</p>
                 <div id="submission-list" style="overflow-x: auto;">確認中...</div>
             </section>
 
@@ -96,15 +96,15 @@
                 
                 <div id="blog-admin-form" style="display: none;" class="admin-form-box">
                     <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
-                    <button id="post-blog-btn">新規投稿する</button>
+                    <button type="button" id="post-blog-btn">新規投稿する</button>
                 </div>
 
                 <div id="blog-edit-form" style="display: none; border: 2px dashed black;" class="admin-form-box">
                     <h3>記事の編集</h3>
                     投稿日時：<input type="datetime-local" id="edit-blog-date" style="max-width: 250px;"><br>
                     内容：<textarea id="edit-blog-input"></textarea><br>
-                    <button onclick="updateBlog()">この内容と日時で更新する</button>
-                    <button onclick="cancelBlogEdit()">キャンセル</button>
+                    <button type="button" onclick="updateBlog()">この内容と日時で更新する</button>
+                    <button type="button" onclick="cancelBlogEdit()">キャンセル</button>
                 </div>
 
                 <div id="blog-list"></div>
@@ -114,7 +114,7 @@
                 <h2>担任へのメッセージ（非公開）</h2>
                 <p style="font-size: 0.85em; margin-top: 0;">※ここで送信した内容は、他の生徒には見えません。先生に直接届きます。</p>
                 <textarea id="dm-input" placeholder="連絡や相談事などを書いてください..." style="height: 100px;"></textarea><br>
-                <button onclick="sendDirectMessage()">送信する</button>
+                <button type="button" onclick="sendDirectMessage()">送信する</button>
             </section>
 
             <section id="admin-area" style="display: none; border: 2px solid black;">
@@ -130,9 +130,9 @@
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書">
                         締め切り：<input type="date" id="subm-deadline" style="width:150px;">
-                        <button id="subm-add-btn" onclick="addSubmission()">追加</button>
-                        <button id="subm-update-btn" style="display:none;" onclick="updateSubmission()">更新する</button>
-                        <button id="subm-cancel-btn" style="display:none;" onclick="cancelSubmEdit()">キャンセル</button>
+                        <button type="button" id="subm-add-btn" onclick="addSubmission()">追加</button>
+                        <button type="button" id="subm-update-btn" style="display:none;" onclick="updateSubmission()">更新する</button>
+                        <button type="button" id="subm-cancel-btn" style="display:none;" onclick="cancelSubmEdit()">キャンセル</button>
                     </div>
                     <div id="admin-submission-table" style="margin-top:15px; overflow-x: auto;"></div>
                 </details>
@@ -145,26 +145,26 @@
                         <option value="fri">金曜日</option>
                     </select>
                     <table id="reg-table"></table>
-                    <button onclick="saveRegularSetting()" style="margin-top:10px;">標準設定を保存</button>
+                    <button type="button" onclick="saveRegularSetting()" style="margin-top:10px;">標準設定を保存</button>
                 </details>
 
                 <details class="admin-form-box">
                     <summary style="cursor:pointer; font-weight:bold;">［設定］長期休業・臨時休校（期間スキップ）</summary>
                     開始：<input type="date" id="vac-start" style="width:160px;"> 終了：<input type="date" id="vac-end" style="width:160px;">
-                    <button onclick="saveVacation()">期間を登録</button>
+                    <button type="button" onclick="saveVacation()">期間を登録</button>
                     <div id="vacation-list" style="margin-top:10px;"></div>
                 </details>
 
                 <div class="admin-form-box">
                     <h3>予定の個別編集</h3>
                     日付：<input type="date" id="edit-date-select" style="width:200px;">
-                    <button onclick="loadScheduleEdit()">編集データ呼出</button>
+                    <button type="button" onclick="loadScheduleEdit()">編集データ呼出</button>
                     <div id="edit-form" style="display:none; margin-top:15px;">
                         <div id="edit-table-container"></div>
                         <div style="margin-top:10px;">
                             最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
                         </div>
-                        <button onclick="saveSchedule()" style="margin-top:10px;">この内容で保存・公開</button>
+                        <button type="button" onclick="saveSchedule()" style="margin-top:10px;">この内容で保存・公開</button>
                     </div>
                 </div>
             </section>
@@ -181,8 +181,8 @@
                     
                     <p style="margin-bottom:5px; font-weight:bold;">【アクセスログの確認】</p>
                     <input type="date" id="log-date-input" style="width:150px;">
-                    <button onclick="loadAccessLogsByDate()">指定日のログを表示</button>
-                    <button onclick="loadAccessLogs()">最新50件を表示</button>
+                    <button type="button" onclick="loadAccessLogsByDate()">指定日のログを表示</button>
+                    <button type="button" onclick="loadAccessLogs()">最新50件を表示</button>
                     <div id="access-log-list" style="margin-top: 10px; max-height: 250px; overflow-y: auto; display: none;"></div>
                 </div>
 
@@ -191,15 +191,15 @@
                     <p style="margin-bottom:5px; font-weight:bold;">【1件ずつ個別登録】</p>
                     <input type="email" id="direct-email" placeholder="メールアドレス" style="width:250px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:150px;">
-                    <button onclick="registerDirect()">新規登録</button>
+                    <button type="button" onclick="registerDirect()">新規登録</button>
 
                     <hr style="border-top:1px dashed black; margin:15px 0;">
                     
                     <p style="margin-bottom:5px; font-weight:bold;">【CSV一括登録・出力】</p>
                     <p style="font-size:0.85em; margin-top:0;">※形式：「メールアドレス,氏名」の2列で作成してください。</p>
                     <input type="file" id="csv-file" accept=".csv" style="width:250px; border:none; padding:0;">
-                    <button onclick="importCSV()">インポート（一括登録）</button>
-                    <button onclick="exportCSV()">エクスポート（ダウンロード）</button>
+                    <button type="button" onclick="importCSV()">インポート（一括登録）</button>
+                    <button type="button" onclick="exportCSV()">エクスポート（ダウンロード）</button>
                 </div>
 
                 <h3>登録済み一覧（名前の直接編集が可能）</h3>
@@ -211,7 +211,7 @@
                 <div style="max-width:400px;">
                     <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
                     <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
-                    <button id="change-pw-btn">パスワードを変更する</button>
+                    <button type="button" id="change-pw-btn">パスワードを変更する</button>
                 </div>
             </section>
         </main>
@@ -248,7 +248,26 @@
         let editingBlogId = null;
         let editingSubmId = null;
 
-        // ★日本時間で確実なYYYY-MM-DDを取得する関数
+        // ★ 自動ログアウト機能（60分無操作でログアウト）
+        let inactivityTimer;
+        const TIMEOUT_MS = 60 * 60 * 1000; // 60分
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (firebase.auth().currentUser) {
+                    alert("安全のため、一定時間（60分間）操作がなかったため自動的にログアウトしました。");
+                    logout();
+                }
+            }, TIMEOUT_MS);
+        }
+
+        // ユーザーの各種操作を検知してタイマーをリセット
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('scroll', resetInactivityTimer);
+
         function getLocalDateStr(dateObj) {
             const y = dateObj.getFullYear();
             const m = ('0' + (dateObj.getMonth() + 1)).slice(-2);
@@ -271,13 +290,32 @@
             await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
         }
 
+        // ★ログイン状態の監視
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                resetInactivityTimer(); // ログイン時にタイマースタート
+                initApp(user);
+            } else {
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('login-section').style.display = 'block';
+                clearTimeout(inactivityTimer); // ログアウト時はタイマー停止
+            }
+        });
+
+        // ログインボタンの処理
         document.getElementById('login-btn').onclick = () => {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
-                .then(res => initApp(res.user))
                 .catch((error) => alert("ログイン失敗\nエラー内容: " + error.message));
         };
+
+        // 安全なログアウト処理
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                location.reload(); 
+            });
+        }
 
         async function initApp(user) {
             document.getElementById('login-section').style.display = 'none';
@@ -315,12 +353,11 @@
                 accessedAt: firebase.firestore.FieldValue.serverTimestamp()
             }).catch(()=>{});
 
-            // 提出物一覧を取得してからスケジュール表示を呼ぶ（週予定に提出物を反映させるため）
             db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
                 submissionsList = [];
                 snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
                 renderSubmissionsUI();
-                displayAllSchedules(); // 提出物が更新されたら週予定も再描画
+                displayAllSchedules(); 
             });
 
             db.collection("blogs").orderBy("createdAt", "desc").limit(20).onSnapshot(snap => {
@@ -340,8 +377,8 @@
                     if (isAdmin) {
                         const escapedContent = data.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
                         adminBtns = `<div class="admin-actions">
-                                        <button onclick="startEditBlog('${d.id}', '${escapedContent}', '${isoDate}')">編集</button>
-                                        <button onclick="deleteBlog('${d.id}')">削除</button>
+                                        <button type="button" onclick="startEditBlog('${d.id}', '${escapedContent}', '${isoDate}')">編集</button>
+                                        <button type="button" onclick="deleteBlog('${d.id}')">削除</button>
                                      </div>`;
                     }
                     list.innerHTML += `<div class="post-item">
@@ -374,7 +411,7 @@
                                     <div style="font-weight: bold; font-size: 0.9em; margin-bottom: 5px; border-bottom: 1px dashed black;">${time}　送信者：${d.name}</div>
                                     <div style="margin-bottom: 10px;">${d.content.replace(/\n/g, '<br>')}</div>
                                     <div style="text-align: right;">
-                                        <button onclick="deleteMessage('${doc.id}')" style="padding: 2px 8px; font-size: 0.8em;">削除</button>
+                                        <button type="button" onclick="deleteMessage('${doc.id}')" style="padding: 2px 8px; font-size: 0.8em;">削除</button>
                                     </div>
                                  </div>`;
                     });
@@ -436,7 +473,7 @@
                 const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
                 const regDoc = await db.collection("config").doc("regular_schedule").get();
                 const regWeek = regDoc.exists ? regDoc.data()[dayKeys[d.getDay()]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30", event: "" };
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
             }
 
             let html = `<span class="day-label">${displayLabel}</span>
@@ -445,11 +482,27 @@
             data.lessons.forEach((l, i) => {
                 html += `<tr><td>${i+1}</td><td>${l.sub || "---"}</td><td class="col-note">${l.note || ""}</td></tr>`;
             });
-            html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px;">最終下校：${data.exitTime}</p>`;
+            html += `</table><p style="text-align:right; font-weight:bold; margin-top:10px; margin-bottom:5px;">最終下校：${data.exitTime}</p>`;
+            
+            let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
+            let subsHtml = subsForDay.map(s => `・${s.title}`).join("<br>");
+            
+            let dayNoteText = data.dayNote || "";
+            let combinedNote = "";
+            if (dayNoteText) combinedNote += dayNoteText.replace(/\n/g, '<br>');
+            if (subsHtml) {
+                if (combinedNote) combinedNote += "<br><br>";
+                combinedNote += `<span style="font-weight:bold; color: #d9534f;">【提出物締切】<br>${subsHtml}</span>`;
+            }
+            
+            html += `<div style="margin-top: 10px; padding: 10px; border: 1px solid #333; background: #fafafa; font-size: 0.9em;">
+                        <strong style="display:block; border-bottom: 1px solid #ccc; margin-bottom: 5px; padding-bottom: 2px;">■ 全体備考・連絡事項</strong>
+                        ${combinedNote || "特になし"}
+                     </div>`;
+            
             el.innerHTML = html;
         }
 
-        // --- 週予定（行事予定と提出物を統合表示） ---
         async function displayWeeklySchedule() {
             let d = new Date();
             let currentDay = d.getDay();
@@ -481,7 +534,6 @@
 
             const weekNames = ["月", "火", "水", "木", "金"];
 
-            // 提出物の列を統合し、行事予定の列にまとめる
             let html = `<table style="width: 100%; min-width: 400px;">
                         <tr>
                             <th style="width:15%;">日付</th>
@@ -498,7 +550,6 @@
 
                 let bgStyle = (!isSchoolDayBool) ? "background-color: #f2f2f2;" : "";
                 
-                // 該当日の提出物をリストアップ（【締切】をつけて目立たせる）
                 let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
                 let subsHtml = subsForDay.map(s => `【締切】${s.title}`).join("<br>");
 
@@ -526,7 +577,7 @@
             document.getElementById('weekly-schedule-display').innerHTML = html;
         }
 
-        // --- 提出物 ---
+        // --- 提出物（インライン編集対応） ---
         function renderSubmissionsUI() {
             const listEl = document.getElementById('submission-list');
             const adminTable = document.getElementById('admin-submission-table');
@@ -570,13 +621,13 @@
                         ? `<span style="color:red; font-size:0.85em;">${unsubmittedNames.join("、 ")}</span>` 
                         : `<span style="color:green; font-weight:bold;">全員提出済み</span>`;
 
-                    adminHtml += `<tr>
-                                    <td style="text-align:left; font-weight:bold;">${sub.title}</td>
-                                    <td>${dateStr}</td>
+                    adminHtml += `<tr id="subm-row-${sub.id}">
+                                    <td id="subm-title-td-${sub.id}" style="text-align:left; font-weight:bold;">${sub.title}</td>
+                                    <td id="subm-deadline-td-${sub.id}">${dateStr}</td>
                                     <td style="text-align:left;">${unsubmittedStr}</td>
-                                    <td>
-                                        <button onclick="startEditSubm('${sub.id}', '${sub.title.replace(/'/g, "\\'")}', '${sub.deadline}')">編集</button>
-                                        <button onclick="deleteSubmission('${sub.id}')">削除</button>
+                                    <td id="subm-action-td-${sub.id}">
+                                        <button type="button" onclick="startInlineEditSubm('${sub.id}', '${sub.title.replace(/'/g, "\\'")}', '${sub.deadline}')">編集</button>
+                                        <button type="button" onclick="deleteSubmission('${sub.id}')">削除</button>
                                     </td>
                                   </tr>`;
                 }
@@ -586,6 +637,34 @@
 
             listEl.innerHTML = listHtml;
             if(adminTable && isAdmin) adminTable.innerHTML = adminHtml;
+        }
+
+        function startInlineEditSubm(id, currentTitle, currentDeadline) {
+            const titleTd = document.getElementById(`subm-title-td-${id}`);
+            const deadlineTd = document.getElementById(`subm-deadline-td-${id}`);
+            const actionTd = document.getElementById(`subm-action-td-${id}`);
+            
+            titleTd.innerHTML = `<input type="text" id="input-subm-title-${id}" value="${currentTitle}" style="width:90%; padding:4px; margin:0; font-weight:normal;">`;
+            deadlineTd.innerHTML = `<input type="date" id="input-subm-deadline-${id}" value="${currentDeadline}" style="padding:4px; margin:0;">`;
+            
+            actionTd.innerHTML = `
+                <button type="button" onclick="saveInlineEditSubm('${id}')">保存</button>
+                <button type="button" onclick="renderSubmissionsUI()">キャンセル</button>
+            `;
+        }
+
+        async function saveInlineEditSubm(id) {
+            const newTitle = document.getElementById(`input-subm-title-${id}`).value.trim();
+            const newDeadline = document.getElementById(`input-subm-deadline-${id}`).value;
+            
+            if (!newTitle || !newDeadline) return alert("提出物名と締め切り日を入力してください");
+            
+            await db.collection("submissions").doc(id).update({
+                title: newTitle,
+                deadline: newDeadline
+            });
+            alert("更新しました");
+            recordSystemUpdate(); 
         }
 
         async function toggleSubm(subId, isChecked) {
@@ -775,7 +854,7 @@
             snap.forEach(doc => {
                 let d = doc.data();
                 let time = d.accessedAt ? d.accessedAt.toDate().toLocaleString() : "---";
-                html += `<tr id="log-row-${doc.id}"><td>${time}</td><td>${d.name}</td><td><button onclick="deleteAccessLog('${doc.id}')">削除</button></td></tr>`;
+                html += `<tr id="log-row-${doc.id}"><td>${time}</td><td>${d.name}</td><td><button type="button" onclick="deleteAccessLog('${doc.id}')">削除</button></td></tr>`;
             });
             html += "</table>";
             container.innerHTML = html;
@@ -802,8 +881,8 @@
                             <td id="name-td-${safeId}">${d.name || ""}</td>
                             <td>${email}</td>
                             <td id="action-td-${safeId}">
-                                <button onclick="startInlineEditStudent('${safeId}', '${email}', '${(d.name||"").replace(/'/g, "\\'")}')">編集</button>
-                                <button onclick="deleteStudent('${email}')">削除</button>
+                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${(d.name||"").replace(/'/g, "\\'")}')">編集</button>
+                                <button type="button" onclick="deleteStudent('${email}')">削除</button>
                             </td>
                          </tr>`; 
             }
@@ -815,7 +894,7 @@
             const nameTd = document.getElementById(`name-td-${safeId}`);
             const actionTd = document.getElementById(`action-td-${safeId}`);
             nameTd.innerHTML = `<input type="text" id="input-name-${safeId}" value="${currentName}" style="width:90%; padding:4px; margin:0;">`;
-            actionTd.innerHTML = `<button onclick="saveInlineEditStudent('${email}', '${safeId}')">保存</button> <button onclick="renderStudentListUI()">キャンセル</button>`;
+            actionTd.innerHTML = `<button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')">保存</button> <button type="button" onclick="renderStudentListUI()">キャンセル</button>`;
         }
 
         async function saveInlineEditStudent(email, safeId) {
@@ -915,7 +994,7 @@
         }
         function renderVacationList() {
             document.getElementById('vacation-list').innerHTML = vacationData.map((v, i) => 
-                `${v.start} 〜 ${v.end} <button onclick="deleteVac(${i})">削除</button>`).join('<br>');
+                `${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>');
         }
         async function deleteVac(i) { 
             vacationData.splice(i,1); 
@@ -933,10 +1012,13 @@
                 const dayNum = new Date(date).getDay();
                 const regDoc = await db.collection("config").doc("regular_schedule").get();
                 const regData = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayNum]] : null;
-                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30", event: "" };
+                data = { lessons: Array.from({length:6}, (_, i) => ({ sub: regData?.[i] || "", note: "" })), exitTime: "16:30", event: "", dayNote: "" };
             }
 
             let html = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event || ""}" style="width:100%; box-sizing:border-box;"></div>`;
+            
+            html += `<div style="margin-bottom:10px;">全体備考・連絡：<textarea id="edit-daynote" style="width:100%; height:60px; box-sizing:border-box;">${data.dayNote || ""}</textarea></div>`;
+
             html += `<table style="width:100%;"><tr><th class='col-period'>校時</th><th class='col-subject'>科目</th><th class='col-note'>備考</th></tr>`;
             data.lessons.forEach((l, i) => {
                 let opts = SUBJECTS.map(s => `<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('');
@@ -954,9 +1036,12 @@
         async function saveSchedule() {
             const date = document.getElementById('edit-date-select').value;
             const eventVal = document.getElementById('edit-event').value;
+            const dayNoteVal = document.getElementById('edit-daynote').value;
+            
             const lessons = Array.from({length:6}, (_, i) => ({ sub: document.getElementById(`edit-sub-${i}`).value, note: document.getElementById(`edit-note-${i}`).value }));
             await db.collection("schedules").doc(date).set({ 
                 event: eventVal, 
+                dayNote: dayNoteVal,
                 lessons: lessons, 
                 exitTime: document.getElementById('edit-exit-time').value, 
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
