@@ -40,10 +40,19 @@
         }
         section { margin-bottom: 40px; border: 1px solid black; padding: 20px; }
         
-        input, textarea, select { 
+        /* ★チェックボックス以外の入力フォームに横幅100%を適用するよう修正 */
+        input:not([type="checkbox"]), textarea, select { 
             width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; 
-            border: 1px solid black; font-family: inherit;
+            border: 1px solid black; font-family: inherit; box-sizing: border-box;
             background: white; color: black;
+        }
+        
+        /* チェックボックス専用のスタイル（中央揃え用） */
+        input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
         }
         
         button { 
@@ -106,7 +115,7 @@
             th, td {
                 padding: 5px; /* 表の余白を狭める */
             }
-            input[type="text"], input[type="email"], input[type="date"], input[type="password"] {
+            input[type="text"], input[type="email"], input[type="date"], input[type="month"], input[type="password"] {
                 width: 100% !important; /* 強制的に画面幅に収める */
             }
         }
@@ -216,6 +225,20 @@
                         <button type="button" id="subm-cancel-btn" style="display:none;" onclick="cancelSubmEdit()">キャンセル</button>
                     </div>
                     <div id="admin-submission-table" class="scroll-area" style="margin-top:15px;"></div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］予定のCSV一括管理（月間）</summary>
+                    <div style="margin-top:10px;">
+                        <p style="font-size:0.85em; margin-bottom:5px;">※対象の年月を選んで「エクスポート」すると、その月の予定データ（または入力用テンプレート）がダウンロードされます。編集後、「インポート」で一括上書きできます。</p>
+                        年月：<input type="month" id="schedule-month-input" style="width:150px;">
+                        <button type="button" onclick="exportScheduleCSV()">エクスポート（ダウンロード）</button>
+
+                        <hr style="border-top:1px dashed black; margin:15px 0;">
+                        <p style="font-size:0.85em; margin-bottom:5px;">※編集済みのCSVファイルを選択してインポートしてください。</p>
+                        <input type="file" id="schedule-csv-file" accept=".csv" style="width:250px; border:none; padding:0;">
+                        <button type="button" onclick="importScheduleCSV()">インポート（一括登録）</button>
+                    </div>
                 </details>
 
                 <details class="admin-form-box">
@@ -412,6 +435,9 @@
 
             if(isAdmin) {
                 document.getElementById('btn-edit-week').style.display = 'inline-block';
+                const now = new Date();
+                const currentMonthStr = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
+                document.getElementById('schedule-month-input').value = currentMonthStr;
             }
 
             const [hRes, vSnap] = await Promise.all([
@@ -843,6 +869,182 @@
             recordSystemUpdate();
         }
 
+        function parseCSVString(str) {
+            const result = [];
+            let row = [];
+            let curr = '';
+            let inQuotes = false;
+            for (let i = 0; i < str.length; i++) {
+                let char = str[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < str.length && str[i + 1] === '"') {
+                            curr += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        curr += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        row.push(curr);
+                        curr = '';
+                    } else if (char === '\n' || char === '\r') {
+                        row.push(curr);
+                        result.push(row);
+                        row = [];
+                        curr = '';
+                        if (char === '\r' && i + 1 < str.length && str[i+1] === '\n') i++; 
+                    } else {
+                        curr += char;
+                    }
+                }
+            }
+            if (curr !== '' || row.length > 0) {
+                row.push(curr);
+                result.push(row);
+            }
+            return result.filter(r => r.length > 1); 
+        }
+
+        async function exportScheduleCSV() {
+            const monthVal = document.getElementById('schedule-month-input').value;
+            if(!monthVal) return alert("出力する年月を選択してください");
+
+            const [yearStr, monthStr] = monthVal.split('-');
+            const year = parseInt(yearStr, 10);
+            const month = parseInt(monthStr, 10);
+            const endDate = new Date(year, month, 0); 
+
+            const regDoc = await db.collection("config").doc("regular_schedule").get();
+            const regData = regDoc.exists ? regDoc.data() : {};
+            const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+            const weekNames = ["日", "月", "火", "水", "木", "金", "土"];
+
+            const startStr = `${year}-${('0'+month).slice(-2)}-01`;
+            const endStr = `${year}-${('0'+month).slice(-2)}-${('0'+endDate.getDate()).slice(-2)}`;
+            
+            const snap = await db.collection("schedules")
+                .where(firebase.firestore.FieldPath.documentId(), ">=", startStr)
+                .where(firebase.firestore.FieldPath.documentId(), "<=", endStr)
+                .get();
+
+            let existingSchedules = {};
+            snap.forEach(doc => { existingSchedules[doc.id] = doc.data(); });
+
+            let csv = "日付,曜日,主な行事予定,1限,2限,3限,4限,5限,6限,下校時刻,全体備考\n";
+
+            const esc = (str) => {
+                if(!str) return "";
+                str = str.toString().replace(/"/g, '""');
+                if(str.includes(',') || str.includes('\n') || str.includes('"')) {
+                    return `"${str}"`;
+                }
+                return str;
+            };
+
+            for(let d = 1; d <= endDate.getDate(); d++) {
+                let currDate = new Date(year, month - 1, d);
+                let dateStr = getLocalDateStr(currDate);
+                let dayNum = currDate.getDay();
+                let dayName = weekNames[dayNum];
+
+                let data = existingSchedules[dateStr];
+                if(!data) {
+                    let regWeek = regData[dayKeys[dayNum]];
+                    data = {
+                        event: "",
+                        dayNote: "",
+                        exitTime: (dayNum === 0 || dayNum === 6) ? "" : "16:30",
+                        lessons: Array.from({length:6}, (_, i) => ({ sub: regWeek?.[i] || "", note: "" }))
+                    };
+                }
+
+                let row = [
+                    dateStr,
+                    dayName,
+                    esc(data.event || ""),
+                    esc(data.lessons[0]?.sub || ""),
+                    esc(data.lessons[1]?.sub || ""),
+                    esc(data.lessons[2]?.sub || ""),
+                    esc(data.lessons[3]?.sub || ""),
+                    esc(data.lessons[4]?.sub || ""),
+                    esc(data.lessons[5]?.sub || ""),
+                    esc(data.exitTime || ""),
+                    esc(data.dayNote || "")
+                ];
+                csv += row.join(",") + "\n";
+            }
+
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `schedules_${year}_${month}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function importScheduleCSV() {
+            const fileInput = document.getElementById('schedule-csv-file');
+            const file = fileInput.files[0];
+            if (!file) return alert("インポートするCSVファイルを選択してください");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const rows = parseCSVString(text);
+                let count = 0;
+
+                let batch = db.batch();
+
+                for (let i = 1; i < rows.length; i++) { 
+                    let cols = rows[i];
+                    if (cols.length < 10) continue; 
+
+                    let dateStr = cols[0].trim();
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue; 
+
+                    let event = cols[2] || "";
+                    let lessons = [
+                        { sub: cols[3] || "", note: "" },
+                        { sub: cols[4] || "", note: "" },
+                        { sub: cols[5] || "", note: "" },
+                        { sub: cols[6] || "", note: "" },
+                        { sub: cols[7] || "", note: "" },
+                        { sub: cols[8] || "", note: "" }
+                    ];
+                    let exitTime = cols[9] || "";
+                    let dayNote = cols[10] || "";
+
+                    let docRef = db.collection("schedules").doc(dateStr);
+                    batch.set(docRef, {
+                        event: event,
+                        lessons: lessons,
+                        exitTime: exitTime,
+                        dayNote: dayNote,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    count++;
+                }
+
+                try {
+                    await batch.commit();
+                    alert(`${count}日分の予定をインポートしました`);
+                    fileInput.value = "";
+                    displayAllSchedules();
+                    recordSystemUpdate();
+                } catch(error) {
+                    alert("インポート中にエラーが発生しました: " + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
         function renderSubmissionsUI() {
             const listEl = document.getElementById('submission-list');
             const adminTable = document.getElementById('admin-submission-table');
@@ -866,11 +1068,11 @@
                 let isChecked = studentMaster[currentUserEmail]?.checks?.[sub.id] ? "checked" : "";
                 
                 listHtml += `<tr>
-                                <td style="text-align:center;">
-                                    <input type="checkbox" onchange="toggleSubm('${sub.id}', this.checked)" style="transform: scale(1.5); margin:0;" ${isChecked}>
+                                <td style="text-align:center; vertical-align:middle;">
+                                    <input type="checkbox" onchange="toggleSubm('${sub.id}', this.checked)" style="transform: scale(1.5); margin: 0 auto; display: block;" ${isChecked}>
                                 </td>
-                                <td style="text-align:left; font-weight:bold;">${sub.title}</td>
-                                <td>${dateStr}</td>
+                                <td style="text-align:left; font-weight:bold; vertical-align:middle;">${sub.title}</td>
+                                <td style="vertical-align:middle;">${dateStr}</td>
                             </tr>`;
 
                 if (isAdmin) {
