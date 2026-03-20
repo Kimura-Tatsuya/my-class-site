@@ -2,21 +2,17 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0">
     <title>My Class Portal</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         
-        /* 目に優しい淡いグレー背景・丸みや影を排除したシンプルなデザイン */
-        body { background-color: #f0f2f5; color: #333; font-family: "MS UI Gothic", "MS Gothic", sans-serif; line-height: 1.5; padding: 20px; max-width: 850px; margin: 0 auto; transition: background-color 0.3s, color 0.3s; }
+        body { background-color: #f7f9fc; color: #333; font-family: "MS UI Gothic", "MS Gothic", sans-serif; line-height: 1.5; padding: 20px; max-width: 850px; margin: 0 auto; transition: background-color 0.3s, color 0.3s; }
         h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #333; }
         .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #333; margin-top: 0; padding-bottom: 5px; }
-        .section-header h2 { border: none; margin: 0; padding: 0; }
+        .section-header h2 { border: none; margin: 0; padding: 0; cursor: move; } /* ドラッグ可能であることを示す */
         
         section { background: white; margin-bottom: 40px; border: 1px solid #ccc; padding: 20px; transition: background-color 0.3s, border-color 0.3s; }
-        
-        /* ◆ 直近の予定 セクションの背景色（薄緑色） */
-        #recent-schedule-section { background-color: #e8f5e9; }
         
         input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; font-family: inherit; box-sizing: border-box; background: white; color: black; transition: 0.3s; }
         input[type="checkbox"] { width: auto; cursor: pointer; margin: 0 auto; display: block; transform: scale(1.2); }
@@ -30,6 +26,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; } 
+        .holiday-row { background-color: #f2f2f2; }
         .col-period { width: 45px; white-space: nowrap; } 
         .col-subject { width: 75px; white-space: nowrap; } 
         .col-note { width: auto; word-break: break-all; text-align: center !important; } 
@@ -47,33 +44,31 @@
         .student-edit-btn:hover { background: #333; color: white; }
         .weather-info { font-size: 0.85em; font-weight: normal; margin-left: 10px; color: #555; display: inline-block; }
 
-        /* カウントダウン表示用スタイル */
         .countdown-card {
             padding: 5px 10px; font-weight: bold; color: #333; width: 160px; height: 75px;
             display: flex; align-items: center; justify-content: center; border: 1px solid #ccc;
             position: relative; overflow: hidden; box-sizing: border-box; background: white;
         }
-        .changed-lesson { background-color: #fff9c4 !important; }
+        .countdown-card.small { width: 100px; height: 50px; padding: 2px 5px; }
+        .countdown-card.small .icon { display: none; }
+        .countdown-card.small .text-area { font-size: 0.75em; line-height: 1.1; }
+        .countdown-card.small .text-area span { font-size: 1.2em !important; }
 
-        /* 折りたたみセクション用のスタイル */
-        .foldable-section { background: white; border: 1px solid #ccc; padding: 20px; margin-bottom: 40px; }
-        .foldable-section summary { cursor: pointer; outline: none; border-bottom: 1px solid #333; padding-bottom: 5px; font-weight: bold; font-size: 1.5em; margin-bottom: 10px; display: block; }
-        .foldable-section summary::-webkit-details-marker { display: none; }
+        .changed-lesson { background-color: #fff9c4 !important; }
 
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
 
-        /* ダークモード設定 */
+        /* ダークモード */
         body.dark-mode { background-color: #121212; color: #e0e0e0; }
         body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item { border-color: #555 !important; }
         body.dark-mode .day-label { border-color: #e0e0e0 !important; }
-        body.dark-mode section, body.dark-mode .day-box, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box, body.dark-mode .student-edit-btn, body.dark-mode .foldable-section { border-color: #444 !important; background-color: #1e1e1e; }
-        body.dark-mode #recent-schedule-section { background-color: #1b3320 !important; border-color: #2e7d32 !important; }
+        body.dark-mode section, body.dark-mode .day-box, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box, body.dark-mode .student-edit-btn { border-color: #444 !important; background-color: #1e1e1e; }
         body.dark-mode input:not([type="checkbox"]), body.dark-mode textarea:not(.has-bg), body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode button, body.dark-mode .student-edit-btn { background-color: #333 !important; color: #e0e0e0 !important; border-color: #666; }
         body.dark-mode button:hover, body.dark-mode .student-edit-btn:hover { background-color: #555 !important; color: #fff !important; }
         body.dark-mode th { background-color: #2a2a2a !important; color: #e0e0e0 !important; }
         body.dark-mode .admin-form-box { background-color: #1e1e1e !important; }
-        body.dark-mode tr[style*="background-color: #f2f2f2;"] { background-color: #2a2a2a !important; }
+        body.dark-mode .holiday-row { background-color: #2a2a2a !important; }
         body.dark-mode div[style*="background:#fff3cd;"], body.dark-mode tr[style*="background:#fff3cd;"], body.dark-mode td[style*="background:#fff3cd;"] { background-color: #333 !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode div[style*="background:#fdf0f0;"] { background-color: #3d1c1c !important; border-color: #d9534f !important; }
         body.dark-mode .checked-item { background-color: #222 !important; opacity: 0.4; }
@@ -81,12 +76,9 @@
         body.dark-mode .deadline-warning { color: #ffa726; }
         body.dark-mode .deadline-overdue { color: #ef5350; }
         body.dark-mode #committee-form-area { background-color: #1e1e1e !important; border-color: #555 !important; }
-        body.dark-mode div[style*="background: #fafafa;"], body.dark-mode div[style*="background:#fafafa;"] { background-color: #2a2a2a !important; border-color: #555 !important; }
         body.dark-mode .weather-info { color: #bbb; }
         body.dark-mode .post-date { color: #bbb; }
         body.dark-mode .countdown-card { color: #000 !important; border-color: #444 !important; }
-        body.dark-mode #my-week-settings { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
-        body.dark-mode .foldable-section summary { border-color: #555 !important; }
         
         .edit-box { background:#f9f9f9; padding:10px; border:2px solid #ffc107; color:inherit; }
         body.dark-mode .edit-box { background:#333 !important; border-color:#d39e00 !important; color:#e0e0e0 !important; }
@@ -105,6 +97,9 @@
             th, td { padding: 5px; }
             input[type="text"], input[type="email"], input[type="date"], input[type="month"], input[type="password"] { width: 100% !important; }
         }
+
+        /* セクションドラッグ時のスタイル */
+        .dragging { opacity: 0.5; border: 2px dashed #0d47a1; }
     </style>
 </head>
 <body>
@@ -116,7 +111,6 @@
         <button type="button" id="login-btn">ログイン</button>
         <footer style="text-align: center; padding: 20px 0; margin-top: 50px; font-size: 0.85em; color: #666;">
             <div>&copy; <span id="login-copyright-year"></span> T.K. All Rights Reserved.</div>
-            <button type="button" onclick="toggleTheme()" style="margin-top:10px; padding:4px 8px; font-size:0.9em; border: 1px solid #999; background:transparent; color:inherit;">Light / Dark</button>
         </footer>
     </div>
 
@@ -134,133 +128,123 @@
         <main>
             <div id="countdown-display-area" style="display:none; flex-wrap:wrap; gap:10px; margin-bottom:20px;"></div>
 
-            <section id="recent-schedule-section">
-                <div class="section-header">
-                    <h2>◆ 直近の予定</h2>
-                    <div>
-                        <button onclick="changeScheduleDate(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 戻る</button>
-                        <button onclick="resetScheduleDate()" style="padding: 4px 8px; font-size: 0.85em;">今日</button>
-                        <button onclick="changeScheduleDate(1)" style="padding: 4px 8px; font-size: 0.85em;">進む ▶</button>
-                    </div>
-                </div>
-                <div class="day-container" id="schedule-display">
-                    <div id="area-1" class="day-box scroll-area">確認中...</div>
-                    <div id="area-2" class="day-box scroll-area">確認中...</div>
-                </div>
-            </section>
-
-            <section>
-                <div class="section-header">
-                    <h2>◆ 週予定</h2>
-                    <div>
-                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="startInlineEditWeek()">全体を編集(管理者)</button>
-                        <button id="btn-edit-my-week" style="padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">編集</button>
-                        <button id="btn-save-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background:#0d47a1; color:white;" onclick="saveMyWeek()">保存</button>
-                        <button id="btn-cancel-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">ｷｬﾝｾﾙ</button>
-                        <span style="margin: 0 5px;">|</span>
-                        <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
-                        <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
-                        <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
-                    </div>
-                </div>
+            <div id="main-sections-container">
                 
-                <div id="my-week-settings" style="display: none; margin-top: 10px; margin-bottom: 10px; font-size: 0.9em; gap: 15px; flex-wrap: wrap; background:#f9f9f9; padding:8px; border:1px solid #ccc; align-items: center; color: #333;">
-                    <label style="cursor: pointer; display:inline-flex; align-items:center; white-space: nowrap;">
-                        <input type="checkbox" id="toggle-weekend" onchange="displayWeeklySchedule()" style="margin:0 5px 0 0; vertical-align: middle;">土日を表示
-                    </label>
-                    <label style="cursor: pointer; display:inline-flex; align-items:center; white-space: nowrap;">
-                        <input type="checkbox" id="toggle-club" onchange="displayWeeklySchedule()" style="margin:0 5px 0 0; vertical-align: middle;">部活動予定を表示
-                    </label>
-                    <div style="margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button onclick="editMyEventOptions()" style="padding: 2px 8px; font-size: 0.9em; margin: 0;">⚙️ 個人の予定の選択肢を編集</button>
-                        <button onclick="editMyClubOptions()" style="padding: 2px 8px; font-size: 0.9em; margin: 0;">⚙️ 部活動の選択肢を編集</button>
+                <section id="sec-recent" draggable="true">
+                    <div class="section-header">
+                        <h2>◆ 直近の予定</h2>
+                        <div>
+                            <button onclick="changeScheduleDate(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 戻る</button>
+                            <button onclick="resetScheduleDate()" style="padding: 4px 8px; font-size: 0.85em;">今日</button>
+                            <button onclick="changeScheduleDate(1)" style="padding: 4px 8px; font-size: 0.85em;">進む ▶</button>
+                        </div>
                     </div>
-                </div>
-                
-                <div id="weekly-schedule-display" class="scroll-area" style="margin-top: 10px;">確認中...</div>
-            </section>
+                    <div class="day-container" id="schedule-display">
+                        <div id="area-1" class="day-box scroll-area">確認中...</div>
+                        <div id="area-2" class="day-box scroll-area">確認中...</div>
+                    </div>
+                </section>
 
-            <section>
-                <div class="section-header">
-                    <h2>◆ 提出物・課題等</h2>
-                </div>
-                <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したらチェックを入れてください。</p>
-                <div id="submission-list" class="scroll-area">確認中...</div>
-            </section>
+                <section id="sec-weekly" draggable="true">
+                    <div class="section-header">
+                        <h2>◆ 週予定</h2>
+                        <div>
+                            <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="startInlineEditWeek()">全体を編集(管理者)</button>
+                            <button id="btn-edit-my-week" style="padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">編集</button>
+                            <button id="btn-save-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background:#0d47a1; color:white;" onclick="saveMyWeek()">保存</button>
+                            <button id="btn-cancel-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">ｷｬﾝｾﾙ</button>
+                            <span style="margin: 0 5px;">|</span>
+                            <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
+                            <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
+                            <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
+                        </div>
+                    </div>
+                    
+                    <div id="my-week-settings" style="display: none; margin-top: 10px; margin-bottom: 10px; font-size: 0.9em; gap: 15px; flex-wrap: wrap; background:#f9f9f9; padding:8px; border:1px solid #ccc; align-items: center; color: #333;">
+                        <label style="cursor: pointer; display:inline-flex; align-items:center; white-space: nowrap;">
+                            <input type="checkbox" id="toggle-weekend" onchange="displayWeeklySchedule()" style="margin:0 5px 0 0;">土日を表示
+                        </label>
+                        <label style="cursor: pointer; display:inline-flex; align-items:center; white-space: nowrap;">
+                            <input type="checkbox" id="toggle-club" onchange="displayWeeklySchedule()" style="margin:0 5px 0 0;">部活動予定を表示
+                        </label>
+                    </div>
+                    <div id="my-list-editor-area" style="display: none; background:#fff3cd; border:1px solid #ffc107; padding:10px; margin-bottom:10px;">
+                        <h4 style="margin-top:0;">予定リストの編集 (カンマ区切りで入力)</h4>
+                        <p style="margin:0 0 5px 0; font-size:0.85em;">自分の予定：</p>
+                        <input type="text" id="edit-my-events-input" style="width:100%;">
+                        <p style="margin:10px 0 5px 0; font-size:0.85em;">部活動の予定：</p>
+                        <input type="text" id="edit-my-clubs-input" style="width:100%;">
+                        <div style="text-align:right; margin-top:5px;">
+                            <button onclick="saveMyListOptions()">リストを保存</button>
+                            <button onclick="closeMyListEditor()">閉じる</button>
+                        </div>
+                    </div>
+                    
+                    <div id="weekly-schedule-display" class="scroll-area" style="margin-top: 10px;">確認中...</div>
+                </section>
 
-            <section>
-                <div class="section-header">
-                    <h2>◆ 係・委員会より連絡</h2>
-                </div>
-                <details style="margin-bottom:10px; background:#fff; border:1px solid #ccc; padding:10px;">
-                    <summary style="cursor:pointer; font-weight:bold; outline:none; border:none; margin:0;">連絡を投稿する（<span id="my-role-name-container"></span>）</summary>
-                    <div style="margin-top:10px;">
+                <section id="sec-submissions" draggable="true">
+                    <div class="section-header">
+                        <h2>◆ 提出物・課題等</h2>
+                    </div>
+                    <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したらチェックを入れてください。</p>
+                    <div id="submission-list" class="scroll-area">確認中...</div>
+                </section>
+
+                <section id="sec-committee" draggable="true">
+                    <div class="section-header">
+                        <h2>◆ 係・委員会より連絡</h2>
+                    </div>
+                    <div id="btn-show-committee-form" style="display:none; text-align:right; margin-bottom:10px;">
+                        <button onclick="document.getElementById('committee-form-area').style.display='block'; this.style.display='none';">＋ 新規投稿（<span id="my-role-name-container"></span>）</button>
+                    </div>
+                    <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #ccc; margin-bottom:15px; background:#fafafa;">
+                        <h3 style="margin-top:0; font-size:1em;">連絡を投稿する</h3>
                         <textarea id="committee-input" placeholder="連絡内容を入力してください..." style="transition: background-color 0.3s;"></textarea>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items:center; font-size:0.9em;">
-                            <div>
-                                背景色：<select id="committee-color" style="width:120px; margin-bottom:0;" onchange="updateCommitteeInputColor(this.value)">
-                                    <option value="#ffffff">白（標準）</option><option value="#ffebee">薄い赤</option><option value="#e8f5e9">薄い緑</option>
-                                    <option value="#e3f2fd">薄い青</option><option value="#fff8e1">薄い黄色</option><option value="#fff3e0">薄いオレンジ</option><option value="#f3e5f5">薄い紫</option>
-                                </select>
-                            </div>
-                            <div>
-                                重要度：<select id="committee-priority" style="width:90px; margin-bottom:0;">
-                                    <option value="3">★★★</option><option value="2" selected>★★</option><option value="1">★</option>
-                                </select>
-                            </div>
-                            <div>
-                                公開期間：<input type="date" id="committee-start" style="width:130px; margin-bottom:0;"> 〜 
-                                <input type="date" id="committee-end" style="width:130px; margin-bottom:0;">
-                            </div>
+                            <div>背景色：<select id="committee-color" style="width:120px; margin-bottom:0;" onchange="updateCommitteeInputColor(this.value)">
+                                <option value="#ffffff">白（標準）</option><option value="#ffebee">薄い赤</option><option value="#e8f5e9">薄い緑</option>
+                                <option value="#e3f2fd">薄い青</option><option value="#fff8e1">薄い黄色</option><option value="#fff3e0">薄いオレンジ</option><option value="#f3e5f5">薄い紫</option>
+                            </select></div>
+                            <div>重要度：<select id="committee-priority" style="width:90px; margin-bottom:0;"><option value="3">★★★</option><option value="2" selected>★★</option><option value="1">★</option></select></div>
+                            <div>公開期間：<input type="date" id="committee-start" style="width:130px; margin-bottom:0;"> 〜 <input type="date" id="committee-end" style="width:130px; margin-bottom:0;"></div>
                         </div>
                         <div style="text-align:right;">
-                            <button type="button" onclick="postCommitteeMessage()">投稿する（先生の承認後に公開）</button>
+                            <button type="button" onclick="postCommitteeMessage()">投稿する</button>
+                            <button type="button" onclick="document.getElementById('committee-form-area').style.display='none'; document.getElementById('btn-show-committee-form').style.display='block';">キャンセル</button>
                         </div>
                     </div>
-                </details>
-                <div id="committee-posts-display" style="margin-top: 10px;"></div>
-            </section>
+                    <div id="committee-posts-display" style="margin-top: 10px;"></div>
+                </section>
 
-            <section>
-                <div class="section-header">
-                    <h2>◆ 担任のやつ</h2>
-                </div>
-                
-                <div id="blog-admin-form" style="display: none;" class="admin-form-box" style="margin-top:10px;">
-                    <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
-                    <button type="button" onclick="postBlog()">新規投稿する</button>
-                </div>
+                <section id="sec-blogs" draggable="true">
+                    <div class="section-header">
+                        <h2>◆ 担任のやつ</h2>
+                    </div>
+                    <div id="blog-admin-form" style="display: none;" class="admin-form-box" style="margin-top:10px;">
+                        <textarea id="blog-input" placeholder="投稿内容"></textarea><br>
+                        <button type="button" onclick="postBlog()">新規投稿する</button>
+                    </div>
+                    <div id="blog-edit-form" style="display: none; border: 2px dashed black;" class="admin-form-box">
+                        <h3>記事の編集</h3>
+                        投稿日時：<input type="datetime-local" id="edit-blog-date" style="max-width: 250px;"><br>
+                        内容：<textarea id="edit-blog-input"></textarea><br>
+                        <button type="button" onclick="updateBlog()">この内容と日時で更新する</button>
+                        <button type="button" onclick="cancelBlogEdit()">キャンセル</button>
+                    </div>
+                    <div id="blog-list" style="margin-top:10px;"></div>
+                    <div id="blog-pagination" style="text-align: center; margin-top: 15px;"></div>
+                </section>
 
-                <div id="blog-edit-form" style="display: none; border: 2px dashed black;" class="admin-form-box">
-                    <h3>記事の編集</h3>
-                    投稿日時：<input type="datetime-local" id="edit-blog-date" style="max-width: 250px;"><br>
-                    内容：<textarea id="edit-blog-input"></textarea><br>
-                    <button type="button" onclick="updateBlog()">この内容と日時で更新する</button>
-                    <button type="button" onclick="cancelBlogEdit()">キャンセル</button>
-                </div>
-
-                <div id="blog-list" style="margin-top:10px;"></div>
-                <div id="blog-pagination" style="text-align: center; margin-top: 15px;"></div>
-            </section>
-
-            <details class="foldable-section">
-                <summary>◆ 担任へ連絡</summary>
-                <p style="font-size: 0.85em; margin-top: 10px;">※ここで送信した内容は先生に直接届きます。</p>
-                <textarea id="dm-input" placeholder="連絡や相談事などを書いてください..." style="height: 100px;"></textarea><br>
-                <button type="button" onclick="sendDirectMessage()">送信する</button>
-            </details>
-
-            <details class="foldable-section">
-                <summary>◆ パスワード変更</summary>
-                <div style="max-width:400px; margin-top:15px;">
-                    <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
-                    <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
-                    <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用）" onpaste="return false;"><br>
-                    <button type="button" id="change-pw-btn">パスワードを変更する</button>
-                </div>
-            </details>
-
-            <section id="admin-area" style="display: none; border: 2px solid #0d47a1;">
+                <section id="sec-dm" draggable="true">
+                    <div class="section-header">
+                        <h2>◆ 担任へ連絡</h2>
+                    </div>
+                    <p style="font-size: 0.85em; margin-top: 10px;">※ここで送信した内容は先生に直接届きます。</p>
+                    <textarea id="dm-input" placeholder="連絡や相談事などを書いてください..." style="height: 100px;"></textarea><br>
+                    <button type="button" onclick="sendDirectMessage()">送信する</button>
+                </section>
+            </div><section id="admin-area" style="display: none; border: 2px solid #0d47a1;">
                 <div class="section-header">
                     <h2 style="border-bottom:none; color:#0d47a1;">管理者用メニュー</h2>
                 </div>
@@ -407,24 +391,71 @@
                 </div>
 
                 <h3>登録済み一覧（直接編集可能）</h3>
-                <p style="font-size:0.85em;">※「投稿禁止」にチェックを入れると、その生徒は一切の投稿・メッセージ送信ができなくなります。</p>
+                <p style="font-size:0.85em;">※「準編集権限」は諸連絡や週予定の編集権限を与えます。「投稿禁止」は一切の投稿を不可にします。</p>
                 <div id="student-list-area" class="scroll-area"></div>
             </section>
-
         </main>
         
         <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #ccc; font-size: 0.85em; color: #666;">
-            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <button type="button" onclick="toggleTheme()" style="margin-bottom:10px; padding:4px 8px; font-size:0.9em; border: 1px solid #999; background:transparent; color:inherit;">Light / Dark</button>
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px;">
+                <div>
+                    <button type="button" onclick="toggleDeviceView()" id="btn-device-view" style="padding:4px 8px; font-size:0.9em; border: 1px solid #999; background:white; color:#333;">Smartphone / PC</button>
+                    <button type="button" onclick="toggleTheme()" id="theme-toggle-btn-bottom" style="padding:4px 8px; font-size:0.9em; border: 1px solid #999; background:white; color:#333;">Light / Dark</button>
+                    <button type="button" onclick="openSettingsModal()" style="padding:4px 8px; font-size:0.9em; border: 1px solid #999; background:white; color:#333;">⚙️ 設定</button>
+                </div>
                 <div>&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
             </div>
         </footer>
     </div>
 
     <div id="event-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
-        <div id="event-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black;">
+        <div id="event-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #333;">
             <button onclick="closeEventModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:#333;">✖</button>
             <div id="event-modal-body"></div>
+        </div>
+    </div>
+    
+    <div id="settings-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+        <div id="settings-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #333;">
+            <button onclick="closeSettingsModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:#333;">✖</button>
+            <h2 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:5px;">⚙️ 設定</h2>
+            
+            <h4 style="margin-bottom:5px;">■ セクションの並び替え</h4>
+            <p style="font-size:0.8em; margin-top:0;">※ドラッグ＆ドロップで順番を変更できます。</p>
+            <ul id="sortable-list" style="list-style-type:none; padding:0; margin:0 0 20px 0; border:1px solid #ccc; background:#fafafa;">
+                </ul>
+            
+            <h4 style="margin-bottom:5px;">■ セクションの背景色</h4>
+            <table style="width:100%; font-size:0.9em; margin-bottom:20px;">
+                <tr><td>直近の予定</td><td><input type="color" id="set-bg-recent" style="width:50px; padding:0;"></td></tr>
+                <tr><td>週予定</td><td><input type="color" id="set-bg-weekly" style="width:50px; padding:0;"></td></tr>
+                <tr><td>提出物・課題等</td><td><input type="color" id="set-bg-subs" style="width:50px; padding:0;"></td></tr>
+                <tr><td>係・委員会連絡</td><td><input type="color" id="set-bg-comm" style="width:50px; padding:0;"></td></tr>
+                <tr><td>担任のやつ</td><td><input type="color" id="set-bg-blogs" style="width:50px; padding:0;"></td></tr>
+                <tr id="set-bg-dm-row"><td>担任へ連絡</td><td><input type="color" id="set-bg-dm" style="width:50px; padding:0;"></td></tr>
+            </table>
+
+            <h4 style="margin-bottom:5px;">■ カウントダウン表示</h4>
+            <div style="margin-bottom:20px; font-size:0.9em;">
+                <label style="display:block; margin-bottom:5px;"><input type="checkbox" id="set-cd-visible"> カウントダウンを表示する</label>
+                サイズ：
+                <label><input type="radio" name="set-cd-size" value="normal"> 標準</label>
+                <label><input type="radio" name="set-cd-size" value="small"> 小（アイコンなし）</label>
+            </div>
+            
+            <div style="text-align:right; margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:20px;">
+                <button onclick="saveUserSettings()" style="background:#0d47a1; color:white;">設定を保存して反映</button>
+            </div>
+
+            <details>
+                <summary style="cursor:pointer; font-weight:bold; font-size:1.1em; outline:none;">◆ パスワード変更</summary>
+                <div style="margin-top:10px; font-size:0.9em;">
+                    <input type="password" id="old-password" placeholder="現在のパスワード" onpaste="return false;"><br>
+                    <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）" onpaste="return false;"><br>
+                    <input type="password" id="new-password-confirm" placeholder="新しいパスワード（確認用）" onpaste="return false;"><br>
+                    <button type="button" id="change-pw-btn">パスワードを変更する</button>
+                </div>
+            </details>
         </div>
     </div>
 
@@ -454,9 +485,9 @@
         let exitTimePeriods = []; 
         let holidays = {};
         let isAdmin = false;
+        let isSubAdmin = false; // ★準編集権限フラグ
         let currentUserEmail = null;
         let submissionsList = [];
-        let clubOptionsList = ["", "午前", "午後", "全日", "Home 試合", "外試合", "大会", "外練", "任意"];
         
         let allBlogs = [];
         let currentBlogPage = 1;
@@ -477,6 +508,21 @@
         let inactivityTimer;
         let weatherData = {};
         let pendingExcelData = {}; 
+        
+        let isPcView = false; // スマホPC切り替え状態
+
+        // ユーザーごとのUI設定デフォルト
+        let userSettings = {
+            order: ['sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'],
+            bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' },
+            cdVisible: true,
+            cdSize: 'normal'
+        };
+
+        const SECTION_NAMES = {
+            'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等',
+            'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡'
+        };
 
         const COUNTDOWN_PRESETS = [
             { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
@@ -524,42 +570,44 @@
         }
         async function recordSystemUpdate() { await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); }
 
-        function getWeatherIcon(desc) {
+        // ★ 天気アイコン解析強化
+        function parseWeatherString(desc) {
             if (!desc) return "☀️";
-            let icon = "";
-            if (desc.includes("曇") && desc.includes("時々雨") && desc.includes("のち晴")) return "🌤️";
-            if (desc.includes("晴") && desc.includes("のち時々曇")) return "🌤️";
-            if (desc.includes("晴") && desc.includes("一時雨") && desc.includes("のち曇")) return "☀️🌧️";
-            if (desc.includes("曇") && desc.includes("時々晴") && desc.includes("一時雨")) return "🌤️🌧️";
-            if (desc.includes("晴") && desc.includes("のち") && desc.includes("曇")) return "☀️➡️☁️";
-            if (desc.includes("曇") && desc.includes("のち") && desc.includes("雨")) return "☁️➡️🌧️";
-            if (desc.includes("雨") && desc.includes("のち") && desc.includes("晴")) return "🌧️➡️☀️";
-            if (desc.includes("雪") && desc.includes("のち") && desc.includes("曇")) return "❄️➡️☁️";
-            if (desc.includes("晴") && (desc.includes("時々曇") || desc.includes("一時曇"))) return "🌤️";
-            if (desc.includes("晴") && (desc.includes("時々雨") || desc.includes("一時雨"))) return "🌦️";
-            if (desc.includes("曇") && (desc.includes("時々雨") || desc.includes("一時雨"))) return "🌧️";
-            if (desc.includes("雨") && (desc.includes("時々雪") || desc.includes("一時雪"))) return "🌧️❄️";
-            
-            let baseIcon = "";
-            if (desc === "快晴") baseIcon = "☀️✨";
-            else if (desc === "晴れ" || desc === "晴") baseIcon = "☀️";
-            else if (desc === "曇り" || desc === "曇") baseIcon = "☁️";
-            else if (desc === "雨") baseIcon = "☔";
-            else if (desc === "雪") baseIcon = "❄️";
-            else {
-                if (desc.includes("快晴")) baseIcon = "☀️✨";
-                else if (desc.includes("晴")) baseIcon = "☀️";
-                else if (desc.includes("曇")) baseIcon = "☁️";
-                else if (desc.includes("雨")) baseIcon = "☔";
-                else if (desc.includes("雪")) baseIcon = "❄️";
-            }
-            if (desc.includes("所により")) baseIcon += "📍";
-            if (desc.includes("雷")) baseIcon += "⚡";
-            if (desc.includes("風")) baseIcon += "🌬️";
-            if (desc.includes("霧")) baseIcon += "🌁";
-            if (desc.includes("暑") || desc.includes("酷暑") || desc.includes("猛暑")) baseIcon += "🌡️🔥";
+            let supplement = "";
+            if (desc.includes("所により")) supplement += "📍";
+            if (desc.includes("雷")) supplement += "⚡";
+            if (desc.includes("風")) supplement += "🌬️";
+            if (desc.includes("霧")) supplement += "🌁";
+            if (desc.includes("暑") || desc.includes("酷暑") || desc.includes("猛暑")) supplement += "🌡️🔥";
 
-            return baseIcon || "☀️";
+            let core = desc.replace(/所により|雷を伴う|風が強い|霧が発生|猛暑|酷暑/g, "");
+
+            if (core.includes("曇り時々晴れ一時雨") || core.includes("曇時々晴一時雨")) return "🌤️🌧️" + supplement;
+            if (core.includes("曇り時々雨のち晴れ") || core.includes("曇時々雨のち晴")) return "🌤️" + supplement; 
+            if (core.includes("晴れのち時々曇り") || core.includes("晴のち時々曇")) return "☀️➡️🌤️" + supplement;
+            if (core.includes("晴れ一時雨のち曇り") || core.includes("晴一時雨のち曇")) return "🌦️➡️☁️" + supplement;
+
+            if (core.includes("のち")) {
+                let parts = core.split("のち");
+                let i1 = getBaseIconWithMixed(parts[0]);
+                let i2 = getBaseIconWithMixed(parts[1]);
+                return i1 + "➡️" + i2 + supplement;
+            }
+            return getBaseIconWithMixed(core) + supplement;
+        }
+
+        function getBaseIconWithMixed(str) {
+            if (str.includes("晴") && str.includes("曇")) return "🌤️";
+            if (str.includes("晴") && str.includes("雨")) return "🌦️";
+            if (str.includes("曇") && str.includes("雨")) return "🌧️";
+            if (str.includes("雨") && str.includes("雪")) return "🌧️❄️";
+            
+            if (str.includes("快晴")) return "☀️✨";
+            if (str.includes("晴")) return "☀️";
+            if (str.includes("曇")) return "☁️";
+            if (str.includes("雪")) return "❄️";
+            if (str.includes("雨")) return "☔";
+            return "☀️";
         }
 
         async function fetchWeather() {
@@ -600,6 +648,143 @@
             } catch (e) { console.error(e); }
         }
 
+        // スマホ/PC切り替え
+        function toggleDeviceView() {
+            isPcView = !isPcView;
+            let meta = document.getElementById('viewport-meta');
+            if (isPcView) {
+                meta.setAttribute('content', 'width=850');
+            } else {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+            }
+        }
+
+        // -------------------------------------
+        // ★ UI設定 (並び替え・背景色・カウントダウン)
+        // -------------------------------------
+        function applyUserSettings() {
+            if (studentMaster[currentUserEmail] && studentMaster[currentUserEmail].settings) {
+                userSettings = Object.assign({}, userSettings, studentMaster[currentUserEmail].settings);
+            }
+            
+            // 背景色適用
+            for (let secId in userSettings.bgColors) {
+                let el = document.getElementById(secId);
+                if (el) el.style.backgroundColor = userSettings.bgColors[secId];
+            }
+            
+            // 順番適用
+            const container = document.getElementById('main-sections-container');
+            if(container) {
+                userSettings.order.forEach(id => {
+                    let el = document.getElementById(id);
+                    if (el) container.appendChild(el);
+                });
+            }
+            
+            // カウントダウン表示反映
+            let cdArea = document.getElementById('countdown-display-area');
+            if(cdArea) {
+                cdArea.style.display = userSettings.cdVisible ? 'flex' : 'none';
+            }
+            renderCountdownsUI(); // サイズクラスの反映のため再描画
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-modal-overlay').style.display = 'flex';
+            
+            // リスト生成
+            let ul = document.getElementById('sortable-list');
+            ul.innerHTML = "";
+            userSettings.order.forEach(id => {
+                if (id === 'sec-dm' && isAdmin) return; // 管理者はDMをリストから除外
+                let li = document.createElement('li');
+                li.draggable = true;
+                li.dataset.id = id;
+                li.style = "padding:10px; border-bottom:1px solid #ccc; cursor:grab; display:flex; align-items:center; background:#fff;";
+                li.innerHTML = `<span style="margin-right:10px; cursor:grab;">☰</span> ${SECTION_NAMES[id]}`;
+                
+                li.addEventListener('dragstart', () => li.classList.add('dragging'));
+                li.addEventListener('dragend', () => li.classList.remove('dragging'));
+                ul.appendChild(li);
+            });
+            
+            // 背景色セット
+            document.getElementById('set-bg-recent').value = userSettings.bgColors['sec-recent'] || '#ffffff';
+            document.getElementById('set-bg-weekly').value = userSettings.bgColors['sec-weekly'] || '#ffffff';
+            document.getElementById('set-bg-subs').value = userSettings.bgColors['sec-submissions'] || '#ffffff';
+            document.getElementById('set-bg-comm').value = userSettings.bgColors['sec-committee'] || '#ffffff';
+            document.getElementById('set-bg-blogs').value = userSettings.bgColors['sec-blogs'] || '#ffffff';
+            
+            if (isAdmin) {
+                document.getElementById('set-bg-dm-row').style.display = 'none';
+            } else {
+                document.getElementById('set-bg-dm').value = userSettings.bgColors['sec-dm'] || '#ffffff';
+            }
+
+            // カウントダウンセット
+            document.getElementById('set-cd-visible').checked = userSettings.cdVisible;
+            if (userSettings.cdSize === 'small') {
+                document.querySelector('input[name="set-cd-size"][value="small"]').checked = true;
+            } else {
+                document.querySelector('input[name="set-cd-size"][value="normal"]').checked = true;
+            }
+
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const ul = document.getElementById('sortable-list');
+            ul.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(ul, e.clientY);
+                const draggable = document.querySelector('.dragging');
+                if (afterElement == null) {
+                    ul.appendChild(draggable);
+                } else {
+                    ul.insertBefore(draggable, afterElement);
+                }
+            });
+        }
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else { return closest; }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        async function saveUserSettings() {
+            let newOrder = [];
+            document.querySelectorAll('#sortable-list li').forEach(li => newOrder.push(li.dataset.id));
+            if(isAdmin && !newOrder.includes('sec-dm')) newOrder.push('sec-dm'); // 管理者の裏で保持
+
+            userSettings.order = newOrder;
+            userSettings.bgColors['sec-recent'] = document.getElementById('set-bg-recent').value;
+            userSettings.bgColors['sec-weekly'] = document.getElementById('set-bg-weekly').value;
+            userSettings.bgColors['sec-submissions'] = document.getElementById('set-bg-subs').value;
+            userSettings.bgColors['sec-committee'] = document.getElementById('set-bg-comm').value;
+            userSettings.bgColors['sec-blogs'] = document.getElementById('set-bg-blogs').value;
+            if(!isAdmin) userSettings.bgColors['sec-dm'] = document.getElementById('set-bg-dm').value;
+
+            userSettings.cdVisible = document.getElementById('set-cd-visible').checked;
+            userSettings.cdSize = document.querySelector('input[name="set-cd-size"]:checked').value;
+
+            await db.collection("students").doc(currentUserEmail).set({ settings: userSettings }, { merge: true });
+            applyUserSettings();
+            closeSettingsModal();
+            alert("設定を保存しました。");
+        }
+
+        function closeSettingsModal() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
+
+
+        // -------------------------------------
+        // ★ カウントダウン機能の管理
+        // -------------------------------------
         function renderAdminCountdowns() {
             let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
             let colorOpts = `<option value="#e3f2fd">青</option><option value="#ffebee">赤</option><option value="#e8f5e9">緑</option><option value="#fff8e1">黄</option><option value="#fff3e0">橙</option><option value="#fce4ec">桃</option><option value="#f3e5f5">紫</option>`;
@@ -618,7 +803,11 @@
         }
         function renderCountdownsUI() {
             let container = document.getElementById('countdown-display-area'); if (!container) return;
+            if(!userSettings.cdVisible) { container.style.display = 'none'; return; }
+
             let todayStr = getLocalDateStr(new Date()); let todayMs = new Date(todayStr).getTime(); let html = "";
+            let isSmall = userSettings.cdSize === 'small';
+
             COUNTDOWN_PRESETS.forEach(p => {
                 let d = countdownSettings[p.id]; if (!d || !d.isEnabled || !d.date) return; if (p.isCustom && !d.label) return;
                 let targetMs = new Date(d.date).getTime(); if (targetMs < todayMs) return;
@@ -626,42 +815,34 @@
                 if (d.mode === "school") { diffDays = getSchoolDaysDiff(d.date); modeLabel = "<span style='font-size:0.7em; font-weight:normal;'>(登校日)</span>"; } 
                 else { diffDays = Math.round((targetMs - todayMs) / 86400000); }
                 if (diffDays >= 0) {
-                    let bg = d.bgColor || "#e3f2fd"; let iconStr = d.icon ? `<span style="font-size:1.5em; margin-right:4px;">${d.icon}</span>` : "";
+                    let bg = d.bgColor || "#e3f2fd"; 
+                    let iconStr = d.icon ? `<span class="icon" style="font-size:1.5em; margin-right:4px;">${d.icon}</span>` : "";
                     let isActionable = (diffDays === 0 && !isAdmin && (p.id === 'term2_start' || p.id === 'term3_start'));
                     let onClickAttr = isActionable ? `onclick="openEventModal('${p.id}')" style="cursor:pointer;"` : '';
-                    let actionHint = isActionable ? `<div style="font-size:0.7em; color:#d32f2f; margin-top:2px; animation: blink 1.5s infinite;">ここをクリック！</div>` : "";
+                    let actionHint = isActionable && !isSmall ? `<div style="font-size:0.7em; color:#d32f2f; margin-top:2px; animation: blink 1.5s infinite;">ここをクリック！</div>` : "";
+                    
                     let contentHtml = "";
                     if (diffDays === 0) {
-                        let labelSize = d.label.length > 5 ? Math.max(0.65, 5 / d.label.length * 1.1) : 1.1;
-                        contentHtml = `<div style="font-size:0.85em; margin-bottom:2px; line-height:1;">本日は</div><div style="font-size:${labelSize}em; white-space:nowrap; line-height:1.2;"><b>${d.label}</b>！</div>${actionHint}`;
+                        let labelSize = isSmall ? 0.9 : (d.label.length > 5 ? Math.max(0.65, 5 / d.label.length * 1.1) : 1.1);
+                        contentHtml = `<div class="text-area" style="text-align:center;"><div style="font-size:0.85em; margin-bottom:2px; line-height:1;">本日は</div><div style="font-size:${labelSize}em; white-space:nowrap; line-height:1.2;"><b>${d.label}</b>！</div>${actionHint}</div>`;
                     } else {
-                        let totalLen = d.label.length + (d.mode === "school" ? 4 : 0); let labelSize = totalLen > 8 ? Math.max(0.55, 8 / totalLen * 0.85) : 0.85;
-                        contentHtml = `<div style="font-size:${labelSize}em; margin-bottom:2px; white-space:nowrap; line-height:1.2;">${d.label} まで ${modeLabel}</div><div style="white-space:nowrap; line-height:1.2;">あと <span style="font-size:1.6em; margin:0 2px;">${diffDays}</span> 日</div>`;
+                        let totalLen = d.label.length + (d.mode === "school" ? 4 : 0); 
+                        let labelSize = isSmall ? 0.8 : (totalLen > 8 ? Math.max(0.55, 8 / totalLen * 0.85) : 0.85);
+                        contentHtml = `<div class="text-area" style="text-align:center;"><div style="font-size:${labelSize}em; margin-bottom:2px; white-space:nowrap; line-height:1.2;">${d.label} まで ${modeLabel}</div><div style="white-space:nowrap; line-height:1.2;">あと <span style="font-size:1.6em; margin:0 2px;">${diffDays}</span> 日</div></div>`;
                     }
-                    html += `<div class="countdown-card" style="background-color: ${bg};" ${onClickAttr}><div style="display:flex; align-items:center; justify-content:center; width:100%;">${iconStr}<div style="text-align:center; flex:1; min-width:0;">${contentHtml}</div></div></div>`;
+
+                    let cardClass = isSmall ? "countdown-card small" : "countdown-card";
+                    html += `<div class="${cardClass}" style="background-color: ${bg};" ${onClickAttr}>
+                                <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
+                                    ${iconStr}${contentHtml}
+                                </div>
+                             </div>`;
                 }
             });
             if (html) { container.innerHTML = html; container.style.display = "flex"; } else { container.innerHTML = ""; container.style.display = "none"; }
         }
 
-        function drawOmikuji() {
-            let rand = Math.random() * 100; let sum = 0; let rank = "中吉";
-            for (let r of OMIKUJI_DATA.ranks) { sum += r.prob; if (rand <= sum) { rank = r.name; break; } }
-            return {
-                rank: rank, study: OMIKUJI_DATA.studies[Math.floor(Math.random() * OMIKUJI_DATA.studies.length)], love: OMIKUJI_DATA.loves[Math.floor(Math.random() * OMIKUJI_DATA.loves.length)],
-                money: OMIKUJI_DATA.moneys[Math.floor(Math.random() * OMIKUJI_DATA.moneys.length)], health: OMIKUJI_DATA.healths[Math.floor(Math.random() * OMIKUJI_DATA.healths.length)],
-                relation: OMIKUJI_DATA.relations[Math.floor(Math.random() * OMIKUJI_DATA.relations.length)], item: OMIKUJI_DATA.items[Math.floor(Math.random() * OMIKUJI_DATA.items.length)]
-            };
-        }
-        function generateBingoCard() {
-            let card = [];
-            for (let col = 0; col < 5; col++) {
-                let nums = []; let min = col * 15 + 1; let max = min + 14;
-                while (nums.length < 5) { let n = Math.floor(Math.random() * (max - min + 1)) + min; if (!nums.includes(n)) nums.push(n); }
-                card.push(nums);
-            }
-            card[2][2] = "FREE"; return card; 
-        }
+        // イベントモーダル
         async function openEventModal(eventId) {
             if (!currentUserEmail) return;
             document.getElementById('event-modal-overlay').style.display = 'flex';
@@ -669,22 +850,40 @@
             let studentDoc = await db.collection("students").doc(currentUserEmail).get();
             let sData = studentDoc.exists ? studentDoc.data() : {};
             if (eventId === 'term3_start') {
-                if (!sData.omikuji) { sData.omikuji = drawOmikuji(); await db.collection("students").doc(currentUserEmail).update({ omikuji: sData.omikuji }); }
-                renderOmikujiIntro(sData.omikuji);
+                if (!sData.omikuji) { 
+                    let rand = Math.random() * 100; let sum = 0; let rank = "中吉";
+                    for (let r of OMIKUJI_DATA.ranks) { sum += r.prob; if (rand <= sum) { rank = r.name; break; } }
+                    sData.omikuji = {
+                        rank: rank, study: OMIKUJI_DATA.studies[Math.floor(Math.random() * OMIKUJI_DATA.studies.length)], love: OMIKUJI_DATA.loves[Math.floor(Math.random() * OMIKUJI_DATA.loves.length)],
+                        money: OMIKUJI_DATA.moneys[Math.floor(Math.random() * OMIKUJI_DATA.moneys.length)], health: OMIKUJI_DATA.healths[Math.floor(Math.random() * OMIKUJI_DATA.healths.length)],
+                        relation: OMIKUJI_DATA.relations[Math.floor(Math.random() * OMIKUJI_DATA.relations.length)], item: OMIKUJI_DATA.items[Math.floor(Math.random() * OMIKUJI_DATA.items.length)]
+                    };
+                    await db.collection("students").doc(currentUserEmail).update({ omikuji: sData.omikuji }); 
+                }
+                window.currentOmikujiData = sData.omikuji;
+                document.getElementById('event-modal-body').innerHTML = `<h2 style="text-align:center; color:#d32f2f; margin-top:10px;">⛩️ 新春 おみくじ ⛩️</h2><div style="text-align:center; margin: 40px 0;"><button onclick="renderOmikujiResult()" style="padding: 15px 30px; font-size: 1.2em; background-color: #d32f2f; color: white; border: none; cursor: pointer;">おみくじを引く！</button></div>`;
             } else if (eventId === 'term2_start') {
-                if (!sData.bingo) { sData.bingo = { cardStr: JSON.stringify(generateBingoCard()), opened: ["FREE"] }; await db.collection("students").doc(currentUserEmail).update({ bingo: sData.bingo }); }
+                if (!sData.bingo) {
+                    let card = [];
+                    for (let col = 0; col < 5; col++) {
+                        let nums = []; let min = col * 15 + 1; let max = min + 14;
+                        while (nums.length < 5) { let n = Math.floor(Math.random() * (max - min + 1)) + min; if (!nums.includes(n)) nums.push(n); }
+                        card.push(nums);
+                    }
+                    card[2][2] = "FREE"; 
+                    sData.bingo = { cardStr: JSON.stringify(card), opened: ["FREE"] }; 
+                    await db.collection("students").doc(currentUserEmail).update({ bingo: sData.bingo }); 
+                }
                 renderBingo(sData.bingo);
             }
         }
         function closeEventModal() { document.getElementById('event-modal-overlay').style.display = 'none'; }
-        function renderOmikujiIntro(data) {
-            window.currentOmikujiData = data; 
-            document.getElementById('event-modal-body').innerHTML = `<h2 style="text-align:center; color:#d32f2f; margin-top:10px;">⛩️ 新春 おみくじ ⛩️</h2><div style="text-align:center; margin: 40px 0;"><button onclick="renderOmikujiResult()" style="padding: 15px 30px; font-size: 1.2em; background-color: #d32f2f; color: white; border: none; cursor: pointer;">おみくじを引く！</button></div>`;
-        }
+        
         function renderOmikujiResult() {
             let data = window.currentOmikujiData; if(!data) return;
             document.getElementById('event-modal-body').innerHTML = `<h2 style="text-align:center; color:#d32f2f; margin-top:10px;">⛩️ 新春 おみくじ ⛩️</h2><div style="text-align:center; font-size:3em; font-weight:bold; color:#d32f2f; margin:15px 0;">${data.rank}</div><div style="font-size:1.1em; line-height:1.6; text-align:left;"><details style="margin-bottom:10px; border-bottom:1px dashed #ccc; padding-bottom:5px;"><summary style="cursor:pointer; font-weight:bold; outline:none;">✏️勉強</summary><div style="padding: 5px 0 5px 20px;">${data.study}</div></details><details style="margin-bottom:10px; border-bottom:1px dashed #ccc; padding-bottom:5px;"><summary style="cursor:pointer; font-weight:bold; outline:none;">💖恋愛</summary><div style="padding: 5px 0 5px 20px;">${data.love}</div></details><details style="margin-bottom:10px; border-bottom:1px dashed #ccc; padding-bottom:5px;"><summary style="cursor:pointer; font-weight:bold; outline:none;">💰金運</summary><div style="padding: 5px 0 5px 20px;">${data.money}</div></details><details style="margin-bottom:10px; border-bottom:1px dashed #ccc; padding-bottom:5px;"><summary style="cursor:pointer; font-weight:bold; outline:none;">💪健康</summary><div style="padding: 5px 0 5px 20px;">${data.health}</div></details><details style="margin-bottom:10px; border-bottom:1px dashed #ccc; padding-bottom:5px;"><summary style="cursor:pointer; font-weight:bold; outline:none;">🤝対人</summary><div style="padding: 5px 0 5px 20px;">${data.relation}</div></details><details style="margin-bottom:10px;"><summary style="cursor:pointer; font-weight:bold; outline:none;">🍀ﾗｯｷｰｱｲﾃﾑ</summary><div style="padding: 5px 0 5px 20px;">${data.item}</div></details></div>`;
         }
+
         function renderBingo(bingoData) {
             let html = `<h2 style="text-align:center; color:#1976d2; margin-top:10px;">🎉 BINGO 🎉</h2><p style="text-align:center; font-size:0.85em; color:#666;">出た数字をタップして穴を開けよう！</p><table style="width:100%; text-align:center; table-layout:fixed; font-size:1.3em; border:2px solid #1976d2; background:#fff;"><tr style="background-color:#1976d2 !important; color:white !important;"><th style="background-color:#1976d2 !important; color:white !important;">B</th><th style="background-color:#1976d2 !important; color:white !important;">I</th><th style="background-color:#1976d2 !important; color:white !important;">N</th><th style="background-color:#1976d2 !important; color:white !important;">G</th><th style="background-color:#1976d2 !important; color:white !important;">O</th></tr>`;
             let cardArr = [];
@@ -695,7 +894,8 @@
                 html += `<tr>`;
                 for(let c=0; c<5; c++) {
                     let num = cardArr[c][r]; let isOpened = bingoData.opened.some(x => String(x) === String(num));
-                    let bg = isOpened ? '#d32f2f' : 'transparent'; let textDeco = isOpened ? 'line-through' : 'none';
+                    let bg = isOpened ? '#b71c1c' : 'transparent'; // 濃い赤に変更
+                    let textDeco = isOpened ? 'line-through' : 'none';
                     let fontColor = isOpened ? 'white' : '#333';
                     let style = `background-color:${bg}; cursor:pointer; height:50px; font-weight:bold; border:1px solid #ccc; text-decoration:${textDeco}; color:${fontColor};`;
                     html += `<td style="${style}" onclick="toggleBingo('${num}')">${num}</td>`;
@@ -704,6 +904,7 @@
             }
             document.getElementById('event-modal-body').innerHTML = html + `</table>`;
         }
+
         async function toggleBingo(num) {
             if (num === "FREE" || num === "undefined") return;
             let studentDoc = await db.collection("students").doc(currentUserEmail).get();
@@ -799,6 +1000,7 @@
             if(isAdmin) {
                 const now = new Date(); document.getElementById('excel-month-input').value = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
                 initExitTimeOptions(document.getElementById('exit-period-time'), false);
+                document.getElementById('sec-dm').style.display = 'none'; // 管理者はDMをメニューから隠す
             }
 
             const today = new Date(); document.getElementById('committee-start').value = getLocalDateStr(today);
@@ -818,9 +1020,20 @@
                 studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
                 let myData = studentMaster[currentUserEmail] || {}; let userName = myData.name || (isAdmin ? "先生" : "生徒");
                 
+                // ★ 準編集権限
+                isSubAdmin = myData.isSubAdmin === true;
+                if (isAdmin || isSubAdmin) {
+                    document.getElementById('btn-edit-week').style.display = 'inline-block';
+                }
+
+                applyUserSettings(); // ★ セクションの順番と色を反映
+
                 let myRoles = [myData.role, myData.committee].filter(Boolean);
-                if (!isAdmin && myRoles.length > 0) {
-                    document.getElementById('committee-form-area').style.display = 'block';
+                if (isAdmin) {
+                    document.getElementById('btn-show-committee-form').style.display = 'block';
+                    document.getElementById('my-role-name-container').innerHTML = `<span id="post-role-fixed" data-role="管理者">管理者</span>`;
+                } else if (myRoles.length > 0) {
+                    document.getElementById('btn-show-committee-form').style.display = 'block';
                     let container = document.getElementById('my-role-name-container');
                     if (myRoles.length > 1) { container.innerHTML = `<select id="post-role-select" style="width:auto; padding:2px; margin:0; font-size:0.9em;">${myRoles.map(r => `<option value="${r}">${r}</option>`).join('')}</select>`; } 
                     else { container.innerHTML = `<span id="post-role-fixed" data-role="${myRoles[0]}">${myRoles[0]}</span>`; }
@@ -907,7 +1120,7 @@
             if (wInfo) {
                 let popStr = ""; let isRainy = wInfo.desc.includes("雨") || wInfo.desc.includes("雪") || wInfo.pop > 0;
                 if (isRainy && wInfo.pop > 0) { popStr = ` <span style="color:#0d47a1; font-weight:bold;">☂${wInfo.pop}%</span>`; }
-                let mainIcon = getWeatherIcon(wInfo.desc);
+                let mainIcon = parseWeatherString(wInfo.desc);
                 weatherHtml = `<div class="weather-info">${mainIcon} ${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃${popStr}</div>`;
             }
 
@@ -931,13 +1144,10 @@
 
                 let html = `<div class="day-label" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap;"><div><span>${displayLabel}</span>${weatherHtml}</div>`;
                 
-                // 学級委員判定
-                let myRole = studentMaster[currentUserEmail]?.role || "";
-                let isClassRepCheck = (myRole === '学級委員');
-                
-                if (isAdmin || isClassRepCheck) html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">直接編集</button>`;
+                if (isAdmin || isSubAdmin) html += `<button onclick="startInlineEditDay('${dateStr}', '${elId}')" style="padding:2px 8px; font-size:0.8em; margin:0;">直接編集</button>`;
                 html += `</div><div>${eventHtml}</div><div class="scroll-area"><table><tr><th class="col-period">校時</th><th class="col-subject">科目</th><th class="col-note">備考</th></tr>`;
                 
+                let myRole = studentMaster[currentUserEmail]?.role || "";
                 let myComm = studentMaster[currentUserEmail]?.committee || "";
                 data.lessons.forEach((l, i) => {
                     let noteHtml = l.note || "";
@@ -955,7 +1165,7 @@
                 let subsHtml = subsForDay.map(s => `・${s.title}`).join("<br>");
                 let combinedNote = data.dayNote ? data.dayNote.replace(/\n/g, '<br>') : "";
                 
-                let editNoteBtn = (isAdmin || isClassRepCheck) ? `<button class="student-edit-btn" onclick="startEditDayNote('${dateStr}', '${(data.dayNote||"").replace(/'/g, "\\'")}')" style="float:right;">✎ 諸連絡を編集</button>` : "";
+                let editNoteBtn = (isAdmin || isSubAdmin) ? `<button class="student-edit-btn" onclick="startEditDayNote('${dateStr}', '${(data.dayNote||"").replace(/'/g, "\\'")}')" style="float:right;">✎ 諸連絡を編集</button>` : "";
                 
                 html += `<div style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; background: #fafafa; font-size: 0.9em;">
                             <strong style="display:block; border-bottom: 1px solid #ccc; margin-bottom: 5px; padding-bottom: 2px;">■ 諸連絡 ${editNoteBtn}</strong>
@@ -1063,42 +1273,47 @@
             document.getElementById('btn-save-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none';
             document.getElementById('btn-cancel-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none';
             document.getElementById('my-week-settings').style.display = isEditingMyWeek ? 'flex' : 'none';
+            document.getElementById('my-list-editor-area').style.display = 'none'; // リスト編集は閉じる
             displayWeeklySchedule(); 
         }
 
-        async function editMyEventOptions() {
+        // ★リスト編集をインラインで展開
+        function editMyEventOptions() {
             let currentOpts = studentMaster[currentUserEmail]?.myEventOptions || ["", "塾", "習い事", "病院"];
-            let res = prompt("自分の予定で選べる選択肢をカンマ(,)区切りで入力してください", currentOpts.join(','));
-            if (res !== null) {
-                let newOpts = ["", ...res.split(',').map(s => s.trim()).filter(s => s)];
-                await db.collection("students").doc(currentUserEmail).set({ myEventOptions: newOpts }, { merge: true });
-                alert("選択肢を更新しました");
-                displayWeeklySchedule();
-            }
+            document.getElementById('edit-my-events-input').value = currentOpts.join(',');
+            
+            let clubOpts = studentMaster[currentUserEmail]?.myClubOptions || clubOptionsList;
+            document.getElementById('edit-my-clubs-input').value = clubOpts.join(',');
+            
+            document.getElementById('my-list-editor-area').style.display = 'block';
         }
-        
-        async function editMyClubOptions() {
-            let currentOpts = studentMaster[currentUserEmail]?.myClubOptions || clubOptionsList;
-            let res = prompt("部活動の予定で選べる選択肢をカンマ(,)区切りで入力してください", currentOpts.join(','));
-            if (res !== null) {
-                let newOpts = ["", ...res.split(',').map(s => s.trim()).filter(s => s)];
-                await db.collection("students").doc(currentUserEmail).set({ myClubOptions: newOpts }, { merge: true });
-                alert("選択肢を更新しました");
-                displayWeeklySchedule();
-            }
+        function editMyClubOptions() { editMyEventOptions(); } // 同じ枠で編集
+
+        async function saveMyListOptions() {
+            let evStr = document.getElementById('edit-my-events-input').value;
+            let clStr = document.getElementById('edit-my-clubs-input').value;
+            let newEvOpts = ["", ...evStr.split(',').map(s => s.trim()).filter(s => s)];
+            let newClOpts = ["", ...clStr.split(',').map(s => s.trim()).filter(s => s)];
+            
+            await db.collection("students").doc(currentUserEmail).set({ myEventOptions: newEvOpts, myClubOptions: newClOpts }, { merge: true });
+            alert("選択肢を保存しました");
+            document.getElementById('my-list-editor-area').style.display = 'none';
+            displayWeeklySchedule(); // リロードして反映
         }
+        function closeMyListEditor() { document.getElementById('my-list-editor-area').style.display = 'none'; }
 
         async function saveMyWeek() {
-            let batchData = {};
+            let updateObj = {};
             for (let i = 0; i < currentWeeklyDates.length; i++) {
                 let dateStr = currentWeeklyDates[i];
-                let noteType = document.getElementById(`edit-my-note-type-${dateStr}`)?.value || "";
-                let noteDetail = document.getElementById(`edit-my-note-detail-${dateStr}`)?.value || "";
-                let clubType = document.getElementById(`edit-my-club-type-${dateStr}`)?.value || "";
-                let clubDetail = document.getElementById(`edit-my-club-detail-${dateStr}`)?.value || "";
-                batchData[dateStr] = { noteType: noteType, noteDetail: noteDetail, clubType: clubType, clubDetail: clubDetail };
+                updateObj[`schedules.${dateStr}`] = {
+                    noteType: document.getElementById(`edit-my-note-type-${dateStr}`)?.value || "",
+                    noteDetail: document.getElementById(`edit-my-note-detail-${dateStr}`)?.value || "",
+                    clubType: document.getElementById(`edit-my-club-type-${dateStr}`)?.value || "",
+                    clubDetail: document.getElementById(`edit-my-club-detail-${dateStr}`)?.value || ""
+                };
             }
-            await db.collection("students").doc(currentUserEmail).set({ schedules: batchData }, { merge: true });
+            await db.collection("students").doc(currentUserEmail).update(updateObj);
             toggleEditMyWeek(); 
         }
 
@@ -1123,7 +1338,7 @@
                 let html = `<table style="width: 100%; min-width: 500px;"><tr>
                     <th style="width:11%;">日付</th>
                     <th style="${showClub ? 'width:30%' : 'width:44.5%'}">主な行事・提出物</th>
-                    <th style="${showClub ? 'width:29%' : 'width:44.5%'}">自分の予定</th>
+                    <th style="${showClub ? 'width:29%' : 'width:44.5%'}">個人の予定</th>
                     ${showClub ? `<th style="width:30%">部活動</th>` : ''}
                     </tr>`;
                 
@@ -1138,8 +1353,7 @@
                     let wIdx = dateObj.getDay();
                     let isSch = isSchoolDay(dateStr);
                     let isHoliday = !isSch || wIdx === 0 || wIdx === 6;
-                    let bgStyle = isHoliday ? "background-color: #f2f2f2;" : "";
-                    let darkRowClass = isHoliday && document.body.classList.contains('dark-mode') ? "background-color: #2a2a2a;" : "";
+                    let rowClass = isHoliday ? "holiday-row" : "";
                     
                     let subsForDay = submissionsList.filter(s => s.deadline === dateStr);
                     let subsHtml = subsForDay.map(s => {
@@ -1165,7 +1379,7 @@
                                       </td>`;
                     } else {
                         myNoteHtml = mySched.noteType ? `<b>${mySched.noteType}</b> ` + (mySched.noteDetail || "") : (mySched.noteDetail ? mySched.noteDetail : '');
-                        myNoteHtml = `<td style="text-align:left; padding-left:10px;">${myNoteHtml}</td>`;
+                        myNoteHtml = `<td style="text-align:left; padding-left:10px;">${myNoteHtml}</td>`; // ★黒字に修正
                     }
 
                     let clubHtml = "";
@@ -1182,9 +1396,10 @@
                         }
                     }
 
-                    let dateCell = `<td style="text-align:center;">${dateObj.getMonth()+1}/${dateObj.getDate()} <span style="color:${wIdx===0?'red':wIdx===6?'blue':'inherit'}; font-weight:bold;">${weekNames[wIdx]}</span></td>`;
+                    // 日付と曜日を統合
+                    let dateCell = `<td style="text-align:center;">${dateObj.getMonth()+1}/${dateObj.getDate()}<br><span style="color:${wIdx===0?'red':wIdx===6?'blue':'inherit'}; font-weight:bold;">${weekNames[wIdx]}</span></td>`;
 
-                    html += `<tr style="${bgStyle} ${darkRowClass}">${dateCell}`;
+                    html += `<tr class="${rowClass}">${dateCell}`;
                     
                     if (isHoliday && !isEditingMyWeek && !showClub) {
                         let text = mySched.noteType ? `<b>${mySched.noteType}</b> ` + (mySched.noteDetail || "") : (mySched.noteDetail ? mySched.noteDetail : '');
@@ -1322,6 +1537,10 @@
             pendingCommitteeCount = 0; 
 
             let sortedPosts = [...allCommitteePosts].sort((a, b) => {
+                // 管理者投稿を一番上に
+                if (a.isAdminPost && !b.isAdminPost) return -1;
+                if (!a.isAdminPost && b.isAdminPost) return 1;
+
                 let pA = a.priority || 1; let pB = b.priority || 1;
                 if (pA !== pB) return pB - pA;
                 let tA = a.createdAt ? a.createdAt.toMillis() : 0; let tB = b.createdAt ? b.createdAt.toMillis() : 0;
@@ -1335,18 +1554,19 @@
                 let bgStyle = isColored ? `background-color:${d.bgColor}; color:#000;` : "";
                 let hasBgClass = isColored ? 'has-bg' : '';
                 
+                let infoText = d.isAdminPost ? `${dateStr} 管理者` : `${dateStr} 【${d.roleName}】${d.authorName} <span style="margin-left:10px; font-weight:normal; font-size:0.9em;">(重要度:${pLabel}) (公開:${d.startDate}〜${d.endDate})</span>`;
+                
                 let contentHtml = `<div id="committee-post-${d.id}" class="post-item ${hasBgClass}" style="${bgStyle} border:1px solid #ccc; margin-bottom:10px;">
                     <div class="post-date" style="border-bottom: 1px dashed #999; padding-bottom: 5px; margin-bottom: 5px; color:inherit;">
-                        ${dateStr} 【${d.roleName}】${d.authorName} 
-                        <span style="margin-left:10px; font-weight:normal; font-size:0.9em;">(重要度:${pLabel}) (公開:${d.startDate}〜${d.endDate})</span>
+                        ${infoText}
                     </div>
                     <div style="white-space:pre-wrap; padding: 5px 0; color:inherit;">${d.content}</div>`;
 
                 if (d.status === 'approved') {
-                    if (d.startDate <= todayStr && d.endDate >= todayStr) {
+                    if (d.isAdminPost || (d.startDate <= todayStr && d.endDate >= todayStr)) {
                         let btnHtml = "";
                         if (isAdmin) btnHtml = `<button onclick="deleteCommitteePost('${d.id}')">削除</button>`;
-                        else if (d.authorEmail === currentUserEmail) btnHtml = `<button onclick="startInlineEditCommitteePost('${d.id}')">再編集</button> <button onclick="deleteCommitteePost('${d.id}')">削除</button>`;
+                        else if (!d.isAdminPost && d.authorEmail === currentUserEmail) btnHtml = `<button onclick="startInlineEditCommitteePost('${d.id}')">再編集</button> <button onclick="deleteCommitteePost('${d.id}')">削除</button>`;
                         postsHtml += contentHtml + (btnHtml ? `<div class="admin-actions">${btnHtml}</div>` : "") + `</div>`;
                     }
                 } else if (d.status === 'pending') {
@@ -1382,7 +1602,7 @@
         }
 
         async function postCommitteeMessage() {
-            if(studentMaster[currentUserEmail]?.isBanned) return alert("現在、投稿機能が制限されています。担任の先生に確認してください。");
+            if(!isAdmin && studentMaster[currentUserEmail]?.isBanned) return alert("現在、投稿機能が制限されています。担任の先生に確認してください。");
 
             const content = document.getElementById('committee-input').value.trim();
             if(!content) return alert("内容を入力してください");
@@ -1391,9 +1611,9 @@
             let roleFixed = document.getElementById('post-role-fixed');
             let roleName = roleSelect ? roleSelect.value : (roleFixed ? roleFixed.getAttribute('data-role') : "生徒");
             
-            let myData = studentMaster[currentUserEmail];
+            let myData = studentMaster[currentUserEmail] || {};
             
-            await db.collection("committee_posts").add({
+            let postData = {
                 authorEmail: currentUserEmail,
                 authorName: myData.name || "生徒",
                 roleName: roleName,
@@ -1404,9 +1624,22 @@
                 endDate: document.getElementById('committee-end').value,
                 status: 'pending', 
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+
+            // ★ 管理者の場合は即公開、名前も管理者に固定
+            if (isAdmin) {
+                postData.status = 'approved';
+                postData.isAdminPost = true;
+                postData.authorName = "管理者";
+            }
+
+            await db.collection("committee_posts").add(postData);
             document.getElementById('committee-input').value = "";
-            alert("送信しました。先生の承認後に公開されます。");
+            document.getElementById('committee-form-area').style.display = 'none';
+            document.getElementById('btn-show-committee-form').style.display = 'block';
+            
+            if (isAdmin) alert("連絡を掲示板の最上部に公開しました。");
+            else alert("送信しました。先生の承認後に公開されます。");
         }
 
         async function approveCommitteePost(id) { await db.collection("committee_posts").doc(id).update({ status: 'approved' }); }
@@ -1586,7 +1819,7 @@
         function renderStudentListUI() {
             const area = document.getElementById('student-list-area');
             if(!area) return;
-            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>投稿禁止</th><th>操作</th></tr>";
+            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>準編集権限</th><th>投稿禁止</th><th>操作</th></tr>";
             for(let email in studentMaster) {
                 if(email === TEACHER_EMAIL) continue;
                 const d = studentMaster[email]; const safeId = email.replace(/[@.]/g, '_');
@@ -1595,47 +1828,44 @@
                             <td>${email}</td>
                             <td id="role-td-${safeId}">${d.role || ""}</td>
                             <td id="comm-td-${safeId}">${d.committee || ""}</td>
+                            <td id="subadmin-td-${safeId}" style="text-align:center;">${d.isSubAdmin ? '👑' : ''}</td>
                             <td id="ban-td-${safeId}" style="text-align:center;">${d.isBanned ? '🚫' : ''}</td>
                             <td id="action-td-${safeId}">
-                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${(d.name||"").replace(/'/g, "\\'")}', '${(d.role||"").replace(/'/g, "\\'")}', '${(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isBanned})">編集</button>
+                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${(d.name||"").replace(/'/g, "\\'")}', '${(d.role||"").replace(/'/g, "\\'")}', '${(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isSubAdmin}, ${!!d.isBanned})">編集</button>
                                 <button type="button" onclick="deleteStudent('${email}')">削除</button>
                             </td>
                          </tr>`; 
             }
             area.innerHTML = html + "</table>";
         }
-        function startInlineEditStudent(safeId, email, name, role, comm, isBanned) {
+        function startInlineEditStudent(safeId, email, name, role, comm, isSubAdmin, isBanned) {
             document.getElementById(`name-td-${safeId}`).innerHTML = `<input type="text" id="input-name-${safeId}" value="${name}" style="width:100%; padding:2px; margin:0;">`;
             document.getElementById(`role-td-${safeId}`).innerHTML = `<select id="input-role-${safeId}" style="width:100%; padding:2px; margin:0;">${getRoleOptions(role)}</select>`;
             document.getElementById(`comm-td-${safeId}`).innerHTML = `<select id="input-comm-${safeId}" style="width:100%; padding:2px; margin:0;">${getCommOptions(comm)}</select>`;
+            document.getElementById(`subadmin-td-${safeId}`).innerHTML = `<input type="checkbox" id="input-subadmin-${safeId}" ${isSubAdmin ? 'checked' : ''} style="transform:scale(1.5);">`;
             document.getElementById(`ban-td-${safeId}`).innerHTML = `<input type="checkbox" id="input-ban-${safeId}" ${isBanned ? 'checked' : ''} style="transform:scale(1.5);">`;
             document.getElementById(`action-td-${safeId}`).innerHTML = `<button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')">保存</button> <button type="button" onclick="renderStudentListUI()">ｷｬﾝｾﾙ</button>`;
         }
         async function saveInlineEditStudent(email, safeId) {
             try {
+                const isSubAdmin = document.getElementById(`input-subadmin-${safeId}`).checked;
                 const isBanned = document.getElementById(`input-ban-${safeId}`).checked;
-                await db.collection("students").doc(email).set({ name: document.getElementById(`input-name-${safeId}`).value.trim(), role: document.getElementById(`input-role-${safeId}`).value.trim(), committee: document.getElementById(`input-comm-${safeId}`).value.trim(), isBanned: isBanned }, { merge: true });
+                await db.collection("students").doc(email).set({ name: document.getElementById(`input-name-${safeId}`).value.trim(), role: document.getElementById(`input-role-${safeId}`).value.trim(), committee: document.getElementById(`input-comm-${safeId}`).value.trim(), isSubAdmin: isSubAdmin, isBanned: isBanned }, { merge: true });
                 alert("生徒情報を更新しました。");
             } catch (err) { alert("更新に失敗しました: " + err.message); }
         }
         async function registerDirect() {
             const email = document.getElementById('direct-email').value.trim(); if(!email) return alert("メールアドレスを入力");
-            await db.collection("students").doc(email).set({ name: document.getElementById('direct-name').value.trim(), role: document.getElementById('direct-role').value.trim(), committee: document.getElementById('direct-committee').value.trim(), isBanned: false });
+            await db.collection("students").doc(email).set({ name: document.getElementById('direct-name').value.trim(), role: document.getElementById('direct-role').value.trim(), committee: document.getElementById('direct-committee').value.trim(), isSubAdmin: false, isBanned: false });
             document.getElementById('direct-email').value = ""; document.getElementById('direct-name').value = ""; alert("登録しました");
         }
         async function deleteStudent(id) { if(confirm("削除しますか？")) await db.collection("students").doc(id).delete(); }
 
+
         // -------------------------------------
         // 11. Excel一括管理 & その他の管理者機能
         // -------------------------------------
-        function formatExcelDate(v) {
-            if(!v) return "";
-            if(typeof v === 'number') { let t = new Date((v - (25567 + 2)) * 86400 * 1000); return getLocalDateStr(t); }
-            if(typeof v === 'string') { let m = v.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/); if(m) return `${m[1]}-${('0'+m[2]).slice(-2)}-${('0'+m[3]).slice(-2)}`; }
-            return v.toString();
-        }
-
-        async function exportExcel() {
+        function exportExcel() {
             const wb = XLSX.utils.book_new();
 
             let studentsData = [];
@@ -1653,35 +1883,35 @@
             const mVal = document.getElementById('excel-month-input').value;
             if(!mVal) return alert("スケジュール出力用の年月を選択してください。");
             const [y, m] = mVal.split('-'); const endDate = new Date(y, m, 0).getDate();
-            const snap = await db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", `${y}-${m}-01`).where(firebase.firestore.FieldPath.documentId(), "<=", `${y}-${m}-${endDate}`).get();
-            let ext = {}; snap.forEach(doc => ext[doc.id] = doc.data());
-            
-            const regDoc = await db.collection("config").doc("regular_schedule").get();
-            const regData = regDoc.exists ? regDoc.data() : {};
-            let schedData = [];
-            
-            for(let d=1; d<=endDate; d++) {
-                let dateStr = `${y}-${m}-${('0'+d).slice(-2)}`;
-                let dObj = new Date(y, m-1, d); let dNum = dObj.getDay();
-                let defaultTime = getStandardExitTime(dateStr);
-                let exitT = ext[dateStr]?.exitTime !== undefined ? ext[dateStr].exitTime : "";
-                let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, lessons:Array.from({length:6}, (_,i)=>({sub:regData[["sun","mon","tue","wed","thu","fri","sat"][dNum]]?.[i]||"", note:""})) };
+            db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", `${y}-${m}-01`).where(firebase.firestore.FieldPath.documentId(), "<=", `${y}-${m}-${endDate}`).get().then(async snap => {
+                let ext = {}; snap.forEach(doc => ext[doc.id] = doc.data());
                 
-                schedData.push({
-                    "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum],
-                    "行事予定": data.event||"", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub,
-                    "下校時刻": data.exitTime||"", "全体備考": data.dayNote||""
-                });
-            }
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedData), "スケジュール");
+                const regDoc = await db.collection("config").doc("regular_schedule").get();
+                const regData = regDoc.exists ? regDoc.data() : {};
+                let schedData = [];
+                
+                for(let d=1; d<=endDate; d++) {
+                    let dateStr = `${y}-${m}-${('0'+d).slice(-2)}`;
+                    let dObj = new Date(y, m-1, d); let dNum = dObj.getDay();
+                    let exitT = ext[dateStr]?.exitTime !== undefined ? ext[dateStr].exitTime : "";
+                    let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, lessons:Array.from({length:6}, (_,i)=>({sub:regData[["sun","mon","tue","wed","thu","fri","sat"][dNum]]?.[i]||"", note:""})) };
+                    
+                    schedData.push({
+                        "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum],
+                        "行事予定": data.event||"", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub,
+                        "下校時刻": data.exitTime||"", "全体備考": data.dayNote||""
+                    });
+                }
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedData), "スケジュール");
 
-            let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end}));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
+                let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end}));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
 
-            let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time}));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
+                let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time}));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
 
-            XLSX.writeFile(wb, `ClassSettings_${y}_${m}.xlsx`);
+                XLSX.writeFile(wb, `ClassSettings_${y}_${m}.xlsx`);
+            });
         }
 
         function handleExcelFileChange(e) {
@@ -1841,25 +2071,6 @@
             recordSystemUpdate();
         }
         
-        async function resetExitTimes() {
-            const startStr = document.getElementById('reset-exit-start').value;
-            const endStr = document.getElementById('reset-exit-end').value;
-            if(!startStr || !endStr) return alert("リセットする期間の開始と終了を指定してください。");
-            if(startStr > endStr) return alert("終了日は開始日以降にしてください。");
-            if(!confirm(`${startStr} から ${endStr} までの個別に設定された下校時刻をすべてリセットし、標準の期間設定に従うようにしますか？`)) return;
-
-            try {
-                const snap = await db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", startStr).where(firebase.firestore.FieldPath.documentId(), "<=", endStr).get();
-                if (snap.empty) return alert("指定期間内に保存された予定データはありませんでした。（標準設定がそのまま適用されています）");
-
-                let batch = db.batch(); let count = 0;
-                snap.forEach(doc => { batch.set(doc.ref, { exitTime: "" }, { merge: true }); count++; });
-                await batch.commit();
-                alert(`${count}日分の個別下校時刻をリセットし、標準設定と連携させました！`);
-                displayAllSchedules(); recordSystemUpdate();
-            } catch(e) { alert("リセット中にエラーが発生しました。"); console.error(e); }
-        }
-
         async function loadUnreadStudents() {
             const sysDoc = await db.collection("config").doc("system").get();
             let lastUpdate = sysDoc.exists ? sysDoc.data().lastUpdatedAt?.toDate() : null;
