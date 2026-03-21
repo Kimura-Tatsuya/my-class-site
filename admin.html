@@ -2,38 +2,800 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ログ確認テスト</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面 - My Class Portal</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { background-color: #f7f9fc; color: #333; font-family: "MS UI Gothic", "MS Gothic", sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; }
+        h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #333; }
+        .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #0d47a1; margin-top: 0; padding-bottom: 5px; color: #0d47a1; }
+        .section-header h2 { border: none; margin: 0; padding: 0; }
+        
+        section { background: white; margin-bottom: 30px; border: 1px solid #0d47a1; padding: 20px; border-radius: 5px; }
+        
+        input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; font-family: inherit; box-sizing: border-box; }
+        input[type="checkbox"] { width: auto; cursor: pointer; margin: 0 auto; display: block; transform: scale(1.2); }
+        button { padding: 6px 12px; cursor: pointer; background: white; color: #333; border: 1px solid #999; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; border-radius: 3px;}
+        button:hover { background: #eee; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; } 
+        
+        .admin-form-box { background: white; border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
+        details.admin-form-box summary { cursor: pointer; outline: none; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-weight: bold; font-size: 1.1em; margin-bottom: 10px; display: block; color: #0d47a1; }
+        details.admin-form-box summary::-webkit-details-marker { display: none; }
+        
+        .scroll-area { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+        .deadline-warning { color: #f57c00; font-weight: bold; } 
+        .deadline-overdue { color: #d32f2f; font-weight: bold; } 
+        
+        .msg-unread { background-color: #e3f2fd; }
+        .msg-protected { background-color: #fff3cd; }
+        .msg-read { background-color: #fafafa; }
+        
+        .edit-box { background:#f9f9f9; padding:10px; border:2px solid #ffc107; margin-bottom:10px; }
+
+        @media screen and (max-width: 650px) {
+            body { padding: 10px; }
+            section { padding: 15px; }
+            table { font-size: 0.85em; }
+            th, td { padding: 5px; }
+        }
+    </style>
 </head>
 <body>
-    <h1>ログ表示テスト</h1>
-    <div id="result">読み込み中...</div>
+
+    <div id="loading-section" style="text-align: center; margin-top: 50px;">
+        <h2>認証中...</h2>
+        <p>管理者権限を確認しています。</p>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+                <h1 style="border:none; margin:0; font-size:1.5em; color:#0d47a1;">⚙️ My Class Portal 管理画面</h1>
+                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: #555;">ログイン中: <span id="admin-email-display"></span></div>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="button" onclick="location.href='index.html'" style="background:#0d47a1; color:white; border-color:#0d47a1;">◀ ポータルへ戻る</button>
+            </div>
+        </header>
+
+        <main>
+            <section>
+                <div class="section-header">
+                    <h2>各種設定・確認メニュー</h2>
+                </div>
+
+                <details class="admin-form-box" open style="border-color: #2e7d32;">
+                    <summary style="color:#2e7d32;">［一括管理］全設定のExcelインポート/エクスポート</summary>
+                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール、長期休業、下校時刻を1つのExcelファイル（.xlsx）のシート（タブ）で管理できます。</p>
+                    <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #ccc;">
+                        <b>1. エクスポート（ダウンロード）</b><br>
+                        <span style="font-size:0.85em;">※指定した月のスケジュールを含めて出力します。</span><br>
+                        スケジュール出力月：<input type="month" id="excel-month-input" style="width:150px; margin-right:10px;">
+                        <button type="button" onclick="exportExcel()">現在の設定をダウンロード</button>
+                    </div>
+                    <div style="margin-top:15px;">
+                        <b>2. インポート（一括更新・プレビュー付き）</b><br>
+                        <span style="font-size:0.85em;">※Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
+                        <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:none; padding:0;" onchange="handleExcelFileChange(event)">
+                        
+                        <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
+                            <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
+                            <div id="import-preview-content" style="font-size:0.9em; margin-bottom:10px; line-height:1.6;"></div>
+                            <button type="button" onclick="commitExcelImport()" style="background:#d9534f; color:white;">✅ この内容で更新を実行する</button>
+                            <button type="button" onclick="cancelExcelImport()">キャンセル</button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［確認］アクセス状況・未確認者チェック</summary>
+                    <p style="margin-bottom:5px;">最終情報更新日時：<span id="last-update-time">---</span></p>
+                    <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
+                    <hr style="border-top:1px dashed #ccc; margin:15px 0;">
+                    <input type="date" id="log-date-input" style="width:150px;">
+                    <button type="button" onclick="loadAccessLogsByDate()">指定日のログを表示</button>
+                    <button type="button" onclick="loadAccessLogs()">最新50件を表示</button>
+                    <div id="access-log-list" class="scroll-area" style="margin-top: 10px; max-height: 250px;"></div>
+                </details>
+
+                <details class="admin-form-box" open style="border-color: #d32f2f;">
+                    <summary style="color:#d32f2f;">［要確認］生徒からの「係・委員会」連絡（承認待ち・差戻し）</summary>
+                    <div id="admin-pending-committee" style="margin-top:10px; max-height: 500px; overflow-y: auto;">確認中...</div>
+                </details>
+                
+                <details class="admin-form-box" open>
+                    <summary>［確認］受信したメッセージ（担任へ連絡）</summary>
+                    <p style="font-size: 0.85em; margin-top: 5px;">※メッセージにマウスを合わせる（またはタップ）で「既読」になります。</p>
+                    <div id="admin-message-list" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］カウントダウン表示内容</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※ここでチェックを入れた項目が、生徒のトップ画面に表示されます。</p>
+                    <div id="admin-countdown-list" class="scroll-area" style="margin-top:10px;"></div>
+                    <button type="button" onclick="saveCountdowns()" style="margin-top:10px;">カウントダウン設定を保存</button>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］回収物・提出物の管理</summary>
+                    <div style="margin-top:10px;">
+                        提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
+                        締め切り：<input type="date" id="subm-deadline" style="width:150px;"><br>
+                        <button type="button" onclick="addSubmission()">追加</button>
+                    </div>
+                    <div id="admin-submission-table" class="scroll-area" style="margin-top:15px;"></div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］標準の最終下校時刻（期間指定）</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※時期ごとに下校時刻を設定できます。追加すると、その期間内の予定も自動的に上書き更新されます。</p>
+                    <div style="margin-top:10px;">
+                        開始：<input type="date" id="exit-period-start" style="width:130px;">
+                        終了：<input type="date" id="exit-period-end" style="width:130px;">
+                        時刻：<select id="exit-period-time" style="width:100px; padding:6px;"></select>
+                        <button type="button" onclick="addExitTimePeriod()">追加して更新</button>
+                    </div>
+                    <div id="exit-period-list" style="margin-top:10px; line-height: 1.8;"></div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］予定の個別編集・旧形式</summary>
+                    <div style="margin-top:10px;">
+                        日付：<input type="date" id="edit-date-select" style="width:200px;">
+                        <button type="button" onclick="loadScheduleEdit()">呼出</button>
+                        <div id="edit-form" style="display:none; margin-top:15px;">
+                            <div id="edit-table-container" class="scroll-area"></div>
+                            <div style="margin-top:10px;">
+                                最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
+                            </div>
+                            <button type="button" onclick="saveSchedule()" style="margin-top:10px;">保存</button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］標準（レギュラー）の時間割</summary>
+                    曜日：<select id="reg-day-select" onchange="loadRegularSetting()" style="width:150px;">
+                        <option value="mon">月曜日</option><option value="tue">火曜日</option>
+                        <option value="wed">水曜日</option><option value="thu">木曜日</option><option value="fri">金曜日</option>
+                    </select>
+                    <div class="scroll-area">
+                        <table id="reg-table"></table>
+                    </div>
+                    <button type="button" onclick="saveRegularSetting()" style="margin-top:10px;">標準設定を保存</button>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］長期休業・臨時休校</summary>
+                    開始：<input type="date" id="vac-start" style="width:160px;"> 終了：<input type="date" id="vac-end" style="width:160px;">
+                    <button type="button" onclick="saveVacation()">期間を登録</button>
+                    <div id="vacation-list" style="margin-top:10px;"></div>
+                </details>
+            </section>
+
+            <section style="border-color: #333;">
+                <div class="section-header">
+                    <h2 style="color:#333;">名簿・役割個別管理</h2>
+                </div>
+                
+                <div class="admin-form-box" style="margin-top:15px;">
+                    <h3 style="margin-top:0;">係・委員会の種類設定（手動登録）</h3>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:200px;">
+                            <p style="font-weight:bold; margin-bottom:5px;">係の登録</p>
+                            <input type="text" id="new-role-input" placeholder="係名（例: 国語係）" style="width:150px; display:inline-block;">
+                            <button type="button" onclick="addRole()">追加</button>
+                            <div id="role-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <p style="font-weight:bold; margin-bottom:5px;">委員会の登録</p>
+                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書）" style="width:150px; display:inline-block;">
+                            <button type="button" onclick="addCommittee()">追加</button>
+                            <div id="comm-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-form-box" style="margin-top:15px;">
+                    <h3 style="margin-top:0;">生徒の新規登録 (1件ずつ手動)</h3>
+                    <input type="email" id="direct-email" placeholder="メールアドレス" style="width:200px;">
+                    <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
+                    <select id="direct-role" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">係</option></select>
+                    <select id="direct-committee" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">委員会</option></select>
+                    <button type="button" onclick="registerDirect()">新規登録</button>
+                </div>
+
+                <h3>登録済み一覧（直接編集可能）</h3>
+                <p style="font-size:0.85em;">※「準編集権限」は諸連絡や週予定の編集権限を与えます。「投稿禁止」は一切の投稿を不可にします。</p>
+                <div id="student-list-area" class="scroll-area"></div>
+            </section>
+        </main>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script>
-        // あなたのプロジェクト設定（index.htmlと同じもの）を入れてください
         const firebaseConfig = {
             apiKey: "AIzaSyC7R6Hbgt3C6iq_ozLM6FF6DBGA65j6dd0",
             authDomain: "my-class-site.firebaseapp.com",
+            databaseURL: "https://my-class-site-default-rtdb.firebaseio.com",
             projectId: "my-class-site",
             storageBucket: "my-class-site.firebasestorage.app",
             messagingSenderId: "125594983188",
             appId: "1:125594983188:web:129aa54e9d3a39ca700001"
         };
+        const TEACHER_EMAIL = "administrator@class.jp";
+        const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事等"];
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // データを取得して表示するだけのシンプルな命令
-        db.collection("access_logs").get().then((querySnapshot) => {
-            let html = "<ul>";
-            querySnapshot.forEach((doc) => {
-                html += `<li>${doc.data().email} - ${doc.data().loginTime?.toDate()}</li>`;
-            });
-            html += "</ul>";
-            document.getElementById("result").innerHTML = html;
-        }).catch((error) => {
-            document.getElementById("result").innerHTML = "エラー発生: " + error.message;
+        let studentMaster = {};
+        let vacationData = [];
+        let exitTimePeriods = []; 
+        let submissionsList = [];
+        let allCommitteePosts = [];
+        let rolesList = [];
+        let committeesList = [];
+        let pendingExcelData = {};
+        
+        const COUNTDOWN_PRESETS = [
+            { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
+            { id: "sports", defaultLabel: "体育祭" }, { id: "chorus", defaultLabel: "合唱祭" }, { id: "soutai", defaultLabel: "学校総合体育大会" },
+            { id: "shinjin", defaultLabel: "新人戦" }, { id: "school_trip", defaultLabel: "修学旅行" }, { id: "camp", defaultLabel: "宿泊学習" },
+            { id: "field_trip", defaultLabel: "校外学習" }, { id: "term2_start", defaultLabel: "2学期始業式" }, { id: "term3_start", defaultLabel: "3学期始業式" },
+            { id: "graduation", defaultLabel: "卒業式" }, { id: "summer", defaultLabel: "夏休み" }, { id: "winter", defaultLabel: "冬休み" },
+            { id: "custom1", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名1" }, { id: "custom2", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名2" }, { id: "custom3", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名3" }
+        ];
+        let countdownSettings = {};
+
+        function getLocalDateStr(dateObj) { return `${dateObj.getFullYear()}-${('0' + (dateObj.getMonth() + 1)).slice(-2)}-${('0' + dateObj.getDate()).slice(-2)}`; }
+        function formatDateTime(dateObj) { return `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${('0'+dateObj.getHours()).slice(-2)}:${('0'+dateObj.getMinutes()).slice(-2)}`; }
+        function formatExcelDate(v) {
+            if(!v) return "";
+            if(typeof v === 'number') { let t = new Date((v - (25567 + 2)) * 86400 * 1000); return getLocalDateStr(t); }
+            if(typeof v === 'string') { let m = v.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/); if(m) return `${m[1]}-${('0'+m[2]).slice(-2)}-${('0'+m[3]).slice(-2)}`; }
+            return v.toString();
+        }
+
+        // 認証と初期化
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                if (user.email !== TEACHER_EMAIL) {
+                    alert("このページは管理者専用です。ポータル画面へ移動します。");
+                    window.location.href = "index.html";
+                } else {
+                    document.getElementById('loading-section').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    document.getElementById('admin-email-display').innerText = user.email;
+                    initAdminApp();
+                }
+            } else {
+                window.location.href = "index.html";
+            }
         });
+
+        async function recordSystemUpdate() { await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); }
+
+        function initAdminApp() {
+            const now = new Date(); 
+            document.getElementById('excel-month-input').value = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
+            initExitTimeOptions(document.getElementById('exit-period-time'), false);
+
+            db.collection("config").doc("countdowns").onSnapshot(snap => { countdownSettings = snap.exists ? snap.data() : {}; renderAdminCountdowns(); });
+            db.collection("config").doc("exit_times").onSnapshot(snap => { exitTimePeriods = snap.exists ? (snap.data().periods || []) : []; renderExitTimePeriods(); });
+            db.collection("config").doc("roles").onSnapshot(snap => { rolesList = snap.exists ? snap.data().items || [] : []; renderRoleCommSettings(); renderStudentListUI(); updateDirectInputs(); });
+            db.collection("config").doc("committees").onSnapshot(snap => { committeesList = snap.exists ? snap.data().items || [] : []; renderRoleCommSettings(); renderStudentListUI(); updateDirectInputs(); });
+            db.collection("config").doc("vacations").onSnapshot(snap => { vacationData = snap.exists ? (snap.data().periods || []) : []; renderVacationList(); });
+
+            db.collection("students").onSnapshot(snap => {
+                studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
+                renderStudentListUI(); loadUnreadStudents(); renderAdminSubmissionsUI();
+            });
+
+            db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
+                submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
+                renderAdminSubmissionsUI();
+            });
+
+            db.collection("committee_posts").onSnapshot(snap => {
+                allCommitteePosts = []; snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()}));
+                renderAdminCommitteePosts();
+            });
+
+            db.collection("messages").orderBy("createdAt", "desc").onSnapshot(snap => {
+                let html = snap.empty ? "<p>メッセージはありません。</p>" : "";
+                snap.forEach(doc => {
+                    const d = doc.data(); 
+                    let bgClass = d.isProtected ? "msg-protected" : (d.isRead ? "msg-read" : "msg-unread"); 
+                    let badge = d.isRead ? "" : `<span style="background:#d9534f; color:white; padding:2px 6px; font-size:0.8em; margin-right:5px;">未読</span>`;
+                    let protectBadge = d.isProtected ? `<span style="color:#f39c12; font-weight:bold; margin-right:5px;">⭐保護中</span>` : "";
+                    html += `<div id="msg-${doc.id}" class="${bgClass}" onmouseenter="markMessageRead('${doc.id}', ${!!d.isRead})" style="border:1px solid #ccc; padding:10px; margin-bottom:10px; transition: background-color 0.3s;">
+                                <div style="font-weight:bold; font-size:0.9em; border-bottom:1px dashed #ccc; padding-bottom:5px; margin-bottom:5px;">${badge}${protectBadge}${d.createdAt ? formatDateTime(d.createdAt.toDate()) : ""} 送信者：${d.name}</div>
+                                <div style="margin-bottom: 10px;">${d.content.replace(/\n/g, '<br>')}</div>
+                                <div style="text-align:right;"><button type="button" onclick="toggleProtectMessage('${doc.id}', ${!!d.isProtected})">${d.isProtected ? '保護を解除' : '保護する'}</button> <button type="button" onclick="deleteMessage('${doc.id}', ${!!d.isProtected})">削除</button></div>
+                             </div>`;
+                });
+                document.getElementById('admin-message-list').innerHTML = html; 
+            });
+
+            loadRegularSetting();
+        }
+
+        // ------------------
+        // カウントダウン設定
+        // ------------------
+        function renderAdminCountdowns() {
+            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
+            let colorOpts = `<option value="#ffffff">白（標準）</option><option value="#e3f2fd">青</option><option value="#ffebee">赤</option><option value="#e8f5e9">緑</option><option value="#fff8e1">黄</option><option value="#fff3e0">橙</option><option value="#fce4ec">桃</option><option value="#f3e5f5">紫</option>`;
+            let iconOpts = `<option value="">(なし)</option><option value="🎯">🎯的</option><option value="🌸">🌸桜</option><option value="🎄">🎄ﾂﾘｰ</option><option value="🏃">🏃運動</option><option value="⚽">⚽球技</option><option value="🎵">🎵音楽</option><option value="🎓">🎓卒業</option><option value="🎒">🎒ｶﾊﾞﾝ</option><option value="🚌">🚌ﾊﾞｽ</option><option value="🔥">🔥炎</option>`;
+            COUNTDOWN_PRESETS.forEach(p => {
+                let d = countdownSettings[p.id] || { isEnabled: false, label: p.defaultLabel, date: "", mode: "calendar", bgColor: "#ffffff", icon: "" };
+                let labelInput = p.isCustom ? `<input type="text" id="cd-label-${p.id}" value="${d.label||''}" placeholder="${p.placeholder}" style="width:100%; margin:0; padding:2px;">` : `<input type="hidden" id="cd-label-${p.id}" value="${p.defaultLabel}">${p.defaultLabel}`;
+                html += `<tr><td style="text-align:center;"><input type="checkbox" id="cd-en-${p.id}" ${d.isEnabled ? 'checked' : ''} style="transform:scale(1.2); margin:0;"></td><td>${labelInput}</td><td><input type="date" id="cd-date-${p.id}" value="${d.date||''}" style="margin:0; padding:2px; width:110px;"></td><td><select id="cd-mode-${p.id}" style="margin:0; padding:2px; width:80px;"><option value="calendar" ${d.mode==='calendar'?'selected':''}>暦日</option><option value="school" ${d.mode==='school'?'selected':''}>登校日</option></select></td><td><select id="cd-bg-${p.id}" style="margin:0; padding:2px; width:80px;">${colorOpts.replace(`value="${d.bgColor||'#ffffff'}"`, `value="${d.bgColor||'#ffffff'}" selected`)}</select></td><td><select id="cd-icon-${p.id}" style="margin:0; padding:2px; width:65px;">${iconOpts.replace(`value="${d.icon||''}"`, `value="${d.icon||''}" selected`)}</select></td></tr>`;
+            });
+            document.getElementById('admin-countdown-list').innerHTML = html + `</table>`;
+        }
+        async function saveCountdowns() {
+            let newData = {};
+            COUNTDOWN_PRESETS.forEach(p => { newData[p.id] = { isEnabled: document.getElementById(`cd-en-${p.id}`).checked, label: document.getElementById(`cd-label-${p.id}`).value, date: document.getElementById(`cd-date-${p.id}`).value, mode: document.getElementById(`cd-mode-${p.id}`).value, bgColor: document.getElementById(`cd-bg-${p.id}`).value, icon: document.getElementById(`cd-icon-${p.id}`).value }; });
+            await db.collection("config").doc("countdowns").set(newData); alert("カウントダウン設定を保存しました。"); recordSystemUpdate();
+        }
+
+        // ------------------
+        // 提出物管理
+        // ------------------
+        function renderAdminSubmissionsUI() {
+            const adminTable = document.getElementById('admin-submission-table');
+            if (submissionsList.length === 0) { adminTable.innerHTML = "<p>提出物はありません。</p>"; return; }
+            let adminHtml = `<table style="width:100%; min-width:500px;"><tr><th>提出物名</th><th>締め切り</th><th>未提出者</th><th>操作</th></tr>`;
+            submissionsList.forEach(sub => {
+                const dObj = new Date(sub.deadline); const week = ["日", "月", "火", "水", "木", "金", "土"];
+                const dateStrFormatted = isNaN(dObj) ? sub.deadline : `${dObj.getMonth()+1}/${dObj.getDate()}(${week[dObj.getDay()]})`;
+                
+                let unsubmittedNames = [];
+                for (let email in studentMaster) {
+                    if (email === TEACHER_EMAIL) continue;
+                    if (!studentMaster[email].checks || !studentMaster[email].checks[sub.id]) unsubmittedNames.push(studentMaster[email].name || email);
+                }
+                
+                let unsubmitCount = unsubmittedNames.length;
+                let isComplete = (unsubmitCount === 0 && Object.keys(studentMaster).length > 1);
+                let titlePrefix = isComplete ? `<span style="color:#d81b60; font-weight:bold;">🌸</span> ` : "";
+                let titleSuffix = isComplete ? ` <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : "";
+                
+                let unsubmittedStr = isComplete ? `<span style="color:green; font-weight:bold;">全員提出済み</span>` : `<span style="color:red; font-size:0.85em;">${unsubmittedNames.join("、 ")}</span>`;
+                
+                adminHtml += `<tr id="subm-row-${sub.id}">
+                                <td id="subm-title-td-${sub.id}" style="text-align:left; font-weight:bold;">${titlePrefix}${sub.title}${titleSuffix}</td>
+                                <td id="subm-deadline-td-${sub.id}">${dateStrFormatted}</td>
+                                <td style="text-align:left;">${unsubmittedStr}</td>
+                                <td id="subm-action-td-${sub.id}">
+                                    <button type="button" onclick="startInlineEditSubm('${sub.id}', '${String(sub.title).replace(/'/g, "\\'")}', '${sub.deadline}')">編集</button>
+                                    <button type="button" onclick="deleteSubmission('${sub.id}')">削除</button>
+                                </td>
+                              </tr>`;
+            });
+            adminTable.innerHTML = adminHtml + "</table>";
+        }
+        function startInlineEditSubm(id, t, d) {
+            document.getElementById(`subm-title-td-${id}`).innerHTML = `<input type="text" id="input-subm-title-${id}" value="${t}" style="width:90%; padding:4px; margin:0; font-weight:normal;">`;
+            document.getElementById(`subm-deadline-td-${id}`).innerHTML = `<input type="date" id="input-subm-deadline-${id}" value="${d}" style="padding:4px; margin:0;">`;
+            document.getElementById(`subm-action-td-${id}`).innerHTML = `<button type="button" onclick="saveInlineEditSubm('${id}')">保存</button> <button type="button" onclick="renderAdminSubmissionsUI()">ｷｬﾝｾﾙ</button>`;
+        }
+        async function saveInlineEditSubm(id) { await db.collection("submissions").doc(id).update({ title: document.getElementById(`input-subm-title-${id}`).value.trim(), deadline: document.getElementById(`input-subm-deadline-${id}`).value }); recordSystemUpdate(); }
+        async function addSubmission() { await db.collection("submissions").add({ title: document.getElementById('subm-title').value.trim(), deadline: document.getElementById('subm-deadline').value, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById('subm-title').value = ""; document.getElementById('subm-deadline').value = ""; recordSystemUpdate(); }
+        async function deleteSubmission(id) { if(confirm("削除しますか？")) { await db.collection("submissions").doc(id).delete(); recordSystemUpdate(); } }
+
+        // ------------------
+        // 係・委員会連絡管理
+        // ------------------
+        function renderAdminCommitteePosts() {
+            let postsHtml = ""; 
+            let sortedPosts = [...allCommitteePosts].sort((a, b) => {
+                let pA = a.priority || 1; let pB = b.priority || 1;
+                if (pA !== pB) return pB - pA;
+                let tA = a.createdAt ? a.createdAt.toMillis() : 0; let tB = b.createdAt ? b.createdAt.toMillis() : 0;
+                return tB - tA;
+            });
+
+            sortedPosts.forEach(d => {
+                let dateStr = d.createdAt ? formatDateTime(d.createdAt.toDate()) : "";
+                let pLabel = d.priority == 3 ? "★★★" : d.priority == 2 ? "★★" : "★";
+                let isColored = d.bgColor && d.bgColor !== '#ffffff';
+                let bgStyle = isColored ? `background-color:${d.bgColor}; color:#000;` : "";
+                
+                let infoText = d.isAdminPost ? `${dateStr} 管理者` : `${dateStr} 【${d.roleName}】${d.authorName} <span style="margin-left:10px; font-weight:normal; font-size:0.9em;">(重要度:${pLabel}) (公開:${d.startDate}〜${d.endDate})</span>`;
+                let contentHtml = `<div id="admin-comm-post-${d.id}" class="post-item" style="${bgStyle} border:1px solid #ccc; margin-bottom:10px; background:white;">
+                    <div class="post-date">${infoText}</div>
+                    <div style="white-space:pre-wrap; padding: 5px 0;">${d.content}</div>`;
+
+                if (d.status === 'pending') {
+                    postsHtml += contentHtml + `<div style="color:red; font-weight:bold; margin-bottom:5px;">承認待ち</div>
+                        <div class="admin-actions">
+                            <button onclick="approveCommitteePost('${d.id}')" style="background:#4caf50; color:white; border-color:#4caf50;">承認(公開)</button> 
+                            <button onclick="startAdminEditCommitteePost('${d.id}')">編集して承認</button>
+                            <button onclick="rejectCommitteePost('${d.id}')">不承認(差戻し)</button> 
+                            <button onclick="deleteCommitteePost('${d.id}')">削除</button>
+                        </div></div>`;
+                } else if (d.status === 'rejected') {
+                    postsHtml += contentHtml + `<div style="color:gray; font-weight:bold; margin-bottom:5px;">差戻し済み</div>
+                        <div class="admin-actions"><button onclick="deleteCommitteePost('${d.id}')">削除</button></div></div>`;
+                } else if (d.status === 'approved') {
+                    postsHtml += contentHtml + `<div style="color:green; font-weight:bold; margin-bottom:5px;">承認済み・公開中</div>
+                        <div class="admin-actions"><button onclick="deleteCommitteePost('${d.id}')">削除</button></div></div>`;
+                }
+            });
+            document.getElementById('admin-pending-committee').innerHTML = postsHtml || "<p>連絡はありません。</p>";
+        }
+
+        async function approveCommitteePost(id) { await db.collection("committee_posts").doc(id).update({ status: 'approved' }); }
+        async function rejectCommitteePost(id) { if(confirm("不承認（差し戻し）にしますか？")) await db.collection("committee_posts").doc(id).update({ status: 'rejected' }); }
+        async function deleteCommitteePost(id) { if(confirm("削除しますか？")) await db.collection("committee_posts").doc(id).delete(); }
+
+        function startAdminEditCommitteePost(id) {
+            const post = allCommitteePosts.find(p => p.id === id);
+            if (!post) return;
+            const container = document.getElementById(`admin-comm-post-${id}`);
+            
+            let colorOpts = `<option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>白（標準）</option><option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>薄赤</option><option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>薄緑</option><option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>薄青</option><option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>薄黄</option><option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>薄橙</option><option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>薄紫</option>`;
+            let priorityOpts = `<option value="3" ${post.priority==3?'selected':''}>★★★</option><option value="2" ${post.priority==2?'selected':''}>★★</option><option value="1" ${post.priority==1?'selected':''}>★</option>`;
+
+            container.innerHTML = `
+                <div class="edit-box" style="background:#fff;">
+                    <h4 style="margin-top:0; color:#333;">連絡の編集</h4>
+                    <textarea id="edit-comm-input-${id}" style="width:100%; height:80px; padding:5px;">${post.content}</textarea>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size:0.9em; align-items:center; color:#333;">
+                        <div>背景色: <select id="edit-comm-color-${id}" style="width:120px; margin-bottom:0;">${colorOpts}</select></div>
+                        <div>重要度: <select id="edit-comm-priority-${id}" style="width:80px; margin-bottom:0;">${priorityOpts}</select></div>
+                        <div>公開: <input type="date" id="edit-comm-start-${id}" value="${post.startDate}" style="width:130px; margin-bottom:0;"> 〜 <input type="date" id="edit-comm-end-${id}" value="${post.endDate}" style="width:130px; margin-bottom:0;"></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <button onclick="saveAndApproveCommitteePost('${id}')" style="background:#4caf50; color:white; border-color:#4caf50;">保存して承認(公開)</button>
+                        <button onclick="renderAdminCommitteePosts()">キャンセル</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function saveAndApproveCommitteePost(id) {
+            const newContent = document.getElementById(`edit-comm-input-${id}`).value.trim();
+            if (!newContent) return alert("内容を入力してください");
+            await db.collection("committee_posts").doc(id).update({
+                content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
+                startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'approved', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("編集して承認しました。");
+        }
+
+        // ------------------
+        // DMメッセージ管理
+        // ------------------
+        function markMessageRead(id, isRead) { if (!isRead) db.collection("messages").doc(id).update({ isRead: true }).catch(e => console.error(e)); }
+        async function toggleProtectMessage(id, currentStatus) { await db.collection("messages").doc(id).update({ isProtected: !currentStatus }); }
+        async function deleteMessage(id, isProtected) {
+            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に「保護を解除」してください。");
+            if (confirm("削除しますか？")) await db.collection("messages").doc(id).delete();
+        }
+
+        // ------------------
+        // その他設定管理群
+        // ------------------
+        async function addExitTimePeriod() { 
+            const s = document.getElementById('exit-period-start').value; const e = document.getElementById('exit-period-end').value; const t = document.getElementById('exit-period-time').value;
+            if (!s || !e || !t) return alert("開始・終了・時刻のすべてを入力してください。"); if (s > e) return alert("終了日は開始日以降に設定してください。");
+            exitTimePeriods.push({ start: s, end: e, time: t });
+            await db.collection("config").doc("exit_times").set({ periods: exitTimePeriods });
+            try {
+                const snap = await db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", s).where(firebase.firestore.FieldPath.documentId(), "<=", e).get();
+                if (!snap.empty) { let batch = db.batch(); snap.forEach(doc => { batch.set(doc.ref, { exitTime: "" }, { merge: true }); }); await batch.commit(); }
+            } catch(err) {}
+            document.getElementById('exit-period-start').value = ""; document.getElementById('exit-period-end').value = ""; alert("期間を追加し更新しました！"); recordSystemUpdate();
+        }
+        function renderExitTimePeriods() {
+            document.getElementById('exit-period-list').innerHTML = exitTimePeriods.map((p, i) => `${p.start} 〜 ${p.end} ➔ <b>${p.time}</b> <button type="button" onclick="deleteExitTimePeriod(${i})" style="padding:2px 8px; font-size:0.8em; margin-left:10px;">削除</button>`).join('<br>');
+        }
+        async function deleteExitTimePeriod(i) { exitTimePeriods.splice(i, 1); await db.collection("config").doc("exit_times").set({ periods: exitTimePeriods }); recordSystemUpdate(); }
+
+        async function loadUnreadStudents() {
+            const sysDoc = await db.collection("config").doc("system").get();
+            let lastUpdate = sysDoc.exists ? sysDoc.data().lastUpdatedAt?.toDate() : null;
+            if (!lastUpdate) return document.getElementById('unread-students-list').innerHTML = "まだ情報が更新されていません。";
+            document.getElementById('last-update-time').innerText = lastUpdate.toLocaleString();
+            let unread = [];
+            for(let email in studentMaster) {
+                if (email === TEACHER_EMAIL) continue;
+                let loginTime = studentMaster[email].lastLogin?.toDate();
+                if (!loginTime || loginTime < lastUpdate) unread.push(studentMaster[email].name || email);
+            }
+            document.getElementById('unread-students-list').innerHTML = unread.length === 0 ? "<span style='color:green;'>全員確認済み</span>" : `<span style='color:red;'>未確認： ${unread.join("、 ")}</span>`;
+        }
+
+        async function loadAccessLogs() { const snap = await db.collection("access_logs").orderBy("accessedAt", "desc").limit(50).get(); renderLogs(snap); }
+        async function loadAccessLogsByDate() {
+            const dStr = document.getElementById('log-date-input').value; if (!dStr) return;
+            const start = new Date(dStr); start.setHours(0,0,0,0); const end = new Date(dStr); end.setHours(23,59,59,999);
+            const snap = await db.collection("access_logs").where("accessedAt", ">=", start).where("accessedAt", "<=", end).orderBy("accessedAt", "desc").get(); renderLogs(snap);
+        }
+        function renderLogs(snap) {
+            let html = "<table><tr><th>アクセス日時</th><th>氏名</th><th>操作</th></tr>";
+            snap.forEach(doc => { let d = doc.data(); html += `<tr id="log-row-${doc.id}"><td>${d.accessedAt ? d.accessedAt.toDate().toLocaleString() : ""}</td><td>${d.name}</td><td><button onclick="deleteAccessLog('${doc.id}')">削除</button></td></tr>`; });
+            document.getElementById('access-log-list').innerHTML = html + "</table>"; document.getElementById('access-log-list').style.display = 'block';
+        }
+        async function deleteAccessLog(id) { if(confirm("削除しますか？")) { await db.collection("access_logs").doc(id).delete(); document.getElementById(`log-row-${id}`)?.remove(); } }
+
+        async function loadRegularSetting() {
+            const day = document.getElementById('reg-day-select').value; const doc = await db.collection("config").doc("regular_schedule").get();
+            document.getElementById('reg-table').innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th></tr>" + Array.from({length:6}, (_,i) => `<tr><td>${i+1}</td><td><select id="reg-sub-${i}" style="margin:0; padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===((doc.exists?doc.data()[day]:[])[i]||"")?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td></tr>`).join('');
+        }
+        async function saveRegularSetting() { await db.collection("config").doc("regular_schedule").set({ [document.getElementById('reg-day-select').value]: Array.from({length:6}, (_,i)=>document.getElementById(`reg-sub-${i}`).value) }, { merge: true }); recordSystemUpdate(); alert("標準時間割を保存しました。"); }
+        
+        async function saveVacation() { vacationData.push({ start: document.getElementById('vac-start').value, end: document.getElementById('vac-end').value }); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
+        function renderVacationList() { document.getElementById('vacation-list').innerHTML = vacationData.map((v,i)=>`${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>'); }
+        async function deleteVac(i) { vacationData.splice(i,1); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
+        
+        async function loadScheduleEdit() {
+            const date = document.getElementById('edit-date-select').value; if(!date) return;
+            const doc = await db.collection("schedules").doc(date).get();
+            let data = doc.exists ? doc.data() : { event:"", dayNote:"", exitTime:"", lessons:Array.from({length:6},()=>({sub:"",note:""})) };
+            document.getElementById('edit-table-container').innerHTML = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event||""}"></div><div style="margin-bottom:10px;">全体備考：<textarea id="edit-daynote" style="height:60px;">${data.dayNote||""}</textarea></div><table style="width:100%;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>` + data.lessons.map((l,i)=>`<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0;padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note||""}" style="margin:0;padding:4px;"></td></tr>`).join('') + `</table>`;
+            initExitTimeOptions(document.getElementById('edit-exit-time'), true); document.getElementById('edit-exit-time').value = data.exitTime || ""; document.getElementById('edit-form').style.display = "block";
+        }
+        async function saveSchedule() {
+            await db.collection("schedules").doc(document.getElementById('edit-date-select').value).set({ event: document.getElementById('edit-event').value, dayNote: document.getElementById('edit-daynote').value, lessons: Array.from({length:6},(_,i)=>({sub:document.getElementById(`edit-sub-${i}`).value, note:document.getElementById(`edit-note-${i}`).value})), exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            alert("予定を保存しました。"); recordSystemUpdate(); 
+        }
+
+        // ------------------
+        // 名簿・係・委員会管理
+        // ------------------
+        function getRoleOptions(selectedValue) {
+            let opts = `<option value="">（なし）</option>`; let found = false;
+            rolesList.forEach(r => { let sel = (r === selectedValue) ? "selected" : ""; if (r === selectedValue) found = true; opts += `<option value="${r}" ${sel}>${r}</option>`; });
+            if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`;
+            return opts;
+        }
+        function getCommOptions(selectedValue) {
+            let opts = `<option value="">（なし）</option>`; let found = false;
+            committeesList.forEach(c => { let sel = (c === selectedValue) ? "selected" : ""; if (c === selectedValue) found = true; opts += `<option value="${c}" ${sel}>${c}</option>`; });
+            if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`;
+            return opts;
+        }
+        function renderRoleCommSettings() {
+            document.getElementById('role-list-display').innerHTML = rolesList.map((r, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border:1px solid #ccc; color:black;">${r} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeRole(${i})">×</button></span>`).join('');
+            document.getElementById('comm-list-display').innerHTML = committeesList.map((c, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border:1px solid #ccc; color:black;">${c} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeCommittee(${i})">×</button></span>`).join('');
+        }
+        function updateDirectInputs() { document.getElementById('direct-role').innerHTML = getRoleOptions(""); document.getElementById('direct-committee').innerHTML = getCommOptions(""); }
+        async function addRole() { let val = document.getElementById('new-role-input').value.trim(); if(!val) return; if(!rolesList.includes(val)) { rolesList.push(val); await db.collection("config").doc("roles").set({ items: rolesList }); document.getElementById('new-role-input').value = ""; } }
+        async function removeRole(idx) { rolesList.splice(idx, 1); await db.collection("config").doc("roles").set({ items: rolesList }); }
+        async function addCommittee() { let val = document.getElementById('new-comm-input').value.trim(); if(!val) return; if(!committeesList.includes(val)) { committeesList.push(val); await db.collection("config").doc("committees").set({ items: committeesList }); document.getElementById('new-comm-input').value = ""; } }
+        async function removeCommittee(idx) { committeesList.splice(idx, 1); await db.collection("config").doc("committees").set({ items: committeesList }); }
+
+        function renderStudentListUI() {
+            const area = document.getElementById('student-list-area');
+            if(!area) return;
+            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>準編集権限</th><th>投稿禁止</th><th>操作</th></tr>";
+            for(let email in studentMaster) {
+                if(email === TEACHER_EMAIL) continue;
+                const d = studentMaster[email]; const safeId = email.replace(/[@.]/g, '_');
+                html += `<tr id="row-${safeId}">
+                            <td id="name-td-${safeId}">${d.name || ""}</td>
+                            <td>${email}</td>
+                            <td id="role-td-${safeId}">${d.role || ""}</td>
+                            <td id="comm-td-${safeId}">${d.committee || ""}</td>
+                            <td id="subadmin-td-${safeId}" style="text-align:center;">${d.isSubAdmin ? '👑' : ''}</td>
+                            <td id="ban-td-${safeId}" style="text-align:center;">${d.isBanned ? '🚫' : ''}</td>
+                            <td id="action-td-${safeId}">
+                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${String(d.name||"").replace(/'/g, "\\'")}', '${String(d.role||"").replace(/'/g, "\\'")}', '${String(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isSubAdmin}, ${!!d.isBanned})">編集</button>
+                                <button type="button" onclick="deleteStudent('${email}')">削除</button>
+                            </td>
+                         </tr>`; 
+            }
+            area.innerHTML = html + "</table>";
+        }
+        function startInlineEditStudent(safeId, email, name, role, comm, isSubAdmin, isBanned) {
+            document.getElementById(`name-td-${safeId}`).innerHTML = `<input type="text" id="input-name-${safeId}" value="${name}" style="width:100%; padding:2px; margin:0;">`;
+            document.getElementById(`role-td-${safeId}`).innerHTML = `<select id="input-role-${safeId}" style="width:100%; padding:2px; margin:0;">${getRoleOptions(role)}</select>`;
+            document.getElementById(`comm-td-${safeId}`).innerHTML = `<select id="input-comm-${safeId}" style="width:100%; padding:2px; margin:0;">${getCommOptions(comm)}</select>`;
+            document.getElementById(`subadmin-td-${safeId}`).innerHTML = `<input type="checkbox" id="input-subadmin-${safeId}" ${isSubAdmin ? 'checked' : ''} style="transform:scale(1.5);">`;
+            document.getElementById(`ban-td-${safeId}`).innerHTML = `<input type="checkbox" id="input-ban-${safeId}" ${isBanned ? 'checked' : ''} style="transform:scale(1.5);">`;
+            document.getElementById(`action-td-${safeId}`).innerHTML = `<button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')" style="background:#0d47a1; color:white;">保存</button> <button type="button" onclick="renderStudentListUI()">ｷｬﾝｾﾙ</button>`;
+        }
+        async function saveInlineEditStudent(email, safeId) {
+            try {
+                const isSubAdmin = document.getElementById(`input-subadmin-${safeId}`).checked;
+                const isBanned = document.getElementById(`input-ban-${safeId}`).checked;
+                await db.collection("students").doc(email).set({ name: document.getElementById(`input-name-${safeId}`).value.trim(), role: document.getElementById(`input-role-${safeId}`).value.trim(), committee: document.getElementById(`input-comm-${safeId}`).value.trim(), isSubAdmin: isSubAdmin, isBanned: isBanned }, { merge: true });
+                alert("生徒情報を更新しました。");
+            } catch (err) { alert("更新に失敗しました: " + err.message); }
+        }
+        async function registerDirect() {
+            const email = document.getElementById('direct-email').value.trim(); if(!email) return alert("メールアドレスを入力");
+            await db.collection("students").doc(email).set({ name: document.getElementById('direct-name').value.trim(), role: document.getElementById('direct-role').value.trim(), committee: document.getElementById('direct-committee').value.trim(), isSubAdmin: false, isBanned: false });
+            document.getElementById('direct-email').value = ""; document.getElementById('direct-name').value = ""; alert("登録しました");
+        }
+        async function deleteStudent(id) { if(confirm("削除しますか？")) await db.collection("students").doc(id).delete(); }
+
+        // -------------------------------------
+        // Excelインポート/エクスポート
+        // -------------------------------------
+        function exportExcel() {
+            const wb = XLSX.utils.book_new();
+
+            let studentsData = [];
+            for(let em in studentMaster) {
+                if(em === TEACHER_EMAIL) continue;
+                studentsData.push({ "メールアドレス": em, "氏名": studentMaster[em].name || "", "係": studentMaster[em].role || "", "委員会": studentMaster[em].committee || "" });
+            }
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(studentsData), "名簿");
+
+            let mastersData = [];
+            rolesList.forEach(r => mastersData.push({"区分": "係", "名称": r}));
+            committeesList.forEach(c => mastersData.push({"区分": "委員会", "名称": c}));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mastersData), "係・委員会");
+
+            const mVal = document.getElementById('excel-month-input').value;
+            if(!mVal) return alert("スケジュール出力用の年月を選択してください。");
+            const [y, m] = mVal.split('-'); const endDate = new Date(y, m, 0).getDate();
+            db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", `${y}-${m}-01`).where(firebase.firestore.FieldPath.documentId(), "<=", `${y}-${m}-${endDate}`).get().then(async snap => {
+                let ext = {}; snap.forEach(doc => ext[doc.id] = doc.data());
+                
+                const regDoc = await db.collection("config").doc("regular_schedule").get();
+                const regData = regDoc.exists ? regDoc.data() : {};
+                let schedData = [];
+                
+                for(let d=1; d<=endDate; d++) {
+                    let dateStr = `${y}-${m}-${('0'+d).slice(-2)}`;
+                    let dObj = new Date(y, m-1, d); let dNum = dObj.getDay();
+                    let exitT = ext[dateStr]?.exitTime !== undefined ? ext[dateStr].exitTime : "";
+                    let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, lessons:Array.from({length:6}, (_,i)=>({sub:regData[["sun","mon","tue","wed","thu","fri","sat"][dNum]]?.[i]||"", note:""})) };
+                    
+                    schedData.push({
+                        "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum],
+                        "行事予定": data.event||"", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub,
+                        "下校時刻": data.exitTime||"", "全体備考": data.dayNote||""
+                    });
+                }
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedData), "スケジュール");
+
+                let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end}));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
+
+                let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time}));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
+
+                XLSX.writeFile(wb, `ClassSettings_${y}_${m}.xlsx`);
+            });
+        }
+
+        function handleExcelFileChange(e) {
+            if(!e.target.files[0]) return;
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const wb = XLSX.read(data, {type: 'array'});
+                    pendingExcelData = {};
+                    let previewHtml = "<ul style='padding-left:20px; margin:0;'>";
+                    
+                    if (wb.Sheets["名簿"]) {
+                        pendingExcelData.students = XLSX.utils.sheet_to_json(wb.Sheets["名簿"]);
+                        previewHtml += `<li><b>名簿</b>: ${pendingExcelData.students.length}件の生徒データを上書き/追加します。</li>`;
+                    }
+                    if (wb.Sheets["係・委員会"]) {
+                        pendingExcelData.masters = XLSX.utils.sheet_to_json(wb.Sheets["係・委員会"]);
+                        previewHtml += `<li><b>係・委員会</b>: ${pendingExcelData.masters.length}件のリストで一括上書きします。</li>`;
+                    }
+                    if (wb.Sheets["スケジュール"]) {
+                        pendingExcelData.schedules = XLSX.utils.sheet_to_json(wb.Sheets["スケジュール"], {raw: false}).filter(r => r["日付"]);
+                        previewHtml += `<li><b>スケジュール</b>: ${pendingExcelData.schedules.length}日分の予定を上書きします。</li>`;
+                    }
+                    if (wb.Sheets["長期休業"]) {
+                        pendingExcelData.vacations = XLSX.utils.sheet_to_json(wb.Sheets["長期休業"], {raw: false});
+                        previewHtml += `<li><b>長期休業</b>: ${pendingExcelData.vacations.length}件の期間設定で一括上書きします。</li>`;
+                    }
+                    if (wb.Sheets["下校時刻設定"]) {
+                        pendingExcelData.exits = XLSX.utils.sheet_to_json(wb.Sheets["下校時刻設定"], {raw: false});
+                        previewHtml += `<li><b>下校時刻設定</b>: ${pendingExcelData.exits.length}件の期間設定で一括上書きします。</li>`;
+                    }
+                    
+                    if(Object.keys(pendingExcelData).length === 0) {
+                        alert("有効なシート（名簿、係・委員会、スケジュール、長期休業、下校時刻設定）が見つかりません。");
+                        return;
+                    }
+
+                    previewHtml += "</ul>";
+                    document.getElementById('import-preview-content').innerHTML = previewHtml;
+                    document.getElementById('import-preview-area').style.display = 'block';
+                } catch(err) {
+                    alert("ファイルの読み込みに失敗しました。正しいExcelファイルか確認してください。");
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function commitExcelImport() {
+            try {
+                let d = pendingExcelData;
+                
+                if (d.masters) {
+                    let r = [], c = [];
+                    d.masters.forEach(m => {
+                        if(m["区分"]==="係" && m["名称"]) r.push(m["名称"].toString().trim());
+                        if(m["区分"]==="委員会" && m["名称"]) c.push(m["名称"].toString().trim());
+                    });
+                    await db.collection("config").doc("roles").set({ items: r });
+                    await db.collection("config").doc("committees").set({ items: c });
+                }
+                
+                if (d.vacations) {
+                    let v = d.vacations.map(x => ({start: formatExcelDate(x["開始日"]), end: formatExcelDate(x["終了日"])})).filter(x => x.start && x.end);
+                    await db.collection("config").doc("vacations").set({ periods: v });
+                }
+                
+                if (d.exits) {
+                    let ex = d.exits.map(x => ({start: formatExcelDate(x["開始日"]), end: formatExcelDate(x["終了日"]), time: x["時刻"]?.toString()})).filter(x => x.start && x.end && x.time);
+                    await db.collection("config").doc("exit_times").set({ periods: ex });
+                }
+                
+                if (d.students) {
+                    let batch = db.batch();
+                    d.students.forEach(s => {
+                        let em = s["メールアドレス"]?.toString().trim();
+                        if(em) {
+                            batch.set(db.collection("students").doc(em), {
+                                name: s["氏名"]?.toString().trim() || "",
+                                role: s["係"]?.toString().trim() || "",
+                                committee: s["委員会"]?.toString().trim() || ""
+                            }, { merge: true });
+                        }
+                    });
+                    await batch.commit();
+                }
+                
+                if (d.schedules) {
+                    let batch = db.batch();
+                    d.schedules.forEach(s => {
+                        let ds = formatExcelDate(s["日付"]);
+                        if(ds && /^\d{4}-\d{2}-\d{2}$/.test(ds)) {
+                            batch.set(db.collection("schedules").doc(ds), {
+                                event: s["行事予定"]?.toString() || "",
+                                lessons: [
+                                    {sub: s["1限"]?.toString()||"", note:""}, {sub: s["2限"]?.toString()||"", note:""}, {sub: s["3限"]?.toString()||"", note:""},
+                                    {sub: s["4限"]?.toString()||"", note:""}, {sub: s["5限"]?.toString()||"", note:""}, {sub: s["6限"]?.toString()||"", note:""}
+                                ],
+                                exitTime: s["下校時刻"]?.toString() || "",
+                                dayNote: s["全体備考"]?.toString() || "",
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        }
+                    });
+                    await batch.commit();
+                }
+                
+                alert("データのインポートが完了しました。");
+                cancelExcelImport();
+                recordSystemUpdate();
+            } catch(err) {
+                console.error(err);
+                alert("エラーが発生しました: " + err.message);
+            }
+        }
+        function cancelExcelImport() {
+            pendingExcelData = {};
+            document.getElementById('import-preview-area').style.display = 'none';
+            document.getElementById('excel-file-input').value = "";
+        }
     </script>
 </body>
 </html>
