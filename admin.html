@@ -6,71 +6,101 @@
     <title>管理画面 - My Class Portal</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        body { background-color: #f7f9fc; color: #333; font-family: "MS UI Gothic", "MS Gothic", sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; }
+        
+        /* 背景色をまぶしくないミディアムグレーに変更 */
+        body { background-color: #888888; color: #333; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; transition: 0.3s; }
         h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #333; }
         .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #0d47a1; margin-top: 0; padding-bottom: 5px; color: #0d47a1; }
         .section-header h2 { border: none; margin: 0; padding: 0; }
         
-        section { background: white; margin-bottom: 30px; border: 1px solid #0d47a1; padding: 20px; border-radius: 5px; }
+        /* 丸みや影を排除し、シンプルな四角いデザインに統一 */
+        section { background: #ffffff; margin-bottom: 30px; border: 1px solid #0d47a1; padding: 15px; transition: 0.3s; }
         
-        input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; font-family: inherit; box-sizing: border-box; }
+        input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; font-family: inherit; box-sizing: border-box; background: white; color: black; transition: 0.3s; }
         input[type="checkbox"] { width: auto; cursor: pointer; margin: 0 auto; display: block; transform: scale(1.2); }
-        button { padding: 6px 12px; cursor: pointer; background: white; color: #333; border: 1px solid #999; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; border-radius: 3px;}
+        button { padding: 6px 12px; cursor: pointer; background: white; color: #333; border: 1px solid #999; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; }
         button:hover { background: #eee; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; background: inherit; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
         th { background-color: #f2f2f2; } 
         
-        .admin-form-box { background: white; border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
+        .admin-form-box { background: #ffffff; padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; overflow-x: auto; }
         details.admin-form-box summary { cursor: pointer; outline: none; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-weight: bold; font-size: 1.1em; margin-bottom: 10px; display: block; color: #0d47a1; }
         details.admin-form-box summary::-webkit-details-marker { display: none; }
         
+        .post-item { border-bottom: 1px dashed #ccc; padding: 15px; margin-bottom: 10px; }
+        .post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; color: #555; }
         .scroll-area { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
-        .deadline-warning { color: #f57c00; font-weight: bold; } 
-        .deadline-overdue { color: #d32f2f; font-weight: bold; } 
-        
+
         .msg-unread { background-color: #e3f2fd; }
         .msg-protected { background-color: #fff3cd; }
         .msg-read { background-color: #fafafa; }
         
         .edit-box { background:#f9f9f9; padding:10px; border:2px solid #ffc107; margin-bottom:10px; }
 
+        /* --- ダークモード --- */
+        body.dark-mode { background-color: #121212; color: #e0e0e0; }
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item { border-color: #555 !important; color: #e0e0e0 !important; }
+        body.dark-mode section, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box { border-color: #444 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
+        body.dark-mode input:not([type="checkbox"]), body.dark-mode textarea, body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
+        body.dark-mode button { background-color: #333 !important; color: #e0e0e0 !important; border-color: #666 !important; }
+        body.dark-mode button:hover { background-color: #555 !important; color: #fff !important; }
+        body.dark-mode th { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
+        body.dark-mode td { border-color: #555 !important; color: #e0e0e0 !important; }
+        body.dark-mode details.admin-form-box summary { color: #64b5f6 !important; border-bottom-color: #555 !important; }
+        body.dark-mode .msg-unread { background-color: #0d47a1 !important; }
+        body.dark-mode .msg-protected { background-color: #4a401c !important; }
+        body.dark-mode .msg-read { background-color: #1e1e1e !important; }
+
         @media screen and (max-width: 650px) {
             body { padding: 10px; }
             section { padding: 15px; }
+            .section-header { flex-direction: column; gap: 10px; }
+            .section-header div { width: 100%; display: flex; justify-content: space-between; }
             table { font-size: 0.85em; }
             th, td { padding: 5px; }
+            input[type="text"], input[type="email"], input[type="date"], input[type="month"], input[type="password"] { width: 100% !important; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <div id="loading-section" style="text-align: center; margin-top: 50px;">
-        <h2>認証中...</h2>
-        <p>管理者権限を確認しています。</p>
+    <div id="login-section" style="text-align: center; margin-top: 50px;">
+        <h1 style="color:#fff;">My Class Portal<br><span style="font-size: 0.6em;">管理者ログイン</span></h1>
+        <input type="email" id="login-email" placeholder="メールアドレス"><br>
+        <input type="password" id="login-password" placeholder="パスワード"><br>
+        <button type="button" id="login-btn">ログイン</button>
+    </div>
+
+    <div id="loading-section" style="text-align: center; margin-top: 50px; display: none;">
+        <h2 style="color:#fff;">認証中...</h2>
+        <p style="color:#fff;">管理者権限を確認しています。</p>
     </div>
 
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
             <div>
-                <h1 style="border:none; margin:0; font-size:1.5em; color:#0d47a1;">⚙️ My Class Portal 管理画面</h1>
-                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: #555;">ログイン中: <span id="admin-email-display"></span></div>
+                <h1 style="border:none; margin:0; font-size:1.5em; color:#ffffff;">⚙️ 管理画面</h1>
+                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: #ffffff;">ログイン中: <span id="admin-email-display"></span></div>
             </div>
             <div style="display: flex; gap: 5px;">
-                <button type="button" onclick="location.href='index.html'" style="background:#0d47a1; color:white; border-color:#0d47a1;">◀ ポータルへ戻る</button>
+                <button type="button" onclick="location.href='index.html'">◀ ポータルへ</button>
+                <button type="button" onclick="logout()" style="margin-top:0;">ログアウト</button>
             </div>
         </header>
 
         <main>
-            <section>
+            <section id="admin-area" style="border: 2px solid #0d47a1;">
                 <div class="section-header">
-                    <h2>各種設定・確認メニュー</h2>
+                    <h2 style="border-bottom:none; color:#0d47a1;">管理者用メニュー</h2>
                 </div>
 
-                <details class="admin-form-box" open style="border-color: #2e7d32;">
-                    <summary style="color:#2e7d32;">［一括管理］全設定のExcelインポート/エクスポート</summary>
+                <details class="admin-form-box" open style="border: 2px solid #2e7d32;">
+                    <summary style="cursor:pointer; font-weight:bold; color:#2e7d32; font-size:1.1em;">［一括管理］全設定のExcelインポート/エクスポート</summary>
                     <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール、長期休業、下校時刻を1つのExcelファイル（.xlsx）のシート（タブ）で管理できます。</p>
+                    <p style="font-size:0.85em; color:#d32f2f;">※「スケジュール」シートにて、行事等がある日のボーナス開始時刻・終了時刻を手動で上書き設定できます。</p>
                     <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #ccc;">
                         <b>1. エクスポート（ダウンロード）</b><br>
                         <span style="font-size:0.85em;">※指定した月のスケジュールを含めて出力します。</span><br>
@@ -85,16 +115,23 @@
                         <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
                             <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
                             <div id="import-preview-content" style="font-size:0.9em; margin-bottom:10px; line-height:1.6;"></div>
-                            <button type="button" onclick="commitExcelImport()" style="background:#d9534f; color:white;">✅ この内容で更新を実行する</button>
+                            <button type="button" onclick="commitExcelImport()" style="background:#d9534f; color:white; font-weight:bold;">✅ この内容で更新を実行する</button>
                             <button type="button" onclick="cancelExcelImport()">キャンセル</button>
                         </div>
                     </div>
                 </details>
 
-                <details class="admin-form-box">
-                    <summary>［確認］アクセス状況・未確認者チェック</summary>
+                <details class="admin-form-box" style="margin-top:15px;">
+                    <summary style="cursor:pointer; font-weight:bold; color:#0d47a1;">［確認］アクセス状況・未確認者チェック</summary>
                     <p style="margin-bottom:5px;">最終情報更新日時：<span id="last-update-time">---</span></p>
                     <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
+                    
+                    <hr style="border-top:1px dashed #ccc; margin:15px 0;">
+                    <h4 style="margin-top:0;">📊 直近7日間のアクセス推移</h4>
+                    <div style="width:100%; max-width:600px; margin:0 auto 15px auto;">
+                        <canvas id="accessChart"></canvas>
+                    </div>
+
                     <hr style="border-top:1px dashed #ccc; margin:15px 0;">
                     <input type="date" id="log-date-input" style="width:150px;">
                     <button type="button" onclick="loadAccessLogsByDate()">指定日のログを表示</button>
@@ -103,25 +140,53 @@
                 </details>
 
                 <details class="admin-form-box" open style="border-color: #d32f2f;">
-                    <summary style="color:#d32f2f;">［要確認］生徒からの「係・委員会」連絡（承認待ち・差戻し）</summary>
-                    <div id="admin-pending-committee" style="margin-top:10px; max-height: 500px; overflow-y: auto;">確認中...</div>
+                    <summary style="cursor:pointer; font-weight:bold; color:#d32f2f;">［要確認］生徒からの「係・委員会」連絡（承認待ち・差戻し）</summary>
+                    <p style="font-size: 0.85em; margin-top: 5px;">※承認すると投稿者にポイントが10Pt付与されます。</p>
+                    <div id="admin-pending-committee" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
                 
                 <details class="admin-form-box" open>
-                    <summary>［確認］受信したメッセージ（担任へ連絡）</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［確認］受信したメッセージ（担任へ連絡）</summary>
                     <p style="font-size: 0.85em; margin-top: 5px;">※メッセージにマウスを合わせる（またはタップ）で「既読」になります。</p>
                     <div id="admin-message-list" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］カウントダウン表示内容</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">※ここでチェックを入れた項目が、生徒のトップ画面に表示されます。</p>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］ボーナス発生時間（帰りの会・予定確認）</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※生徒が明日の予定を確認してポイントを受け取れる標準の帰りの会時間帯を設定します。</p>
+                    <div style="margin-top:10px;">
+                        標準開始時刻：<input type="time" id="bonus-default-start" style="width:120px; margin-right:10px;">
+                        標準終了時刻：<input type="time" id="bonus-default-end" style="width:120px;"><br>
+                        <label style="display:inline-block; margin-top:10px;">
+                            <input type="checkbox" id="bonus-test-mode"> 実験用（チェック中は時間や曜日を問わず常にボーナス発生）
+                        </label><br>
+                        <button type="button" onclick="saveBonusTime()" style="margin-top:10px;">設定を保存</button>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］独自記念日・祝日の登録</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※開校記念日や県民の日など、独自の記念日とポップアップの説明文を登録できます。</p>
+                    <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; align-items:baseline;">
+                        <input type="date" id="custom-holiday-date" style="width:150px; margin:0;">
+                        <input type="text" id="custom-holiday-name" placeholder="記念日名 (例: 開校記念日)" style="width:200px; margin:0;">
+                    </div>
+                    <div style="margin-top:5px;">
+                        <textarea id="custom-holiday-desc" placeholder="ポップアップで表示される説明文を入力..." style="height:60px; margin-bottom:5px;"></textarea>
+                        <button type="button" onclick="addCustomHoliday()">登録する</button>
+                    </div>
+                    <div id="custom-holiday-list" style="margin-top:15px;"></div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］カウントダウン表示</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※チェックを入れた項目が、生徒のトップ画面に表示されます。</p>
                     <div id="admin-countdown-list" class="scroll-area" style="margin-top:10px;"></div>
                     <button type="button" onclick="saveCountdowns()" style="margin-top:10px;">カウントダウン設定を保存</button>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］回収物・提出物の管理</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］回収物・提出物の管理</summary>
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
                         締め切り：<input type="date" id="subm-deadline" style="width:150px;"><br>
@@ -131,7 +196,7 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］標準の最終下校時刻（期間指定）</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準の最終下校時刻（期間指定）</summary>
                     <p style="font-size:0.85em; margin-top:5px;">※時期ごとに下校時刻を設定できます。追加すると、その期間内の予定も自動的に上書き更新されます。</p>
                     <div style="margin-top:10px;">
                         開始：<input type="date" id="exit-period-start" style="width:130px;">
@@ -143,7 +208,14 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］予定の個別編集・旧形式</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］部活動予定の選択肢</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※生徒が週予定の「部活動」で選べる項目をカンマ区切りで設定します。</p>
+                    <input type="text" id="club-options-input" style="width:100%; margin-top:5px;" placeholder="午前,午後,全日,大会...">
+                    <button type="button" onclick="saveClubOptions()">保存</button>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］予定の個別編集・旧形式</summary>
                     <div style="margin-top:10px;">
                         日付：<input type="date" id="edit-date-select" style="width:200px;">
                         <button type="button" onclick="loadScheduleEdit()">呼出</button>
@@ -158,19 +230,16 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］標準（レギュラー）の時間割</summary>
-                    曜日：<select id="reg-day-select" onchange="loadRegularSetting()" style="width:150px;">
-                        <option value="mon">月曜日</option><option value="tue">火曜日</option>
-                        <option value="wed">水曜日</option><option value="thu">木曜日</option><option value="fri">金曜日</option>
-                    </select>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］標準（レギュラー）の時間割</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※月曜日から金曜日までの標準時間割を一括で登録・編集できます。</p>
                     <div class="scroll-area">
-                        <table id="reg-table"></table>
+                        <table id="reg-table" style="min-width: 600px;"></table>
                     </div>
                     <button type="button" onclick="saveRegularSetting()" style="margin-top:10px;">標準設定を保存</button>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］長期休業・臨時休校</summary>
+                    <summary style="cursor:pointer; font-weight:bold;">［設定］長期休業・臨時休校</summary>
                     開始：<input type="date" id="vac-start" style="width:160px;"> 終了：<input type="date" id="vac-end" style="width:160px;">
                     <button type="button" onclick="saveVacation()">期間を登録</button>
                     <div id="vacation-list" style="margin-top:10px;"></div>
@@ -210,10 +279,18 @@
                 </div>
 
                 <h3>登録済み一覧（直接編集可能）</h3>
-                <p style="font-size:0.85em;">※「準編集権限」は諸連絡や週予定の編集権限を与えます。「投稿禁止」は一切の投稿を不可にします。</p>
+                <p style="font-size:0.85em;">※「準編集権限(👑)」を与えると、生徒が自分の予定だけでなくクラス全体の予定の一部を編集できるようになります。</p>
                 <div id="student-list-area" class="scroll-area"></div>
             </section>
+
         </main>
+        
+        <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #ccc; font-size: 0.85em; color: #ffffff;">
+            <div>
+                <button type="button" onclick="toggleTheme()" style="padding:4px 8px; font-size:0.9em; border: 1px solid #999; background:white; color:#333;">Light / Dark</button>
+            </div>
+            <div style="margin-top:10px;">&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
+        </footer>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -237,15 +314,19 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let studentMaster = {};
-        let vacationData = [];
-        let exitTimePeriods = []; 
-        let submissionsList = [];
-        let allCommitteePosts = [];
-        let rolesList = [];
-        let committeesList = [];
-        let pendingExcelData = {};
-        
+        // 全てのグローバル変数を網羅
+        let studentMaster = {}, vacationData = [], exitTimePeriods = [], holidays = {}, customHolidays = {};
+        let isAdmin = false, isSubAdmin = false, currentUserEmail = null, submissionsList = [], clubOptionsList = [];
+        let allBlogs = [], currentBlogPage = 1, allCommitteePosts = [];
+        let rolesList = [], committeesList = [], pendingExcelData = {};
+        let currentScheduleBaseDate = new Date(), currentWeekBaseDate = new Date(), currentWeeklyDates = [];
+        let isEditingMyWeek = false, weatherData = {}, savedScrollY = 0, isRestoringScroll = false, inactivityTimer;
+        let countdownSettings = {}, bonusTimeSettings = {}, myPoints = 0, myStreak = 0, spinnerMulti = 1;
+        let todayScheduleData = null; 
+        let accessChartInstance = null; 
+        let pendingCommitteeCount = 0; 
+        let unreadMessageCount = 0; 
+
         const COUNTDOWN_PRESETS = [
             { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
             { id: "sports", defaultLabel: "体育祭" }, { id: "chorus", defaultLabel: "合唱祭" }, { id: "soutai", defaultLabel: "学校総合体育大会" },
@@ -254,7 +335,6 @@
             { id: "graduation", defaultLabel: "卒業式" }, { id: "summer", defaultLabel: "夏休み" }, { id: "winter", defaultLabel: "冬休み" },
             { id: "custom1", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名1" }, { id: "custom2", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名2" }, { id: "custom3", defaultLabel: "", isCustom: true, placeholder: "任意のイベント名3" }
         ];
-        let countdownSettings = {};
 
         function getLocalDateStr(dateObj) { return `${dateObj.getFullYear()}-${('0' + (dateObj.getMonth() + 1)).slice(-2)}-${('0' + dateObj.getDate()).slice(-2)}`; }
         function formatDateTime(dateObj) { return `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${('0'+dateObj.getHours()).slice(-2)}:${('0'+dateObj.getMinutes()).slice(-2)}`; }
@@ -265,7 +345,30 @@
             return v.toString();
         }
 
-        // 認証と初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+            applyLightness();
+            document.getElementById('copyright-year').innerText = new Date().getFullYear();
+        });
+        
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode'); 
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+            applyLightness();
+        }
+
+        function applyLightness() {
+            if(document.body.classList.contains('dark-mode')) {
+                document.body.style.backgroundColor = ""; return;
+            }
+            let level = localStorage.getItem('lightBgLevel') || '1';
+            if(level === '1') document.body.style.backgroundColor = "#f7f9fc"; 
+            else if(level === '2') document.body.style.backgroundColor = "#c9d1d9"; 
+            else if(level === '3') document.body.style.backgroundColor = "#888888"; 
+        }
+
+        // 認証
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 if (user.email !== TEACHER_EMAIL) {
@@ -273,14 +376,24 @@
                     window.location.href = "index.html";
                 } else {
                     document.getElementById('loading-section').style.display = 'none';
+                    document.getElementById('login-section').style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
                     document.getElementById('admin-email-display').innerText = user.email;
                     initAdminApp();
                 }
             } else {
-                window.location.href = "index.html";
+                document.getElementById('loading-section').style.display = 'none';
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('login-section').style.display = 'block';
             }
         });
+
+        document.getElementById('login-btn').onclick = () => { 
+            firebase.auth().signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value)
+                .catch(err => alert("ログイン失敗: " + err.message)); 
+        };
+        
+        function logout() { firebase.auth().signOut().then(() => window.location.href = "index.html"); }
 
         async function recordSystemUpdate() { await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); }
 
@@ -294,6 +407,26 @@
             db.collection("config").doc("roles").onSnapshot(snap => { rolesList = snap.exists ? snap.data().items || [] : []; renderRoleCommSettings(); renderStudentListUI(); updateDirectInputs(); });
             db.collection("config").doc("committees").onSnapshot(snap => { committeesList = snap.exists ? snap.data().items || [] : []; renderRoleCommSettings(); renderStudentListUI(); updateDirectInputs(); });
             db.collection("config").doc("vacations").onSnapshot(snap => { vacationData = snap.exists ? (snap.data().periods || []) : []; renderVacationList(); });
+            
+            // ボーナス時間読み込み
+            db.collection("config").doc("bonus_time").onSnapshot(snap => {
+                let data = snap.exists ? snap.data() : { defaultStart:"16:40", defaultEnd:"16:50", testMode:false };
+                document.getElementById('bonus-default-start').value = data.defaultStart || "";
+                document.getElementById('bonus-default-end').value = data.defaultEnd || "";
+                document.getElementById('bonus-test-mode').checked = !!data.testMode;
+            });
+
+            // カスタム祝日読み込み
+            db.collection("config").doc("custom_holidays").onSnapshot(snap => {
+                customHolidays = snap.exists ? snap.data() : {};
+                renderCustomHolidays();
+            });
+
+            db.collection("config").doc("club_options").onSnapshot(snap => {
+                if(snap.exists) clubOptionsList = snap.data().items || ["", "午前", "午後", "全日", "Home 試合", "外試合", "大会", "外練", "任意"];
+                let inputEl = document.getElementById('club-options-input'); 
+                if(inputEl) inputEl.value = clubOptionsList.filter(x => x).join(',');
+            });
 
             db.collection("students").onSnapshot(snap => {
                 studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
@@ -317,9 +450,11 @@
                     let bgClass = d.isProtected ? "msg-protected" : (d.isRead ? "msg-read" : "msg-unread"); 
                     let badge = d.isRead ? "" : `<span style="background:#d9534f; color:white; padding:2px 6px; font-size:0.8em; margin-right:5px;">未読</span>`;
                     let protectBadge = d.isProtected ? `<span style="color:#f39c12; font-weight:bold; margin-right:5px;">⭐保護中</span>` : "";
+                    let dateStr = (d.createdAt && d.createdAt.toDate) ? formatDateTime(d.createdAt.toDate()) : "";
+                    
                     html += `<div id="msg-${doc.id}" class="${bgClass}" onmouseenter="markMessageRead('${doc.id}', ${!!d.isRead})" style="border:1px solid #ccc; padding:10px; margin-bottom:10px; transition: background-color 0.3s;">
-                                <div style="font-weight:bold; font-size:0.9em; border-bottom:1px dashed #ccc; padding-bottom:5px; margin-bottom:5px;">${badge}${protectBadge}${d.createdAt ? formatDateTime(d.createdAt.toDate()) : ""} 送信者：${d.name}</div>
-                                <div style="margin-bottom: 10px;">${d.content.replace(/\n/g, '<br>')}</div>
+                                <div style="font-weight:bold; font-size:0.9em; border-bottom:1px dashed #ccc; padding-bottom:5px; margin-bottom:5px; color:inherit;">${badge}${protectBadge}${dateStr} 送信者：${d.name}</div>
+                                <div style="margin-bottom: 10px; color:inherit;">${(d.content || "").replace(/\n/g, '<br>')}</div>
                                 <div style="text-align:right;"><button type="button" onclick="toggleProtectMessage('${doc.id}', ${!!d.isProtected})">${d.isProtected ? '保護を解除' : '保護する'}</button> <button type="button" onclick="deleteMessage('${doc.id}', ${!!d.isProtected})">削除</button></div>
                              </div>`;
                 });
@@ -327,14 +462,117 @@
             });
 
             loadRegularSetting();
+            drawAccessChart(); 
         }
 
-        // ------------------
-        // カウントダウン設定
-        // ------------------
+        function initExitTimeOptions(targetEl, includeDefault = false) {
+            if (!targetEl) return;
+            let html = includeDefault ? `<option value="">（期間設定に従う）</option>` : "";
+            for(let h=13; h<=19; h++) { for(let m=0; m<60; m+=10) { let time = `${h}:${m===0?'00':m}`; html += `<option value="${time}">${time}</option>`; } }
+            targetEl.innerHTML = html;
+        }
+
+        // --- ★ 新機能：ボーナス時間設定 ---
+        async function saveBonusTime() {
+            await db.collection("config").doc("bonus_time").set({
+                defaultStart: document.getElementById('bonus-default-start').value,
+                defaultEnd: document.getElementById('bonus-default-end').value,
+                testMode: document.getElementById('bonus-test-mode').checked
+            });
+            alert("ボーナス設定を保存しました。");
+        }
+
+        // --- ★ 新機能：カスタム祝日設定 ---
+        async function addCustomHoliday() {
+            let dStr = document.getElementById('custom-holiday-date').value;
+            let name = document.getElementById('custom-holiday-name').value.trim();
+            let desc = document.getElementById('custom-holiday-desc').value.trim();
+            if(!dStr || !name) return alert("日付と記念日名を入力してください。");
+            
+            customHolidays[dStr] = { name: name, desc: desc };
+            await db.collection("config").doc("custom_holidays").set(customHolidays);
+            document.getElementById('custom-holiday-date').value = "";
+            document.getElementById('custom-holiday-name').value = "";
+            document.getElementById('custom-holiday-desc').value = "";
+            alert("記念日を登録しました。");
+        }
+        function renderCustomHolidays() {
+            let html = `<table style="width:100%;"><tr><th>日付</th><th>名称</th><th>操作</th></tr>`;
+            let keys = Object.keys(customHolidays).sort();
+            keys.forEach(k => {
+                html += `<tr><td>${k}</td><td>${customHolidays[k].name}</td>
+                         <td><button onclick="deleteCustomHoliday('${k}')">削除</button></td></tr>`;
+            });
+            html += `</table>`;
+            document.getElementById('custom-holiday-list').innerHTML = html;
+        }
+        async function deleteCustomHoliday(dateStr) {
+            if(!confirm("削除しますか？")) return;
+            delete customHolidays[dateStr];
+            await db.collection("config").doc("custom_holidays").set(customHolidays);
+        }
+
+        // --- ★ 新機能：アクセス状況のグラフ化 (Chart.js) ---
+        async function drawAccessChart() {
+            let dates = [];
+            let counts = [];
+            for(let i=6; i>=0; i--) {
+                let d = new Date(); d.setDate(d.getDate() - i);
+                dates.push(getLocalDateStr(d));
+                counts.push(0);
+            }
+            
+            let sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            sevenDaysAgo.setHours(0,0,0,0);
+
+            try {
+                const snap = await db.collection("access_logs").where("accessedAt", ">=", sevenDaysAgo).get();
+                snap.forEach(doc => {
+                    let log = doc.data();
+                    if(log.accessedAt) {
+                        let logDate = getLocalDateStr(log.accessedAt.toDate());
+                        let idx = dates.indexOf(logDate);
+                        if(idx !== -1) counts[idx]++;
+                    }
+                });
+
+                const ctx = document.getElementById('accessChart').getContext('2d');
+                if (accessChartInstance) accessChartInstance.destroy();
+                
+                let textColor = document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#333';
+                
+                accessChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates.map(d => d.slice(5)), 
+                        datasets: [{
+                            label: 'アクセス回数',
+                            data: counts,
+                            backgroundColor: '#42a5f5',
+                            borderColor: '#1e88e5',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor }, grid: { color: '#ccc' } },
+                            x: { ticks: { color: textColor }, grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        }
+                    }
+                });
+            } catch(err) {
+                console.log("グラフ描画エラー: ", err);
+            }
+        }
+
+
         function renderAdminCountdowns() {
             let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
-            let colorOpts = `<option value="#ffffff">白（標準）</option><option value="#e3f2fd">青</option><option value="#ffebee">赤</option><option value="#e8f5e9">緑</option><option value="#fff8e1">黄</option><option value="#fff3e0">橙</option><option value="#fce4ec">桃</option><option value="#f3e5f5">紫</option>`;
+            let colorOpts = `<option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#fce4ec">Pink</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option>`;
             let iconOpts = `<option value="">(なし)</option><option value="🎯">🎯的</option><option value="🌸">🌸桜</option><option value="🎄">🎄ﾂﾘｰ</option><option value="🏃">🏃運動</option><option value="⚽">⚽球技</option><option value="🎵">🎵音楽</option><option value="🎓">🎓卒業</option><option value="🎒">🎒ｶﾊﾞﾝ</option><option value="🚌">🚌ﾊﾞｽ</option><option value="🔥">🔥炎</option>`;
             COUNTDOWN_PRESETS.forEach(p => {
                 let d = countdownSettings[p.id] || { isEnabled: false, label: p.defaultLabel, date: "", mode: "calendar", bgColor: "#ffffff", icon: "" };
@@ -349,9 +587,6 @@
             await db.collection("config").doc("countdowns").set(newData); alert("カウントダウン設定を保存しました。"); recordSystemUpdate();
         }
 
-        // ------------------
-        // 提出物管理
-        // ------------------
         function renderAdminSubmissionsUI() {
             const adminTable = document.getElementById('admin-submission-table');
             if (submissionsList.length === 0) { adminTable.innerHTML = "<p>提出物はありません。</p>"; return; }
@@ -370,7 +605,6 @@
                 let isComplete = (unsubmitCount === 0 && Object.keys(studentMaster).length > 1);
                 let titlePrefix = isComplete ? `<span style="color:#d81b60; font-weight:bold;">🌸</span> ` : "";
                 let titleSuffix = isComplete ? ` <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : "";
-                
                 let unsubmittedStr = isComplete ? `<span style="color:green; font-weight:bold;">全員提出済み</span>` : `<span style="color:red; font-size:0.85em;">${unsubmittedNames.join("、 ")}</span>`;
                 
                 adminHtml += `<tr id="subm-row-${sub.id}">
@@ -394,28 +628,31 @@
         async function addSubmission() { await db.collection("submissions").add({ title: document.getElementById('subm-title').value.trim(), deadline: document.getElementById('subm-deadline').value, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById('subm-title').value = ""; document.getElementById('subm-deadline').value = ""; recordSystemUpdate(); }
         async function deleteSubmission(id) { if(confirm("削除しますか？")) { await db.collection("submissions").doc(id).delete(); recordSystemUpdate(); } }
 
-        // ------------------
-        // 係・委員会連絡管理
-        // ------------------
         function renderAdminCommitteePosts() {
             let postsHtml = ""; 
+            
             let sortedPosts = [...allCommitteePosts].sort((a, b) => {
                 let pA = a.priority || 1; let pB = b.priority || 1;
                 if (pA !== pB) return pB - pA;
-                let tA = a.createdAt ? a.createdAt.toMillis() : 0; let tB = b.createdAt ? b.createdAt.toMillis() : 0;
+                let tA = (a.createdAt && a.createdAt.toMillis) ? a.createdAt.toMillis() : 0; 
+                let tB = (b.createdAt && b.createdAt.toMillis) ? b.createdAt.toMillis() : 0;
                 return tB - tA;
             });
 
             sortedPosts.forEach(d => {
-                let dateStr = d.createdAt ? formatDateTime(d.createdAt.toDate()) : "";
+                let dateStr = (d.createdAt && d.createdAt.toMillis) ? formatDateTime(d.createdAt.toDate()) : "";
                 let pLabel = d.priority == 3 ? "★★★" : d.priority == 2 ? "★★" : "★";
                 let isColored = d.bgColor && d.bgColor !== '#ffffff';
                 let bgStyle = isColored ? `background-color:${d.bgColor}; color:#000;` : "";
+                let likesCount = (d.likes || []).length;
                 
                 let infoText = d.isAdminPost ? `${dateStr} 管理者` : `${dateStr} 【${d.roleName}】${d.authorName} <span style="margin-left:10px; font-weight:normal; font-size:0.9em;">(重要度:${pLabel}) (公開:${d.startDate}〜${d.endDate})</span>`;
                 let contentHtml = `<div id="admin-comm-post-${d.id}" class="post-item" style="${bgStyle} border:1px solid #ccc; margin-bottom:10px; background:white;">
-                    <div class="post-date">${infoText}</div>
-                    <div style="white-space:pre-wrap; padding: 5px 0;">${d.content}</div>`;
+                    <div class="post-date" style="color:inherit; display:flex; justify-content:space-between;">
+                        <span>${infoText}</span>
+                        <span style="color:#e91e63; font-size:1.1em;">❤️ ${likesCount}</span>
+                    </div>
+                    <div style="white-space:pre-wrap; padding: 5px 0; color:inherit;">${d.content}</div>`;
 
                 if (d.status === 'pending') {
                     postsHtml += contentHtml + `<div style="color:red; font-weight:bold; margin-bottom:5px;">承認待ち</div>
@@ -436,7 +673,16 @@
             document.getElementById('admin-pending-committee').innerHTML = postsHtml || "<p>連絡はありません。</p>";
         }
 
-        async function approveCommitteePost(id) { await db.collection("committee_posts").doc(id).update({ status: 'approved' }); }
+        // ★ 承認時に投稿者に+10Pt付与
+        async function approveCommitteePost(id) { 
+            let post = allCommitteePosts.find(p => p.id === id);
+            await db.collection("committee_posts").doc(id).update({ status: 'approved' }); 
+            if (post && post.authorEmail && !post.isAdminPost) {
+                await db.collection("students").doc(post.authorEmail).update({ points: firebase.firestore.FieldValue.increment(10) }).catch(()=>{});
+            }
+            alert("承認しました。投稿者にボーナスポイント（+10 Pt）が付与されました！");
+        }
+        
         async function rejectCommitteePost(id) { if(confirm("不承認（差し戻し）にしますか？")) await db.collection("committee_posts").doc(id).update({ status: 'rejected' }); }
         async function deleteCommitteePost(id) { if(confirm("削除しますか？")) await db.collection("committee_posts").doc(id).delete(); }
 
@@ -445,14 +691,14 @@
             if (!post) return;
             const container = document.getElementById(`admin-comm-post-${id}`);
             
-            let colorOpts = `<option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>白（標準）</option><option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>薄赤</option><option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>薄緑</option><option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>薄青</option><option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>薄黄</option><option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>薄橙</option><option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>薄紫</option>`;
+            let colorOpts = `<option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>White</option><option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>Green</option><option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>Blue</option><option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>Red</option><option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>Yellow</option><option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>Orange</option><option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>Purple</option><option value="#e0e0e0" ${post.bgColor==='#e0e0e0'?'selected':''}>Ash</option>`;
             let priorityOpts = `<option value="3" ${post.priority==3?'selected':''}>★★★</option><option value="2" ${post.priority==2?'selected':''}>★★</option><option value="1" ${post.priority==1?'selected':''}>★</option>`;
 
             container.innerHTML = `
-                <div class="edit-box" style="background:#fff;">
-                    <h4 style="margin-top:0; color:#333;">連絡の編集</h4>
+                <div class="edit-box" style="background:#fff; color:#333;">
+                    <h4 style="margin-top:0;">連絡の編集</h4>
                     <textarea id="edit-comm-input-${id}" style="width:100%; height:80px; padding:5px;">${post.content}</textarea>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size:0.9em; align-items:center; color:#333;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size:0.9em; align-items:center;">
                         <div>背景色: <select id="edit-comm-color-${id}" style="width:120px; margin-bottom:0;">${colorOpts}</select></div>
                         <div>重要度: <select id="edit-comm-priority-${id}" style="width:80px; margin-bottom:0;">${priorityOpts}</select></div>
                         <div>公開: <input type="date" id="edit-comm-start-${id}" value="${post.startDate}" style="width:130px; margin-bottom:0;"> 〜 <input type="date" id="edit-comm-end-${id}" value="${post.endDate}" style="width:130px; margin-bottom:0;"></div>
@@ -465,19 +711,21 @@
             `;
         }
         
+        // ★ 編集して承認時にも+10Pt付与
         async function saveAndApproveCommitteePost(id) {
             const newContent = document.getElementById(`edit-comm-input-${id}`).value.trim();
             if (!newContent) return alert("内容を入力してください");
+            let post = allCommitteePosts.find(p => p.id === id);
             await db.collection("committee_posts").doc(id).update({
                 content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
                 startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'approved', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            alert("編集して承認しました。");
+            if (post && post.authorEmail && !post.isAdminPost) {
+                await db.collection("students").doc(post.authorEmail).update({ points: firebase.firestore.FieldValue.increment(10) }).catch(()=>{});
+            }
+            alert("編集して承認しました。投稿者にボーナスポイント（+10 Pt）が付与されました！");
         }
 
-        // ------------------
-        // DMメッセージ管理
-        // ------------------
         function markMessageRead(id, isRead) { if (!isRead) db.collection("messages").doc(id).update({ isRead: true }).catch(e => console.error(e)); }
         async function toggleProtectMessage(id, currentStatus) { await db.collection("messages").doc(id).update({ isProtected: !currentStatus }); }
         async function deleteMessage(id, isProtected) {
@@ -485,9 +733,6 @@
             if (confirm("削除しますか？")) await db.collection("messages").doc(id).delete();
         }
 
-        // ------------------
-        // その他設定管理群
-        // ------------------
         async function addExitTimePeriod() { 
             const s = document.getElementById('exit-period-start').value; const e = document.getElementById('exit-period-end').value; const t = document.getElementById('exit-period-time').value;
             if (!s || !e || !t) return alert("開始・終了・時刻のすべてを入力してください。"); if (s > e) return alert("終了日は開始日以降に設定してください。");
@@ -503,6 +748,13 @@
             document.getElementById('exit-period-list').innerHTML = exitTimePeriods.map((p, i) => `${p.start} 〜 ${p.end} ➔ <b>${p.time}</b> <button type="button" onclick="deleteExitTimePeriod(${i})" style="padding:2px 8px; font-size:0.8em; margin-left:10px;">削除</button>`).join('<br>');
         }
         async function deleteExitTimePeriod(i) { exitTimePeriods.splice(i, 1); await db.collection("config").doc("exit_times").set({ periods: exitTimePeriods }); recordSystemUpdate(); }
+
+        async function saveClubOptions() {
+            let val = document.getElementById('club-options-input').value;
+            let items = ["", ...val.split(',').map(s => s.trim()).filter(s => s)];
+            await db.collection("config").doc("club_options").set({ items: items });
+            alert("部活動の選択肢を保存しました");
+        }
 
         async function loadUnreadStudents() {
             const sysDoc = await db.collection("config").doc("system").get();
@@ -526,16 +778,42 @@
         }
         function renderLogs(snap) {
             let html = "<table><tr><th>アクセス日時</th><th>氏名</th><th>操作</th></tr>";
-            snap.forEach(doc => { let d = doc.data(); html += `<tr id="log-row-${doc.id}"><td>${d.accessedAt ? d.accessedAt.toDate().toLocaleString() : ""}</td><td>${d.name}</td><td><button onclick="deleteAccessLog('${doc.id}')">削除</button></td></tr>`; });
+            snap.forEach(doc => { let d = doc.data(); html += `<tr id="log-row-${doc.id}"><td>${(d.accessedAt && d.accessedAt.toDate) ? d.accessedAt.toDate().toLocaleString() : ""}</td><td>${d.name}</td><td><button onclick="deleteAccessLog('${doc.id}')">削除</button></td></tr>`; });
             document.getElementById('access-log-list').innerHTML = html + "</table>"; document.getElementById('access-log-list').style.display = 'block';
         }
         async function deleteAccessLog(id) { if(confirm("削除しますか？")) { await db.collection("access_logs").doc(id).delete(); document.getElementById(`log-row-${id}`)?.remove(); } }
 
         async function loadRegularSetting() {
-            const day = document.getElementById('reg-day-select').value; const doc = await db.collection("config").doc("regular_schedule").get();
-            document.getElementById('reg-table').innerHTML = "<tr><th class='col-period'>校時</th><th class='col-subject'>科目</th></tr>" + Array.from({length:6}, (_,i) => `<tr><td>${i+1}</td><td><select id="reg-sub-${i}" style="margin:0; padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===((doc.exists?doc.data()[day]:[])[i]||"")?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td></tr>`).join('');
+            const doc = await db.collection("config").doc("regular_schedule").get();
+            const data = doc.exists ? doc.data() : {};
+            const days = ["mon", "tue", "wed", "thu", "fri"];
+            const dayLabels = ["月", "火", "水", "木", "金"];
+            
+            let html = "<tr><th class='col-period'>校時</th>";
+            for(let d of dayLabels) html += `<th>${d}</th>`;
+            html += "</tr>";
+
+            for(let i=0; i<6; i++) {
+                html += `<tr><td>${i+1}</td>`;
+                for(let j=0; j<days.length; j++) {
+                    let sub = (data[days[j]] || [])[i] || "";
+                    html += `<td><select id="reg-sub-${days[j]}-${i}" style="margin:0; padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===sub?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td>`;
+                }
+                html += `</tr>`;
+            }
+            document.getElementById('reg-table').innerHTML = html;
         }
-        async function saveRegularSetting() { await db.collection("config").doc("regular_schedule").set({ [document.getElementById('reg-day-select').value]: Array.from({length:6}, (_,i)=>document.getElementById(`reg-sub-${i}`).value) }, { merge: true }); recordSystemUpdate(); alert("標準時間割を保存しました。"); }
+
+        async function saveRegularSetting() { 
+            const days = ["mon", "tue", "wed", "thu", "fri"];
+            let newData = {};
+            for(let day of days) {
+                newData[day] = Array.from({length:6}, (_,i)=>document.getElementById(`reg-sub-${day}-${i}`).value);
+            }
+            await db.collection("config").doc("regular_schedule").set(newData, { merge: true }); 
+            recordSystemUpdate(); 
+            alert("標準時間割を保存しました。"); 
+        }
         
         async function saveVacation() { vacationData.push({ start: document.getElementById('vac-start').value, end: document.getElementById('vac-end').value }); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
         function renderVacationList() { document.getElementById('vacation-list').innerHTML = vacationData.map((v,i)=>`${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>'); }
@@ -545,33 +823,43 @@
             const date = document.getElementById('edit-date-select').value; if(!date) return;
             const doc = await db.collection("schedules").doc(date).get();
             let data = doc.exists ? doc.data() : { event:"", dayNote:"", exitTime:"", lessons:Array.from({length:6},()=>({sub:"",note:""})) };
-            document.getElementById('edit-table-container').innerHTML = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${data.event||""}"></div><div style="margin-bottom:10px;">全体備考：<textarea id="edit-daynote" style="height:60px;">${data.dayNote||""}</textarea></div><table style="width:100%;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>` + data.lessons.map((l,i)=>`<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0;padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td><td class="col-note"><input type="text" id="edit-note-${i}" value="${l.note||""}" style="margin:0;padding:4px;"></td></tr>`).join('') + `</table>`;
-            initExitTimeOptions(document.getElementById('edit-exit-time'), true); document.getElementById('edit-exit-time').value = data.exitTime || ""; document.getElementById('edit-form').style.display = "block";
+            
+            let html = `<div style="margin-bottom:10px;">主な行事予定：<input type="text" id="edit-event" value="${String(data.event||"").replace(/"/g, '&quot;')}"></div>`;
+            html += `<div style="margin-bottom:10px;">全体備考：<textarea id="edit-daynote" style="height:60px;">${data.dayNote||""}</textarea></div>`;
+            html += `<table style="width:100%;"><tr><th>校時</th><th>科目</th><th>備考</th></tr>`;
+            data.lessons.forEach((l, i) => {
+                html += `<tr><td>${i+1}</td><td><select id="edit-sub-${i}" style="margin:0;padding:4px;">${SUBJECTS.map(s=>`<option value="${s}" ${s===l.sub?'selected':''}>${s||"（空欄）"}</option>`).join('')}</select></td>`;
+                html += `<td class="col-note"><input type="text" id="edit-note-${i}" value="${String(l.note||"").replace(/"/g, '&quot;')}" style="margin:0;padding:4px;"></td></tr>`;
+            });
+            html += `</table>`;
+            document.getElementById('edit-table-container').innerHTML = html;
+            initExitTimeOptions(document.getElementById('edit-exit-time'), true); 
+            document.getElementById('edit-exit-time').value = data.exitTime || ""; 
+            document.getElementById('edit-form').style.display = "block";
         }
         async function saveSchedule() {
-            await db.collection("schedules").doc(document.getElementById('edit-date-select').value).set({ event: document.getElementById('edit-event').value, dayNote: document.getElementById('edit-daynote').value, lessons: Array.from({length:6},(_,i)=>({sub:document.getElementById(`edit-sub-${i}`).value, note:document.getElementById(`edit-note-${i}`).value})), exitTime: document.getElementById('edit-exit-time').value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            const date = document.getElementById('edit-date-select').value;
+            if(!date) return alert("日付を選択してください。");
+            let lessons = [];
+            for(let i=0; i<6; i++) {
+                lessons.push({
+                    sub: document.getElementById(`edit-sub-${i}`).value,
+                    note: document.getElementById(`edit-note-${i}`).value
+                });
+            }
+            await db.collection("schedules").doc(date).set({ 
+                event: document.getElementById('edit-event').value, 
+                dayNote: document.getElementById('edit-daynote').value, 
+                lessons: lessons,
+                exitTime: document.getElementById('edit-exit-time').value, 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+            }, { merge: true });
             alert("予定を保存しました。"); recordSystemUpdate(); 
         }
 
-        // ------------------
-        // 名簿・係・委員会管理
-        // ------------------
-        function getRoleOptions(selectedValue) {
-            let opts = `<option value="">（なし）</option>`; let found = false;
-            rolesList.forEach(r => { let sel = (r === selectedValue) ? "selected" : ""; if (r === selectedValue) found = true; opts += `<option value="${r}" ${sel}>${r}</option>`; });
-            if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`;
-            return opts;
-        }
-        function getCommOptions(selectedValue) {
-            let opts = `<option value="">（なし）</option>`; let found = false;
-            committeesList.forEach(c => { let sel = (c === selectedValue) ? "selected" : ""; if (c === selectedValue) found = true; opts += `<option value="${c}" ${sel}>${c}</option>`; });
-            if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`;
-            return opts;
-        }
-        function renderRoleCommSettings() {
-            document.getElementById('role-list-display').innerHTML = rolesList.map((r, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border:1px solid #ccc; color:black;">${r} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeRole(${i})">×</button></span>`).join('');
-            document.getElementById('comm-list-display').innerHTML = committeesList.map((c, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border:1px solid #ccc; color:black;">${c} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeCommittee(${i})">×</button></span>`).join('');
-        }
+        function getRoleOptions(selectedValue) { let opts = `<option value="">（なし）</option>`; let found = false; rolesList.forEach(r => { let sel = (r === selectedValue) ? "selected" : ""; if (r === selectedValue) found = true; opts += `<option value="${r}" ${sel}>${r}</option>`; }); if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`; return opts; }
+        function getCommOptions(selectedValue) { let opts = `<option value="">（なし）</option>`; let found = false; committeesList.forEach(c => { let sel = (c === selectedValue) ? "selected" : ""; if (c === selectedValue) found = true; opts += `<option value="${c}" ${sel}>${c}</option>`; }); if (selectedValue && !found) opts += `<option value="${selectedValue}" selected>${selectedValue} (手入力)</option>`; return opts; }
+        function renderRoleCommSettings() { document.getElementById('role-list-display').innerHTML = rolesList.map((r, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border:1px solid #ccc; color:black;">${r} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeRole(${i})">×</button></span>`).join(''); document.getElementById('comm-list-display').innerHTML = committeesList.map((c, i) => `<span style="display:inline-block; background:#eee; padding:2px 8px; margin:2px; border:1px solid #ccc; color:black;">${c} <button type="button" style="padding:0 5px; font-size:0.8em; margin:0; border:none; background:transparent; color:red;" onclick="removeCommittee(${i})">×</button></span>`).join(''); }
         function updateDirectInputs() { document.getElementById('direct-role').innerHTML = getRoleOptions(""); document.getElementById('direct-committee').innerHTML = getCommOptions(""); }
         async function addRole() { let val = document.getElementById('new-role-input').value.trim(); if(!val) return; if(!rolesList.includes(val)) { rolesList.push(val); await db.collection("config").doc("roles").set({ items: rolesList }); document.getElementById('new-role-input').value = ""; } }
         async function removeRole(idx) { rolesList.splice(idx, 1); await db.collection("config").doc("roles").set({ items: rolesList }); }
@@ -579,24 +867,12 @@
         async function removeCommittee(idx) { committeesList.splice(idx, 1); await db.collection("config").doc("committees").set({ items: committeesList }); }
 
         function renderStudentListUI() {
-            const area = document.getElementById('student-list-area');
-            if(!area) return;
-            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>準編集権限</th><th>投稿禁止</th><th>操作</th></tr>";
+            const area = document.getElementById('student-list-area'); if(!area) return;
+            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>準編集</th><th>投稿禁止</th><th>操作</th></tr>";
             for(let email in studentMaster) {
                 if(email === TEACHER_EMAIL) continue;
                 const d = studentMaster[email]; const safeId = email.replace(/[@.]/g, '_');
-                html += `<tr id="row-${safeId}">
-                            <td id="name-td-${safeId}">${d.name || ""}</td>
-                            <td>${email}</td>
-                            <td id="role-td-${safeId}">${d.role || ""}</td>
-                            <td id="comm-td-${safeId}">${d.committee || ""}</td>
-                            <td id="subadmin-td-${safeId}" style="text-align:center;">${d.isSubAdmin ? '👑' : ''}</td>
-                            <td id="ban-td-${safeId}" style="text-align:center;">${d.isBanned ? '🚫' : ''}</td>
-                            <td id="action-td-${safeId}">
-                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${String(d.name||"").replace(/'/g, "\\'")}', '${String(d.role||"").replace(/'/g, "\\'")}', '${String(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isSubAdmin}, ${!!d.isBanned})">編集</button>
-                                <button type="button" onclick="deleteStudent('${email}')">削除</button>
-                            </td>
-                         </tr>`; 
+                html += `<tr id="row-${safeId}"><td id="name-td-${safeId}">${d.name || ""}</td><td>${email}</td><td id="role-td-${safeId}">${d.role || ""}</td><td id="comm-td-${safeId}">${d.committee || ""}</td><td id="subadmin-td-${safeId}" style="text-align:center;">${d.isSubAdmin ? '👑' : ''}</td><td id="ban-td-${safeId}" style="text-align:center;">${d.isBanned ? '🚫' : ''}</td><td id="action-td-${safeId}"><button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${String(d.name||"").replace(/'/g, "\\'")}', '${String(d.role||"").replace(/'/g, "\\'")}', '${String(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isSubAdmin}, ${!!d.isBanned})">編集</button> <button type="button" onclick="deleteStudent('${email}')">削除</button></td></tr>`; 
             }
             area.innerHTML = html + "</table>";
         }
@@ -623,179 +899,99 @@
         }
         async function deleteStudent(id) { if(confirm("削除しますか？")) await db.collection("students").doc(id).delete(); }
 
-        // -------------------------------------
-        // Excelインポート/エクスポート
-        // -------------------------------------
         function exportExcel() {
             const wb = XLSX.utils.book_new();
-
             let studentsData = [];
-            for(let em in studentMaster) {
-                if(em === TEACHER_EMAIL) continue;
-                studentsData.push({ "メールアドレス": em, "氏名": studentMaster[em].name || "", "係": studentMaster[em].role || "", "委員会": studentMaster[em].committee || "" });
-            }
+            for(let em in studentMaster) { if(em === TEACHER_EMAIL) continue; studentsData.push({ "メールアドレス": em, "氏名": studentMaster[em].name || "", "係": studentMaster[em].role || "", "委員会": studentMaster[em].committee || "" }); }
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(studentsData), "名簿");
 
             let mastersData = [];
-            rolesList.forEach(r => mastersData.push({"区分": "係", "名称": r}));
-            committeesList.forEach(c => mastersData.push({"区分": "委員会", "名称": c}));
+            rolesList.forEach(r => mastersData.push({"区分": "係", "名称": r})); committeesList.forEach(c => mastersData.push({"区分": "委員会", "名称": c}));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mastersData), "係・委員会");
 
-            const mVal = document.getElementById('excel-month-input').value;
-            if(!mVal) return alert("スケジュール出力用の年月を選択してください。");
+            const mVal = document.getElementById('excel-month-input').value; if(!mVal) return alert("スケジュール出力用の年月を選択してください。");
             const [y, m] = mVal.split('-'); const endDate = new Date(y, m, 0).getDate();
             db.collection("schedules").where(firebase.firestore.FieldPath.documentId(), ">=", `${y}-${m}-01`).where(firebase.firestore.FieldPath.documentId(), "<=", `${y}-${m}-${endDate}`).get().then(async snap => {
                 let ext = {}; snap.forEach(doc => ext[doc.id] = doc.data());
-                
-                const regDoc = await db.collection("config").doc("regular_schedule").get();
-                const regData = regDoc.exists ? regDoc.data() : {};
+                const regDoc = await db.collection("config").doc("regular_schedule").get(); const regData = regDoc.exists ? regDoc.data() : {};
                 let schedData = [];
-                
                 for(let d=1; d<=endDate; d++) {
-                    let dateStr = `${y}-${m}-${('0'+d).slice(-2)}`;
-                    let dObj = new Date(y, m-1, d); let dNum = dObj.getDay();
+                    let dateStr = `${y}-${m}-${('0'+d).slice(-2)}`; let dObj = new Date(y, m-1, d); let dNum = dObj.getDay();
                     let exitT = ext[dateStr]?.exitTime !== undefined ? ext[dateStr].exitTime : "";
-                    let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, lessons:Array.from({length:6}, (_,i)=>({sub:regData[["sun","mon","tue","wed","thu","fri","sat"][dNum]]?.[i]||"", note:""})) };
-                    
-                    schedData.push({
-                        "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum],
-                        "行事予定": data.event||"", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub,
-                        "下校時刻": data.exitTime||"", "全体備考": data.dayNote||""
-                    });
+                    let dayData = regData[["sun","mon","tue","wed","thu","fri","sat"][dNum]] || [];
+                    let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, lessons:Array.from({length:6}, (_,i)=>({sub:dayData[i]||"", note:""})), bonusStart: ext[dateStr]?.bonusStart||"", bonusEnd: ext[dateStr]?.bonusEnd||"" };
+                    schedData.push({ "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum], "行事予定": data.event||"", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub, "下校時刻": data.exitTime||"", "全体備考": data.dayNote||"", "ボーナス開始": data.bonusStart, "ボーナス終了": data.bonusEnd });
                 }
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedData), "スケジュール");
-
-                let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end}));
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
-
-                let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time}));
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
-
+                let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end})); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
+                let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time})); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
                 XLSX.writeFile(wb, `ClassSettings_${y}_${m}.xlsx`);
             });
         }
 
         function handleExcelFileChange(e) {
             if(!e.target.files[0]) return;
-            const file = e.target.files[0];
             const reader = new FileReader();
-            
             reader.onload = function(evt) {
                 try {
-                    const data = new Uint8Array(evt.target.result);
-                    const wb = XLSX.read(data, {type: 'array'});
-                    pendingExcelData = {};
-                    let previewHtml = "<ul style='padding-left:20px; margin:0;'>";
-                    
-                    if (wb.Sheets["名簿"]) {
-                        pendingExcelData.students = XLSX.utils.sheet_to_json(wb.Sheets["名簿"]);
-                        previewHtml += `<li><b>名簿</b>: ${pendingExcelData.students.length}件の生徒データを上書き/追加します。</li>`;
-                    }
-                    if (wb.Sheets["係・委員会"]) {
-                        pendingExcelData.masters = XLSX.utils.sheet_to_json(wb.Sheets["係・委員会"]);
-                        previewHtml += `<li><b>係・委員会</b>: ${pendingExcelData.masters.length}件のリストで一括上書きします。</li>`;
-                    }
-                    if (wb.Sheets["スケジュール"]) {
-                        pendingExcelData.schedules = XLSX.utils.sheet_to_json(wb.Sheets["スケジュール"], {raw: false}).filter(r => r["日付"]);
-                        previewHtml += `<li><b>スケジュール</b>: ${pendingExcelData.schedules.length}日分の予定を上書きします。</li>`;
-                    }
-                    if (wb.Sheets["長期休業"]) {
-                        pendingExcelData.vacations = XLSX.utils.sheet_to_json(wb.Sheets["長期休業"], {raw: false});
-                        previewHtml += `<li><b>長期休業</b>: ${pendingExcelData.vacations.length}件の期間設定で一括上書きします。</li>`;
-                    }
-                    if (wb.Sheets["下校時刻設定"]) {
-                        pendingExcelData.exits = XLSX.utils.sheet_to_json(wb.Sheets["下校時刻設定"], {raw: false});
-                        previewHtml += `<li><b>下校時刻設定</b>: ${pendingExcelData.exits.length}件の期間設定で一括上書きします。</li>`;
-                    }
-                    
-                    if(Object.keys(pendingExcelData).length === 0) {
-                        alert("有効なシート（名簿、係・委員会、スケジュール、長期休業、下校時刻設定）が見つかりません。");
-                        return;
-                    }
-
-                    previewHtml += "</ul>";
-                    document.getElementById('import-preview-content').innerHTML = previewHtml;
-                    document.getElementById('import-preview-area').style.display = 'block';
-                } catch(err) {
-                    alert("ファイルの読み込みに失敗しました。正しいExcelファイルか確認してください。");
-                    console.error(err);
-                }
+                    const wb = XLSX.read(new Uint8Array(evt.target.result), {type: 'array'});
+                    pendingExcelData = {}; let previewHtml = "<ul style='padding-left:20px; margin:0;'>";
+                    if (wb.Sheets["名簿"]) { pendingExcelData.students = XLSX.utils.sheet_to_json(wb.Sheets["名簿"]); previewHtml += `<li><b>名簿</b>: ${pendingExcelData.students.length}件</li>`; }
+                    if (wb.Sheets["係・委員会"]) { pendingExcelData.masters = XLSX.utils.sheet_to_json(wb.Sheets["係・委員会"]); previewHtml += `<li><b>係・委員会</b>: ${pendingExcelData.masters.length}件</li>`; }
+                    if (wb.Sheets["スケジュール"]) { pendingExcelData.schedules = XLSX.utils.sheet_to_json(wb.Sheets["スケジュール"], {raw: false}).filter(r => r["日付"]); previewHtml += `<li><b>スケジュール</b>: ${pendingExcelData.schedules.length}日分</li>`; }
+                    if (wb.Sheets["長期休業"]) { pendingExcelData.vacations = XLSX.utils.sheet_to_json(wb.Sheets["長期休業"], {raw: false}); previewHtml += `<li><b>長期休業</b>: ${pendingExcelData.vacations.length}件</li>`; }
+                    if (wb.Sheets["下校時刻設定"]) { pendingExcelData.exits = XLSX.utils.sheet_to_json(wb.Sheets["下校時刻設定"], {raw: false}); previewHtml += `<li><b>下校時刻設定</b>: ${pendingExcelData.exits.length}件</li>`; }
+                    if(Object.keys(pendingExcelData).length === 0) return alert("有効なシートが見つかりません。");
+                    document.getElementById('import-preview-content').innerHTML = previewHtml + "</ul>"; document.getElementById('import-preview-area').style.display = 'block';
+                } catch(err) { alert("ファイルの読み込みに失敗しました。"); }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(e.target.files[0]);
         }
 
         async function commitExcelImport() {
             try {
                 let d = pendingExcelData;
-                
                 if (d.masters) {
                     let r = [], c = [];
-                    d.masters.forEach(m => {
-                        if(m["区分"]==="係" && m["名称"]) r.push(m["名称"].toString().trim());
-                        if(m["区分"]==="委員会" && m["名称"]) c.push(m["名称"].toString().trim());
-                    });
-                    await db.collection("config").doc("roles").set({ items: r });
-                    await db.collection("config").doc("committees").set({ items: c });
+                    d.masters.forEach(m => { if(m["区分"]==="係" && m["名称"]) r.push(m["名称"].toString().trim()); if(m["区分"]==="委員会" && m["名称"]) c.push(m["名称"].toString().trim()); });
+                    await db.collection("config").doc("roles").set({ items: r }); await db.collection("config").doc("committees").set({ items: c });
                 }
-                
                 if (d.vacations) {
                     let v = d.vacations.map(x => ({start: formatExcelDate(x["開始日"]), end: formatExcelDate(x["終了日"])})).filter(x => x.start && x.end);
                     await db.collection("config").doc("vacations").set({ periods: v });
                 }
-                
                 if (d.exits) {
                     let ex = d.exits.map(x => ({start: formatExcelDate(x["開始日"]), end: formatExcelDate(x["終了日"]), time: x["時刻"]?.toString()})).filter(x => x.start && x.end && x.time);
                     await db.collection("config").doc("exit_times").set({ periods: ex });
                 }
-                
                 if (d.students) {
                     let batch = db.batch();
-                    d.students.forEach(s => {
-                        let em = s["メールアドレス"]?.toString().trim();
-                        if(em) {
-                            batch.set(db.collection("students").doc(em), {
-                                name: s["氏名"]?.toString().trim() || "",
-                                role: s["係"]?.toString().trim() || "",
-                                committee: s["委員会"]?.toString().trim() || ""
-                            }, { merge: true });
-                        }
-                    });
+                    d.students.forEach(s => { let em = s["メールアドレス"]?.toString().trim(); if(em) batch.set(db.collection("students").doc(em), { name: s["氏名"]?.toString().trim() || "", role: s["係"]?.toString().trim() || "", committee: s["委員会"]?.toString().trim() || "" }, { merge: true }); });
                     await batch.commit();
                 }
-                
                 if (d.schedules) {
                     let batch = db.batch();
                     d.schedules.forEach(s => {
                         let ds = formatExcelDate(s["日付"]);
                         if(ds && /^\d{4}-\d{2}-\d{2}$/.test(ds)) {
-                            batch.set(db.collection("schedules").doc(ds), {
-                                event: s["行事予定"]?.toString() || "",
-                                lessons: [
-                                    {sub: s["1限"]?.toString()||"", note:""}, {sub: s["2限"]?.toString()||"", note:""}, {sub: s["3限"]?.toString()||"", note:""},
-                                    {sub: s["4限"]?.toString()||"", note:""}, {sub: s["5限"]?.toString()||"", note:""}, {sub: s["6限"]?.toString()||"", note:""}
-                                ],
-                                exitTime: s["下校時刻"]?.toString() || "",
-                                dayNote: s["全体備考"]?.toString() || "",
-                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
+                            let docData = { 
+                                event: s["行事予定"]?.toString() || "", 
+                                lessons: [ {sub: s["1限"]?.toString()||"", note:""}, {sub: s["2限"]?.toString()||"", note:""}, {sub: s["3限"]?.toString()||"", note:""}, {sub: s["4限"]?.toString()||"", note:""}, {sub: s["5限"]?.toString()||"", note:""}, {sub: s["6限"]?.toString()||"", note:""} ], 
+                                exitTime: s["下校時刻"]?.toString() || "", 
+                                dayNote: s["全体備考"]?.toString() || "", 
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+                            };
+                            if (s["ボーナス開始"]) docData.bonusStart = s["ボーナス開始"].toString();
+                            if (s["ボーナス終了"]) docData.bonusEnd = s["ボーナス終了"].toString();
+                            batch.set(db.collection("schedules").doc(ds), docData, { merge: true });
                         }
                     });
                     await batch.commit();
                 }
-                
-                alert("データのインポートが完了しました。");
-                cancelExcelImport();
-                recordSystemUpdate();
-            } catch(err) {
-                console.error(err);
-                alert("エラーが発生しました: " + err.message);
-            }
+                alert("データのインポートが完了しました。"); cancelExcelImport(); recordSystemUpdate();
+            } catch(err) { alert("エラーが発生しました: " + err.message); }
         }
-        function cancelExcelImport() {
-            pendingExcelData = {};
-            document.getElementById('import-preview-area').style.display = 'none';
-            document.getElementById('excel-file-input').value = "";
-        }
+        function cancelExcelImport() { pendingExcelData = {}; document.getElementById('import-preview-area').style.display = 'none'; document.getElementById('excel-file-input').value = ""; }
     </script>
 </body>
 </html>
