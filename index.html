@@ -4,57 +4,82 @@
 <meta charset="UTF-8"><meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0"><title>My Class Portal</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; }
-body { background-color: #f7f9fc; color: #333; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 850px; margin: 0 auto; transition: 0.3s; }
-h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #333; }
-.section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #333; margin-top: 0; padding-bottom: 5px; }
+body { background-color: #f7f9fc; color: #000; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 850px; margin: 0 auto; transition: 0.3s; }
+h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #000; }
+.section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #000; margin-top: 0; padding-bottom: 5px; }
 .section-header h2 { border: none; margin: 0; padding: 0; }
-/* 丸み(border-radius)を完全排除 */
-section { background: white; margin-bottom: 30px; border: 1px solid #ccc; padding: 15px; transition: 0.3s; }
-input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; background: white; color: black; }
+section { background: white; margin-bottom: 30px; border: 1px solid #000; padding: 15px; transition: 0.3s; }
+input:not([type="checkbox"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #000; background: white; color: black; border-radius: 0; }
+input[type="time"]::-webkit-calendar-picker-indicator { background: transparent; bottom: 0; color: transparent; cursor: pointer; height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto; }
+input[type="time"] { position: relative; width: 80px !important; }
 input[type="checkbox"] { width: auto; cursor: pointer; transform: scale(1.2); }
-button { padding: 6px 12px; cursor: pointer; background: white; color: #333; border: 1px solid #999; font-weight: bold; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; }
+button { padding: 6px 12px; cursor: pointer; background: white; color: #000; border: 1px solid #000; font-weight: bold; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; border-radius: 0; }
 button:hover { background: #eee; }
 .day-container { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
-.day-box { flex: 1; border: 1px solid #ccc; padding: 10px; min-width: 280px; background: inherit; }
-.day-label { font-weight: bold; font-size: 1.1em; border-bottom: 2px solid #333; margin-bottom: 10px; padding-bottom: 5px; }
+.day-box { flex: 1; border: 1px solid #000; padding: 10px; min-width: 280px; background: inherit; }
+.day-label { font-weight: bold; font-size: 1.1em; border-bottom: 2px solid #000; margin-bottom: 10px; padding-bottom: 5px; }
 table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; background: inherit; }
-th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+th, td { border: 1px solid #000; padding: 6px; text-align: center; }
 th { background-color: #f2f2f2; }
 .holiday-row { background-color: #f9f9f9; }
 .scroll-area { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+
+/* ★ 提出物のグレーアウト仕様（ダークモードでもはっきりわかるように変更） */
+.checked-item { background-color: #e0e0e0 !important; color: #666 !important; text-decoration: none !important; }
+
 .deadline-warning { color: #f57c00 !important; font-weight: bold; }
 .deadline-overdue { color: #d32f2f !important; font-weight: bold; }
 .student-edit-btn { padding: 2px 6px; font-size: 0.75em; margin-left: 5px; cursor: pointer; }
-.weather-info { font-size: 0.85em; font-weight: normal; margin-left: 10px; color: #555; }
-.countdown-card { padding: 5px 10px; font-weight: bold; color: #333; width: 160px; height: 75px; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc; background: white; }
-.countdown-card.small { width: 100px; height: 50px; padding: 2px 5px; }
-.countdown-card.small .text-area span { font-size: 1.2em !important; }
+.weather-info { font-size: 0.85em; font-weight: normal; margin-left: 10px; color: #333; }
+.countdown-card { padding: 5px 10px; font-weight: bold; color: #000; width: 160px; height: 75px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; background: white; }
+.countdown-card.small { width: auto; min-width: 90px; height: 40px; padding: 2px 5px; font-size: 0.85em; }
+.countdown-card.small .text-area span { font-size: 1.1em !important; }
 .changed-lesson { background-color: #fff9c4 !important; color: #000 !important; }
-.post-item { border-bottom: 1px dashed #ccc; padding: 15px; margin-bottom: 10px; }
-.post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; color: #555; }
-.foldable-section { background: white; border: 1px solid #ccc; padding: 20px; margin-bottom: 40px; }
-.foldable-section summary { cursor: pointer; border-bottom: 1px solid #333; padding-bottom: 5px; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; display: block; outline:none; }
+.post-item { border-bottom: 1px dashed #000; padding: 15px; margin-bottom: 10px; }
+.comm-box { background: white; }
+.post-date { font-size: 0.8em; margin-bottom: 5px; font-weight: bold; color: #333; }
+.foldable-section { background: white; border: 1px solid #000; padding: 20px; margin-bottom: 40px; }
+.foldable-section summary { cursor: pointer; border-bottom: 1px solid #000; padding-bottom: 5px; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; display: block; outline:none; }
 .foldable-section summary::-webkit-details-marker { display: none; }
-.point-badge { background: #ffd700; color: #b8860b; padding: 2px 8px; font-weight: bold; font-size: 0.9em; margin-left: 10px; border: 1px solid #daa520; }
-.spinner-btn { background: #ff9800; color: white; border: 1px solid #e65100; padding: 4px 10px; font-weight: bold; cursor: pointer; }
+.point-badge { background: #ffd700; color: #000; padding: 2px 8px; font-weight: bold; font-size: 0.9em; margin-left: 10px; border: 1px solid #000; cursor: pointer; }
+.spinner-btn { background: #ff9800; color: white; border: 1px solid #000; padding: 4px 10px; font-weight: bold; cursor: pointer; }
+
 /* ダークモード */
 body.dark-mode { background-color: #121212; color: #e0e0e0; }
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item, body.dark-mode .day-label { border-color: #555 !important; color: #e0e0e0 !important; }
-body.dark-mode section, body.dark-mode .day-box, body.dark-mode .foldable-section { border-color: #444 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
+body.dark-mode section, body.dark-mode .day-box, body.dark-mode .foldable-section { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
 body.dark-mode input:not([type="checkbox"]), body.dark-mode textarea:not(.has-bg), body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
-body.dark-mode button { background-color: #333 !important; color: #e0e0e0 !important; border-color: #666 !important; }
+body.dark-mode button { background-color: #333 !important; color: #e0e0e0 !important; border-color: #555 !important; }
 body.dark-mode button:hover { background-color: #555 !important; color: #fff !important; }
 body.dark-mode th { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
 body.dark-mode td { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode .holiday-row { background-color: #252525 !important; }
+body.dark-mode .weather-info, body.dark-mode .post-date, body.dark-mode #realtime-clock, body.dark-mode #copyright-year-container { color: #bbb !important; }
 body.dark-mode .deadline-warning { color: #ffa726 !important; }
 body.dark-mode .deadline-overdue { color: #ef5350 !important; }
-body.dark-mode .weather-info, body.dark-mode .post-date { color: #bbb !important; }
-body.dark-mode .countdown-card { color: #000 !important; border-color: #444 !important; }
+body.dark-mode .countdown-card { color: #e0e0e0 !important; border-color: #444 !important; background: #2a2a2a !important; }
 body.dark-mode .changed-lesson { background-color: #4a401c !important; color: #e0e0e0 !important; }
-body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color: #b8860b; }
-.like-btn { background: transparent; border: 1px solid #ccc; color: #555; padding: 2px 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
-.like-btn.liked { background: #e91e63; color: white; border-color: #e91e63; }
+body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color: #555; }
+body.dark-mode .comm-box { background: #1e1e1e !important; border-color: #555 !important; }
+
+/* ★ ダークモードでのグレーアウト仕様 */
+body.dark-mode .checked-item { background-color: #333333 !important; color: #888888 !important; }
+
+/* ダークモード設定画面・投稿画面の色反映 */
+body.dark-mode #settings-modal-content { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode #settings-modal-content h2, body.dark-mode #settings-modal-content h4 { border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode #settings-modal-content ul { background-color: #2a2a2a !important; border-color: #555 !important; }
+body.dark-mode #settings-modal-content li { border-color: #555 !important; }
+body.dark-mode #committee-form-area { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode #committee-form-area h3, body.dark-mode #my-role-name-container { color: #e0e0e0 !important; }
+
+.like-btn { background: transparent; border: 1px solid #000; color: #000; padding: 2px 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
+.like-btn.liked { background: #000; color: white; border-color: #000; }
+.like-btn.all-checked { background: #388e3c; color: white; border-color: #388e3c; }
+body.dark-mode .like-btn { border-color: #e0e0e0; color: #e0e0e0; }
+body.dark-mode .like-btn.liked { background: #e0e0e0; color: #000; border-color: #e0e0e0; }
+body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border-color: #388e3c; }
+
 @media screen and (max-width: 650px) { body { padding: 10px; } .section-header { flex-direction: column; gap: 10px; } }
 </style>
 </head>
@@ -71,15 +96,15 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
         <div>
             <div style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px;">
                 <h2 id="welcome-msg" style="border:none; margin:0; font-size:1.1em; display:inline-block;">確認中...</h2>
-                <span id="realtime-clock" style="font-size: 0.9em; color: #666; font-weight: bold;"></span>
+                <span id="realtime-clock" style="font-size: 0.9em; font-weight: bold; color: #000;"></span>
                 <span id="holiday-msg" style="font-weight:bold; color:#d32f2f; cursor:pointer; display:none; background:#ffcdd2; padding:2px 8px; font-size:0.85em; border:1px solid #d32f2f;" onclick="openHolidayModal()"></span>
-                <span id="my-points-display" class="point-badge">0 Pt</span>
-                <button id="spinner-btn" class="spinner-btn" style="display:none;" onclick="spinRoulette()">🎯 ルーレット</button>
+                <span id="my-points-display" class="point-badge" onclick="openPointDetails()">0 Pt</span>
+                <button id="spinner-btn" class="spinner-btn" style="display:none;" onclick="spinRoulette()">ルーレット</button>
             </div>
             <div id="top-reminder" style="font-weight: bold; font-size: 0.9em; margin-top: 5px; line-height: 1.6;"></div>
         </div>
         <div style="display: flex; gap: 5px;">
-            <button type="button" id="btn-admin-page" style="display:none; background:#d32f2f; color:white; border-color:#d32f2f;" onclick="location.href='admin.html'">⚙️ 管理画面</button>
+            <button type="button" id="btn-admin-page" style="display:none; background:#d32f2f; color:white; border-color:#000;" onclick="location.href='admin.html'">管理画面</button>
             <button type="button" onclick="logout()">ログアウト</button>
         </div>
     </header>
@@ -96,9 +121,9 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
                         <button onclick="changeScheduleDate(1)" style="padding: 4px 8px; font-size: 0.85em;">進む ▶</button>
                     </div>
                 </div>
-                <div id="bonus-check-area" style="display:none; text-align:center; background:#fff3cd; padding:10px; border:2px solid #ffc107; margin-bottom:10px;">
-                    <p style="margin:0 0 5px 0; font-weight:bold; color:#d32f2f;">✨ 帰りの会（予定確認）の時間です！</p>
-                    <button onclick="claimDailyBonus()" style="background:#d32f2f; color:white; border:none; padding:8px 20px; font-size:1.1em;">明日の予定を確認した！</button>
+                <div id="bonus-check-area" style="display:none; text-align:center; background:#fff3cd; padding:10px; border:1px solid #000; margin-bottom:10px;">
+                    <p style="margin:0 0 5px 0; font-weight:bold; color:#d32f2f;">間もなく帰りの会が始まります！<br>席に着いて明日の予定を確認しながら、帰りの会を待ちましょう。</p>
+                    <button onclick="claimDailyBonus()" style="background:#d32f2f; color:white; border:1px solid #000; padding:8px 20px; font-size:1.1em;">明日の予定を確認しました！</button>
                 </div>
                 <div class="day-container" id="schedule-display">
                     <div id="area-1" class="day-box scroll-area">確認中...</div>
@@ -110,24 +135,23 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
                 <div class="section-header">
                     <h2>◆ 週予定</h2>
                     <div>
-                        <button id="btn-edit-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="startInlineEditWeek()">全体を編集(管理者)</button>
                         <button id="btn-edit-my-week" style="padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">編集</button>
-                        <button id="btn-save-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background:#0d47a1; color:white;" onclick="saveMyWeek()">保存</button>
-                        <button id="btn-cancel-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">ｷｬﾝｾﾙ</button>
+                        <button id="btn-save-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background:#000; color:white;" onclick="saveMyWeek()">保存</button>
+                        <button id="btn-cancel-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">キャンセル</button>
                         <span style="margin: 0 5px;">|</span>
                         <button onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
                         <button onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
                         <button onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
                     </div>
                 </div>
-                <div id="my-week-settings" style="display: none; margin-top: 10px; margin-bottom: 10px; font-size: 0.9em; gap: 15px; flex-wrap: wrap; background:#f9f9f9; padding:8px; border:1px solid #ccc; align-items: center; color: #333;">
-                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-weekend" onchange="displayWeeklySchedule()">土日を表示</label>
-                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-club" onchange="displayWeeklySchedule()">部活動予定を表示</label>
-                    <button onclick="editMyEventOptions()" style="padding: 2px 8px; font-size: 0.9em; margin-left:auto;">⚙️ 予定リストの編集</button>
+                <div id="my-week-settings" style="display: none; margin-top: 10px; margin-bottom: 10px; font-size: 0.9em; gap: 15px; flex-wrap: wrap; background:#f9f9f9; padding:8px; border:1px solid #000; align-items: center; color: #000;">
+                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-weekend" onchange="safeRenderAll()">土日を表示</label>
+                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-club" onchange="safeRenderAll()">部活動予定を表示</label>
+                    <button onclick="editMyEventOptions()" style="padding: 2px 8px; font-size: 0.9em; margin-left:auto;">予定リストの編集</button>
                 </div>
-                <div id="my-list-editor-area" style="display: none; background:#fff3cd; border:1px solid #ffc107; padding:10px; margin-bottom:10px; color:black;">
+                <div id="my-list-editor-area" style="display: none; background:#fff3cd; border:1px solid #000; padding:10px; margin-bottom:10px; color:black;">
                     <h4 style="margin-top:0;">予定リストの編集 (カンマ区切り)</h4>
-                    <p style="margin:0 0 5px 0; font-size:0.85em;">個人の予定：</p><input type="text" id="edit-my-events-input" style="width:100%;">
+                    <p style="margin:0 0 5px 0; font-size:0.85em;">自分の予定：</p><input type="text" id="edit-my-events-input" style="width:100%;">
                     <p style="margin:10px 0 5px 0; font-size:0.85em;">部活動の予定：</p><input type="text" id="edit-my-clubs-input" style="width:100%;">
                     <div style="text-align:right; margin-top:5px;"><button onclick="saveMyListOptions()">保存</button> <button onclick="closeMyListEditor()">閉じる</button></div>
                 </div>
@@ -143,9 +167,9 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
             <section id="sec-committee">
                 <div class="section-header"><h2>◆ 係・委員会より連絡</h2></div>
                 <div id="btn-show-committee-form" style="display:none; text-align:right; margin-bottom:10px;">
-                    <button onclick="document.getElementById('committee-form-area').style.display='block'; this.style.display='none';">＋ 新規投稿</button>
+                    <button onclick="document.getElementById('committee-form-area').style.display='block'; document.getElementById('btn-show-committee-form').style.display='none';">＋ 新規投稿</button>
                 </div>
-                <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #ccc; margin-bottom:15px; background:#fafafa;">
+                <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #000; margin-bottom:15px; background:#fafafa;">
                     <h3 style="margin-top:0; font-size:1em; color:black;">連絡を投稿する</h3>
                     <div style="margin-bottom: 10px; font-size: 0.9em; color: black;">投稿者（役職）: <span id="my-role-name-container"></span></div>
                     <textarea id="committee-input" placeholder="連絡内容を入力してください..." style="height:80px;"></textarea>
@@ -174,9 +198,9 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
 
             <section id="sec-dm">
                 <details class="foldable-section" style="margin-bottom:0; padding:0; border:none; background:transparent;">
-                    <summary style="border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 1.2em;">◆ 担任へ連絡</summary>
-                    <div style="background:white; border:1px solid #ccc; padding:20px; margin-top:10px;">
-                        <p style="font-size: 0.85em; margin-top: 0; color:#333;">※ここで送信した内容は先生に直接届きます。</p>
+                    <summary style="border-bottom: 1px solid #000; padding-bottom: 5px; font-size: 1.2em;">◆ 担任へ連絡</summary>
+                    <div style="background:white; border:1px solid #000; padding:20px; margin-top:10px;">
+                        <p style="font-size: 0.85em; margin-top: 0; color:#000;">※ここで送信した内容は先生に直接届きます。</p>
                         <textarea id="dm-input" placeholder="相談事などを書いてください..." style="height: 80px;"></textarea><br>
                         <button type="button" onclick="sendDirectMessage()">送信する</button>
                     </div>
@@ -184,39 +208,47 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
             </section>
         </div>
     </main>
-    <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #ccc; font-size: 0.85em; color: #666;">
+    <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #000; font-size: 0.85em; color: #000;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div>
                 <button type="button" onclick="toggleDeviceView()">Smartphone / PC</button>
                 <button type="button" onclick="toggleTheme()">Light / Dark</button>
-                <button type="button" onclick="toggleLightness()">☀️ 明るさ調整</button>
-                <button type="button" onclick="openSettingsModal()">⚙️ 設定</button>
+                <button type="button" id="btn-lightness" onclick="toggleLightness()">明るさ調整</button>
+                <button type="button" onclick="openSettingsModal()">設定</button>
             </div>
-            <div>&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
+            <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
         </div>
     </footer>
 </div>
 
 <div id="event-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
-    <div id="event-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #333;">
-        <button onclick="closeEventModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:#333;">✖</button>
+    <div id="event-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #000;">
+        <button onclick="closeEventModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:#000;">✖</button>
         <div id="event-modal-body"></div>
     </div>
 </div>
 
+<div id="point-details-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; width:90%; max-width:400px; border:1px solid #000; color:#000; position:relative;">
+        <h3 style="margin-top:0; border-bottom:1px solid #000; padding-bottom:5px;">本日の獲得ポイント</h3>
+        <div id="point-details-content" style="max-height:300px; overflow-y:auto; margin-bottom:15px; font-size:0.95em; line-height:1.8;"></div>
+        <div style="text-align:right;"><button onclick="document.getElementById('point-details-modal').style.display='none'">閉じる</button></div>
+    </div>
+</div>
+
 <div id="settings-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
-    <div id="settings-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #333;">
-        <button onclick="closeSettingsModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:#333;">✖</button>
-        <h2 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:5px;">⚙️ 設定</h2>
+    <div id="settings-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #000;">
+        <button onclick="closeSettingsModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:#000;">✖</button>
+        <h2 style="margin-top:0; border-bottom:1px solid #000; padding-bottom:5px;">設定</h2>
         <h4 style="margin-bottom:5px;">■ セクションの並び替え</h4>
-        <ul id="sortable-list" style="list-style-type:none; padding:0; margin:0 0 20px 0; border:1px solid #ccc; background:#fafafa;"></ul>
+        <ul id="sortable-list" style="list-style-type:none; padding:0; margin:0 0 20px 0; border:1px solid #000; background:#fafafa;"></ul>
         <h4 style="margin-bottom:5px;">■ セクションの背景色</h4>
         <table style="width:100%; font-size:0.9em; margin-bottom:20px;">
             <tr><td>直近の予定</td><td><select id="set-bg-recent"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
             <tr><td>週予定</td><td><select id="set-bg-weekly"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
             <tr><td>提出物</td><td><select id="set-bg-subs"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
             <tr><td>係・委員会</td><td><select id="set-bg-comm"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
-            <tr><td>担任ブログ</td><td><select id="set-bg-blogs"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
+            <tr><td>担任のやつ</td><td><select id="set-bg-blogs"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
             <tr id="set-bg-dm-row"><td>担任へ連絡</td><td><select id="set-bg-dm"><option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option></select></td></tr>
         </table>
         <h4 style="margin-bottom:5px;">■ カウントダウン表示</h4>
@@ -224,8 +256,8 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
             <label><input type="checkbox" id="set-cd-visible" style="margin:0; vertical-align:middle;"> 表示する</label>
             <div>サイズ：<label style="margin-right:10px;"><input type="radio" name="set-cd-size" value="normal" style="margin:0; vertical-align:middle;"> 標準</label><label><input type="radio" name="set-cd-size" value="small" style="margin:0; vertical-align:middle;"> 小</label></div>
         </div>
-        <div style="text-align:right; margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:20px;">
-            <button onclick="saveUserSettings()" style="background:#0d47a1; color:white;">設定を保存</button>
+        <div style="text-align:right; margin-bottom:20px; border-bottom:1px solid #000; padding-bottom:20px;">
+            <button onclick="saveUserSettings()" style="background:#000; color:white;">設定を保存</button>
             <button onclick="resetUserSettings()" style="color:#d32f2f;">初期設定に戻す</button>
         </div>
         <details>
@@ -234,7 +266,7 @@ body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color:
                 <input type="password" id="old-password" placeholder="現在のパスワード"><br>
                 <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）"><br>
                 <input type="password" id="new-password-confirm" placeholder="確認用"><br>
-                <button type="button" id="change-pw-btn" style="background:#333; color:white;">変更する</button>
+                <button type="button" id="change-pw-btn" style="background:#000; color:white;">変更する</button>
             </div>
         </details>
     </div>
@@ -253,23 +285,21 @@ const firebaseConfig = {
     messagingSenderId: "125594983188",
     appId: "1:125594983188:web:129aa54e9d3a39ca700001"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 const TEACHER_EMAIL = "administrator@class.jp";
 const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事等"];
 
-// ★ ここで全てのグローバル変数を漏れなく宣言（読込エラー防止）
-let studentMaster = {}, vacationData = [], exitTimePeriods = [], holidays = {}, customHolidays = {};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let studentMaster = {}, vacationData = [], exitTimePeriods = [], holidays = {}, customHolidays = {}, holidayDescs = {};
 let isAdmin = false, isSubAdmin = false, currentUserEmail = null, submissionsList = [], clubOptionsList = [];
 let allBlogs = [], currentBlogPage = 1, allCommitteePosts = [];
-let rolesList = [], committeesList = [], pendingExcelData = {};
 let currentScheduleBaseDate = new Date(), currentWeekBaseDate = new Date(), currentWeeklyDates = [];
-let isEditingMyWeek = false, weatherData = {}, savedScrollY = 0, isRestoringScroll = false, inactivityTimer;
+let isEditingMyWeek = false, weatherData = {}, inactivityTimer;
 let countdownSettings = {}, bonusTimeSettings = {}, myPoints = 0, myStreak = 0, spinnerMulti = 1;
-let todayScheduleData = null; // ボーナス時間判定用
-let accessChartInstance = null; 
-let pendingCommitteeCount = 0; 
-let unreadMessageCount = 0; 
+let todayScheduleData = null; 
+let isRendering = false, pendingRender = false;
+let isProcessingPoints = false;
 
 let userSettings = { order: ['sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' }, cdVisible: true, cdSize: 'normal' };
 const SECTION_NAMES = { 'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等', 'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡' };
@@ -279,11 +309,32 @@ function getLocalDateStr(d) { return `${d.getFullYear()}-${('0'+(d.getMonth()+1)
 function formatDateTime(d) { return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${('0'+d.getHours()).slice(-2)}:${('0'+d.getMinutes()).slice(-2)}`; }
 function getSchoolDaysDiff(tStr) { let t1=new Date(); t1.setHours(0,0,0,0); let t2=new Date(tStr); t2.setHours(0,0,0,0); if(t2<t1) return -1; let d=0, c=new Date(t1); while(c<t2){ c.setDate(c.getDate()+1); if(isSchoolDay(getLocalDateStr(c))) d++; } return d; }
 function isSchoolDay(ds) { let d=new Date(ds).getDay(); if(d===0||d===6||holidays[ds]||customHolidays[ds]||(vacationData&&vacationData.find(v=>ds>=v.start&&ds<=v.end))) return false; return true; }
+function getStandardExitTime(ds) { for(let p of exitTimePeriods){ if(ds>=p.start&&ds<=p.end) return p.time; } return "16:30"; }
 
-// ★直近の予定エラー対応（関数を確実に定義）
-function getStandardExitTime(ds) { 
-    for(let p of exitTimePeriods){ if(ds>=p.start&&ds<=p.end) return p.time; } 
-    return "16:30"; 
+function getDefaultHolidayDesc(name) {
+    if (!name) return "国民の祝日です。";
+    if (name.includes("元日")) return "年のはじめを祝う日です。";
+    if (name.includes("成人")) return "おとなになったことを自覚し、みずから生き抜こうとする青年を祝いはげます日です。";
+    if (name.includes("建国記念")) return "建国をしのび、国を愛する心を養う日です。";
+    if (name.includes("天皇誕生日")) return "天皇の誕生日を祝う日です。";
+    if (name.includes("春分")) return "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。";
+    if (name.includes("昭和")) return "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。";
+    if (name.includes("憲法記念")) return "日本国憲法の施行を記念し、国の成長を期する日です。";
+    if (name.includes("みどり")) return "自然に親しむとともにその恩恵に感謝し、豊かな心をはぐくむ日です。";
+    if (name.includes("こども")) return "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。";
+    if (name.includes("海の日")) return "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。";
+    if (name.includes("山の日")) return "山の恩恵に感謝し、自然に親しむ機会とする日です。";
+    if (name.includes("敬老")) return "多年にわたり社会につくしてきた老人を敬愛し、長寿を祝う日です。";
+    if (name.includes("秋分")) return "祖先をうやまい、なくなった人々をしのぶ日です。";
+    if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身をつちかう日です。";
+    if (name.includes("文化の日")) return "自由と平和を愛し、文化をすすめる日です。";
+    if (name.includes("勤労感謝")) return "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日です。";
+    if (name.includes("振替休日")) {
+        let baseName = name.replace(" 振替休日", "");
+        return `${baseName}の振替休業日です。`;
+    }
+    if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となった日です。";
+    return "国民の祝日です。";
 }
 
 setInterval(() => {
@@ -302,9 +353,7 @@ function toggleLightness() {
 }
 
 function applyLightness() {
-    if(document.body.classList.contains('dark-mode')) {
-        document.body.style.backgroundColor = ""; return;
-    }
+    if(document.body.classList.contains('dark-mode')) { document.body.style.backgroundColor = ""; return; }
     let level = localStorage.getItem('lightBgLevel') || '1';
     if(level === '1') document.body.style.backgroundColor = "#f7f9fc"; 
     else if(level === '2') document.body.style.backgroundColor = "#c9d1d9"; 
@@ -312,20 +361,25 @@ function applyLightness() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
     applyLightness();
+    let lightBtn = document.getElementById('btn-lightness');
+    if(document.body.classList.contains('dark-mode')) { lightBtn.style.display = 'none'; } else { lightBtn.style.display = 'inline-block'; }
     document.getElementById('copyright-year').innerText = new Date().getFullYear();
     document.getElementById('login-copyright-year').innerText = new Date().getFullYear();
-    fetchWeather(); resetInactivityTimer();
+    
+    // 天気取得後に描画を確実に実行する
+    fetchWeather().then(() => { if(typeof safeRenderAll === 'function') safeRenderAll(); });
+    resetInactivityTimer();
 });
 
 function toggleTheme() { 
     document.body.classList.toggle('dark-mode'); 
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+    let lightBtn = document.getElementById('btn-lightness');
+    if(document.body.classList.contains('dark-mode')) { lightBtn.style.display = 'none'; } else { lightBtn.style.display = 'inline-block'; }
     applyLightness(); applyUserSettings(); 
 }
-
 function toggleDeviceView() { let meta=document.getElementById('viewport-meta'); isPcView=!isPcView; meta.setAttribute('content', isPcView?'width=850':'width=device-width, initial-scale=1.0'); }
 function resetInactivityTimer() { clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ if(firebase.auth().currentUser){ alert("タイムアウトしました"); logout(); } }, 3600000); }
 ['mousemove','keydown','click','scroll','touchstart'].forEach(e=>window.addEventListener(e, resetInactivityTimer, {passive:true}));
@@ -343,7 +397,44 @@ async function fetchWeather() {
         const data = await res.json();
         const wmoDesc = c => { if(c===0) return "☀️快晴"; if(c<=2) return "☀️晴れ"; if(c===3) return "☁️曇り"; if(c<=48) return "🌁霧"; if(c<=67) return "☔雨"; if(c<=77) return "❄️雪"; if(c<=82) return "🌦️にわか雨"; if(c<=86) return "❄️雪"; if(c>=95) return "⚡雷雨"; return "☀️晴れ"; };
         for(let i=0; i<data.daily.time.length; i++) weatherData[data.daily.time[i]] = { desc: wmoDesc(data.daily.weathercode[i]), max: data.daily.temperature_2m_max[i], min: data.daily.temperature_2m_min[i], pop: data.daily.precipitation_probability_max[i] };
-    } catch(e) {}
+    } catch(e) { console.error(e); }
+}
+
+// ★ 描画エンジン: 強制スクロールバグ撲滅のため、描画中も高さを固定しチラツキをなくす
+async function safeRenderAll() {
+    if(isRendering) { pendingRender = true; return; }
+    isRendering = true;
+    let st = window.scrollY;
+    document.body.style.minHeight = document.body.scrollHeight + 'px';
+
+    try {
+        await displayNextSchoolDays();
+        await displayWeeklySchedule();
+        renderSubmissionsUI();
+        updateTopReminder();
+    } catch(e) {
+        console.error(e);
+    } finally {
+        window.scrollTo(0, st);
+        setTimeout(() => {
+            window.scrollTo(0, st);
+            document.body.style.minHeight = 'auto';
+            isRendering = false;
+            if(pendingRender) { pendingRender = false; safeRenderAll(); }
+        }, 30);
+    }
+}
+
+function resetWeekDatesOnly() {
+    let now = new Date(); let todayStr = getLocalDateStr(now);
+    let d = new Date(now); d.setDate(d.getDate() - d.getDay());
+    let remainingSchoolDays = false;
+    for(let i=now.getDay(); i<=6; i++) {
+        let tempD = new Date(d); tempD.setDate(tempD.getDate() + i);
+        if(isSchoolDay(getLocalDateStr(tempD))) { remainingSchoolDays = true; break; }
+    }
+    if (!remainingSchoolDays && !isSchoolDay(todayStr)) { now.setDate(now.getDate() + (7 - now.getDay())); }
+    currentWeekBaseDate = now;
 }
 
 async function initApp(user) {
@@ -356,28 +447,51 @@ async function initApp(user) {
     }
 
     db.collection("config").doc("countdowns").onSnapshot(s => { countdownSettings = s.exists ? s.data() : {}; renderCountdownsUI(); });
-    db.collection("config").doc("exit_times").onSnapshot(s => { exitTimePeriods = s.exists ? (s.data().periods||[]) : []; displayAllSchedules(); });
+    db.collection("config").doc("exit_times").onSnapshot(s => { exitTimePeriods = s.exists ? (s.data().periods||[]) : []; safeRenderAll(); });
     db.collection("config").doc("club_options").onSnapshot(s => { clubOptionsList = s.exists ? s.data().items||["午前","午後","全日"] : ["午前","午後","全日"]; });
-    db.collection("config").doc("custom_holidays").onSnapshot(s => { customHolidays = s.exists ? s.data() : {}; updateTopReminder(); });
     db.collection("config").doc("bonus_time").onSnapshot(s => { bonusTimeSettings = s.exists ? s.data() : { defaultStart:"16:40", defaultEnd:"16:50", testMode:false }; });
 
-    try { const hRes = await fetch('https://holidays-jp.github.io/api/v1/date.json').then(r=>r.json()); holidays = hRes||{}; } catch(e){}
+    let holidaysLoaded = false;
+    fetch('https://holidays-jp.github.io/api/v1/date.json').then(r=>r.json()).then(hRes => {
+        holidays = hRes || {};
+        db.collection("config").doc("custom_holidays").onSnapshot(snap => {
+            customHolidays = snap.exists ? snap.data() : {};
+            db.collection("config").doc("holiday_descs").onSnapshot(snap2 => {
+                holidayDescs = snap2.exists ? snap2.data() : {};
+                if(!holidaysLoaded) { resetWeekDatesOnly(); currentScheduleBaseDate = new Date(); holidaysLoaded = true; }
+                safeRenderAll();
+            });
+        });
+    }).catch(e=>{
+        if(!holidaysLoaded) { resetWeekDatesOnly(); currentScheduleBaseDate = new Date(); holidaysLoaded = true; }
+        safeRenderAll();
+    });
+
     db.collection("config").doc("vacations").get().then(s => { vacationData = (s.exists&&s.data().periods)?s.data().periods:[]; renderCountdownsUI(); });
 
-    db.collection("students").doc(user.email).onSnapshot(doc => {
-        let d = doc.data() || {}; studentMaster[user.email] = d;
-        isSubAdmin = d.isSubAdmin === true;
-        myPoints = d.points || 0; myStreak = d.streak || 0;
-        document.getElementById('my-points-display').innerText = `${myPoints} Pt (連続${myStreak}日)`;
+    db.collection("students").onSnapshot(snap => {
+        studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
+        let myD = studentMaster[currentUserEmail] || {};
+        isSubAdmin = myD.isSubAdmin === true;
+        myPoints = myD.points || 0; myStreak = myD.streak || 0;
+        document.getElementById('my-points-display').innerText = `${myPoints} Pt`;
         
         let todayStr = getLocalDateStr(new Date());
-        if(d.spinnerUsedDate !== todayStr && isSchoolDay(todayStr) && !isAdmin) { document.getElementById('spinner-btn').style.display='inline-block'; }
+        
+        // ルーレットの倍率維持
+        if(myD.spinnerUsedDate === todayStr && myD.todaySpinnerMulti) {
+            spinnerMulti = myD.todaySpinnerMulti;
+        } else {
+            spinnerMulti = 1;
+        }
+        
+        if(myD.spinnerUsedDate !== todayStr && isSchoolDay(todayStr) && !isAdmin) { document.getElementById('spinner-btn').style.display='inline-block'; }
         else { document.getElementById('spinner-btn').style.display='none'; }
 
-        if(d.settings) userSettings = Object.assign({}, userSettings, d.settings);
+        if(myD.settings) userSettings = Object.assign({}, userSettings, myD.settings);
         applyUserSettings();
 
-        let myRoles = [d.role, d.committee].filter(Boolean);
+        let myRoles = [myD.role, myD.committee].filter(Boolean);
         if(myRoles.length > 0 || isAdmin) {
             document.getElementById('btn-show-committee-form').style.display='block';
             let c = document.getElementById('my-role-name-container');
@@ -386,25 +500,84 @@ async function initApp(user) {
         }
         
         const hr = new Date().getHours(); let gr = (hr>=17||hr<6)?"こんばんは":(hr>=6&&hr<11)?"おはようございます":"こんにちは";
-        document.getElementById('welcome-msg').innerText = `${gr}、${d.name||(isAdmin?"先生":"生徒")}さん！`;
+        document.getElementById('welcome-msg').innerText = `${gr}、${myD.name||(isAdmin?"先生":"生徒")}さん！`;
         
-        if(!isAdmin) {
-            resetWeek(); // 自動翌週表示の判定込み
-            displayAllSchedules();
+        // ★ 管理者から付与された特別ポイントの処理
+        if (!isAdmin && myD.pendingPoints && myD.pendingPoints.length > 0) {
+            processPendingPoints(myD.pendingPoints);
         }
-        updateTopReminder();
+        
+        if(holidaysLoaded) safeRenderAll();
     });
 
     await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
     db.collection("access_logs").add({ email: user.email, name: isAdmin ? "先生" : (studentMaster[user.email]?.name || "生徒"), accessedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
     db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
-        savedScrollY = window.scrollY; submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
-        renderSubmissionsUI(); displayAllSchedules(); updateTopReminder();
-        if(isRestoringScroll) requestAnimationFrame(() => { window.scrollTo(0, savedScrollY); isRestoringScroll = false; });
+        submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() }));
+        if(holidaysLoaded) safeRenderAll();
     });
     db.collection("blogs").orderBy("createdAt", "desc").onSnapshot(snap => { allBlogs = []; snap.forEach(d => allBlogs.push({id: d.id, ...d.data()})); currentBlogPage = 1; renderBlogs(); });
     db.collection("committee_posts").onSnapshot(snap => { allCommitteePosts = []; snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()})); renderCommitteePosts(); });
+}
+
+// ★ 特別ポイント付与処理（生徒ログイン時）
+async function processPendingPoints(pendingArray) {
+    if(isProcessingPoints) return;
+    isProcessingPoints = true;
+
+    let totalAdded = 0;
+    let messages = [];
+    let todayStr = getLocalDateStr(new Date());
+    let myD = studentMaster[currentUserEmail] || {};
+    let details = myD.pointDetails || { date: "", history: [] };
+    if (details.date !== todayStr) details = { date: todayStr, history: [] };
+
+    pendingArray.forEach(p => {
+        totalAdded += p.points;
+        messages.push(`・${p.reason} (${p.points > 0 ? '+' : ''}${p.points} Pt)`);
+        details.history.push({ reason: p.reason, points: p.points, time: formatDateTime(new Date()) });
+    });
+
+    try {
+        await db.collection("students").doc(currentUserEmail).update({
+            points: firebase.firestore.FieldValue.increment(totalAdded),
+            pointDetails: details,
+            pendingPoints: firebase.firestore.FieldValue.delete()
+        });
+        alert(`先生からポイントが付与されました！\n\n${messages.join('\n')}\n\n合計: ${totalAdded > 0 ? '+' : ''}${totalAdded} Pt`);
+    } catch(e) {
+        console.error(e);
+    } finally {
+        isProcessingPoints = false;
+    }
+}
+
+// --- ポイント詳細 ---
+async function addPoints(reason, pts) {
+    if(isAdmin) return;
+    let todayStr = getLocalDateStr(new Date());
+    let ref = db.collection("students").doc(currentUserEmail);
+    let myData = studentMaster[currentUserEmail] || {};
+    let details = myData.pointDetails || { date: "", history: [] };
+    if (details.date !== todayStr) details = { date: todayStr, history: [] };
+    
+    details.history.push({ reason: reason, points: pts, time: formatDateTime(new Date()) });
+    await ref.update({ points: firebase.firestore.FieldValue.increment(pts), pointDetails: details }).catch(e=>console.log(e));
+}
+
+function openPointDetails() {
+    if(isAdmin) return;
+    let details = studentMaster[currentUserEmail]?.pointDetails || {};
+    let todayStr = getLocalDateStr(new Date());
+    let html = "";
+    if (details.date === todayStr && details.history && details.history.length > 0) {
+        html = details.history.map(h => `<div style="border-bottom:1px dashed #000; padding:5px 0;">${h.time} - ${h.reason} <span style="color:#d32f2f; font-weight:bold; float:right;">+${h.points}Pt</span></div>`).join('');
+    } else {
+        html = "<p>本日のポイント獲得履歴はありません。</p>";
+    }
+    document.getElementById('point-details-content').innerHTML = html;
+    document.getElementById('point-details-modal').style.display = 'flex';
 }
 
 function checkBonusTime(now) {
@@ -412,7 +585,6 @@ function checkBonusTime(now) {
     let todayStr = getLocalDateStr(now);
     let myData = studentMaster[currentUserEmail] || {};
     
-    // 実験用チェック
     if(bonusTimeSettings.testMode) {
         if(myData.lastCheckDate !== todayStr) document.getElementById('bonus-check-area').style.display='block';
         return;
@@ -448,21 +620,28 @@ async function claimDailyBonus() {
     let pts = 10 + Math.floor(newStreak / 5) * 5; 
     pts = pts * spinnerMulti; 
     
-    await db.collection("students").doc(currentUserEmail).update({ points: firebase.firestore.FieldValue.increment(pts), streak: newStreak, lastCheckDate: todayStr });
+    await db.collection("students").doc(currentUserEmail).update({ streak: newStreak, lastCheckDate: todayStr });
+    await addPoints(`帰りの会（連続${newStreak}日${spinnerMulti>1?'×'+spinnerMulti:''}）`, pts);
     document.getElementById('bonus-check-area').style.display='none';
     alert(`予定を確認しました！\n連続 ${newStreak} 日達成！\n${pts} Pt 獲得しました✨`);
 }
 
 async function spinRoulette() {
-    let myData = studentMaster[currentUserEmail] || {}; let todayStr = getLocalDateStr(new Date());
-    if(myData.spinnerUsedDate === todayStr) return alert("本日のルーレットは終了しています。");
+    let myD = studentMaster[currentUserEmail] || {}; let todayStr = getLocalDateStr(new Date());
+    if(myD.spinnerUsedDate === todayStr) return alert("本日のルーレットは終了しています。");
     let r = Math.random() * 100; let result = 1; let msg = "";
     if(r < 5) { result = 4; msg = "大当たり！本日のボーナスが 4倍！🎉"; }
     else if(r < 20) { result = 3; msg = "当たり！本日のボーナスが 3倍！✨"; }
     else if(r < 50) { result = 2; msg = "小当たり！本日のボーナスが 2倍！👍"; }
     else { result = 1; msg = "残念... 本日のボーナスは 1倍 です。"; }
-    spinnerMulti = result; await db.collection("students").doc(currentUserEmail).update({ spinnerUsedDate: todayStr });
-    document.getElementById('spinner-btn').style.display='none'; alert(`🎯 ルーレット結果\n\n${msg}`);
+    
+    spinnerMulti = result; 
+    await db.collection("students").doc(currentUserEmail).update({ 
+        spinnerUsedDate: todayStr,
+        todaySpinnerMulti: spinnerMulti
+    });
+    document.getElementById('spinner-btn').style.display='none'; 
+    alert(`🎯 ルーレット結果\n\n${msg}`);
 }
 
 async function likePost(postId) {
@@ -471,7 +650,7 @@ async function likePost(postId) {
     let likes = post.likes || []; if(likes.includes(currentUserEmail)) return; 
     likes.push(currentUserEmail);
     await db.collection("committee_posts").doc(postId).update({ likes: likes });
-    await db.collection("students").doc(currentUserEmail).update({ points: firebase.firestore.FieldValue.increment(2) }); 
+    await addPoints("確認済（係・委員会）", 2);
 }
 
 function updateTopReminder() {
@@ -479,7 +658,16 @@ function updateTopReminder() {
     if (submissionsList.length > 0) {
         submissionsList.forEach(sub => {
             const diffDays = getSchoolDaysDiff(sub.deadline);
-            let isUnsubmitted = !isAdmin && !studentMaster[currentUserEmail]?.checks?.[sub.id];
+            let unsubmittedCount = 0; let myUnsubmitted = false;
+            for(let em in studentMaster) {
+                if(em === TEACHER_EMAIL) continue;
+                if(!studentMaster[em].checks || !studentMaster[em].checks[sub.id]) {
+                    unsubmittedCount++;
+                    if(em === currentUserEmail) myUnsubmitted = true;
+                }
+            }
+            let isUnsubmitted = isAdmin ? (unsubmittedCount > 0) : myUnsubmitted;
+            
             if (isUnsubmitted) {
                 let dayStr = ""; let colorStyle = "";
                 if (diffDays < 0) { dayStr = "【期限超過】"; colorStyle = "color: #d32f2f;"; } 
@@ -490,16 +678,25 @@ function updateTopReminder() {
         });
     }
     reminderEl.innerHTML = msgs.join('<br>');
-    let todayStr = getLocalDateStr(new Date()); let hMsg = holidays[todayStr] || (customHolidays[todayStr] ? customHolidays[todayStr].name : null);
-    if(hMsg) { let el = document.getElementById('holiday-msg'); el.innerText = `㊗️ ${hMsg}`; el.style.display = 'inline-block'; el.dataset.date = todayStr; } 
+    let todayStr = getLocalDateStr(new Date()); 
+    let hMsg = holidays[todayStr] || (customHolidays[todayStr] ? customHolidays[todayStr].name : null);
+    if(hMsg) { 
+        let displayName = hMsg.includes("振替休日") ? "振替休日" : hMsg;
+        let el = document.getElementById('holiday-msg'); el.innerText = `㊗️ ${displayName}`; el.style.display = 'inline-block'; el.dataset.date = todayStr; 
+    } 
     else { document.getElementById('holiday-msg').style.display = 'none'; }
 }
 
 function openHolidayModal() {
     let dateStr = document.getElementById('holiday-msg').dataset.date; if(!dateStr) return;
     let name = holidays[dateStr] || (customHolidays[dateStr] ? customHolidays[dateStr].name : "祝日");
-    let desc = customHolidays[dateStr] ? customHolidays[dateStr].desc : "国民の祝日です。";
-    document.getElementById('event-modal-body').innerHTML = `<h3 style="margin-top:0; color:#d32f2f;">${name}</h3><p style="font-size:1.1em;">${desc}</p>`;
+    let desc = getDefaultHolidayDesc(name);
+    if (customHolidays[dateStr]) desc = customHolidays[dateStr].desc;
+    else if (holidayDescs[dateStr]) desc = holidayDescs[dateStr];
+    
+    let displayName = name.includes("振替休日") ? "振替休日" : name;
+    
+    document.getElementById('event-modal-body').innerHTML = `<h3 style="margin-top:0; color:#d32f2f;">${displayName}</h3><p style="font-size:1.1em; line-height:1.8;">${desc}</p>`;
     document.getElementById('event-modal-overlay').style.display = 'flex';
 }
 function closeEventModal() { document.getElementById('event-modal-overlay').style.display = 'none'; }
@@ -517,7 +714,7 @@ function openSettingsModal() {
     let ul = document.getElementById('sortable-list'); ul.innerHTML = "";
     userSettings.order.forEach((id, i) => {
         if(isAdmin && id==='sec-dm') return;
-        let li = document.createElement('li'); li.dataset.id = id; li.style = "padding:10px; border-bottom:1px solid #ccc; display:flex; align-items:center;";
+        let li = document.createElement('li'); li.dataset.id = id; li.style = "padding:10px; border-bottom:1px solid #000; display:flex; align-items:center;";
         li.innerHTML = `<button onclick="moveSectionItem(${i}, -1)" style="padding:2px 6px;" ${i===0?'disabled':''}>↑</button><button onclick="moveSectionItem(${i}, 1)" style="padding:2px 6px; margin-right:10px;" ${i===userSettings.order.length-1?'disabled':''}>↓</button> ${SECTION_NAMES[id]}`;
         ul.appendChild(li);
     });
@@ -557,19 +754,81 @@ function renderCountdownsUI() {
     container.innerHTML = html; container.style.display = html ? "flex" : "none";
 }
 
-function changeScheduleDate(dir) { let d = new Date(currentScheduleBaseDate); d.setDate(d.getDate() + dir); while(!isSchoolDay(getLocalDateStr(d))) d.setDate(d.getDate() + dir); currentScheduleBaseDate = d; displayNextSchoolDays(); }
-function resetScheduleDate() { currentScheduleBaseDate = new Date(); displayNextSchoolDays(); }
-async function displayAllSchedules() { await displayNextSchoolDays(); await displayWeeklySchedule(); }
+function changeScheduleDate(dir) { let d = new Date(currentScheduleBaseDate); d.setDate(d.getDate() + dir); while(!isSchoolDay(getLocalDateStr(d))) d.setDate(d.getDate() + dir); currentScheduleBaseDate = d; safeRenderAll(); }
+function resetScheduleDate() { currentScheduleBaseDate = new Date(); safeRenderAll(); }
+
 async function displayNextSchoolDays() {
     let foundDays = []; let checkDate = new Date(getLocalDateStr(currentScheduleBaseDate)); let todayStr = getLocalDateStr(new Date());
     while (foundDays.length < 2) { let ds = getLocalDateStr(checkDate); if (isSchoolDay(ds)) foundDays.push({ date: ds, gap: Math.round((new Date(ds) - new Date(todayStr)) / 86400000) }); checkDate.setDate(checkDate.getDate() + 1); }
     await renderDay(foundDays[0].date, "area-1", foundDays[0].gap===0?"【本日】":foundDays[0].gap===1?"【明日】":"");
     await renderDay(foundDays[1].date, "area-2", foundDays[1].gap===1?"【明日】":foundDays[0].gap===0?"【次回】":"");
 }
+
+function startAdminInlineEdit(ds) {
+    let rowEls = document.querySelectorAll(`.admin-editable-row-${ds}`);
+    rowEls.forEach(tr => {
+        tr.style.display = 'table-row'; 
+        let idx = tr.getAttribute('data-idx');
+        let subCell = tr.querySelector('.sub-cell');
+        let noteCell = tr.querySelector('.note-cell');
+        let curSub = subCell.innerText.replace(/^\d+\s*/, '').trim();
+        let inputEl = noteCell.querySelector('input[type="text"]');
+        let curNote = inputEl ? inputEl.value : noteCell.innerText.replace('✎', '').trim();
+        
+        let subOpts = SUBJECTS.map(s => `<option value="${s}" ${s===curSub?'selected':''}>${s||"（なし）"}</option>`).join('');
+        subCell.innerHTML = `<select id="admin-inline-sub-${ds}-${idx}" style="width:70px; padding:2px; margin:0; border-radius:0;">${subOpts}</select>`;
+        noteCell.innerHTML = `<input type="text" id="admin-inline-note-${ds}-${idx}" value="${String(curNote).replace(/"/g, '&quot;')}" style="width:100%; padding:2px; margin:0; border-radius:0;">`;
+    });
+    
+    let dayNoteEl = document.getElementById(`day-note-container-${ds}`);
+    if(dayNoteEl) {
+        let curDayNote = dayNoteEl.innerText.trim();
+        dayNoteEl.innerHTML = `<textarea id="admin-inline-daynote-${ds}" style="width:100%; height:60px; padding:2px; border-radius:0;">${curDayNote}</textarea>`;
+    }
+    
+    document.getElementById(`admin-edit-btn-${ds}`).style.display = 'none';
+    document.getElementById(`admin-save-btn-${ds}`).style.display = 'inline-block';
+    document.getElementById(`admin-revert-btn-${ds}`).style.display = 'inline-block';
+    document.getElementById(`admin-cancel-btn-${ds}`).style.display = 'inline-block';
+}
+
+async function revertToRegularSchedule(ds) {
+    if(!confirm("標準時間割に戻しますか？（備考欄は空欄になります）")) return;
+    const d = new Date(ds);
+    const regDoc = await db.collection("config").doc("regular_schedule").get();
+    const regWeek = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()]] : null;
+    for(let i=0; i<6; i++) {
+        let subEl = document.getElementById(`admin-inline-sub-${ds}-${i}`);
+        if(subEl && regWeek) { subEl.value = regWeek[i] || ""; }
+        let noteEl = document.getElementById(`admin-inline-note-${ds}-${i}`);
+        if(noteEl) { noteEl.value = ""; }
+    }
+}
+
+async function saveAdminInlineEdit(ds) {
+    let docRef = db.collection("schedules").doc(ds);
+    let doc = await docRef.get(); let data = doc.exists ? doc.data() : {};
+    if(!data.lessons) data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" }));
+    
+    for(let i=0; i<6; i++) {
+        let subEl = document.getElementById(`admin-inline-sub-${ds}-${i}`);
+        let noteEl = document.getElementById(`admin-inline-note-${ds}-${i}`);
+        if(subEl && noteEl) {
+            data.lessons[i].sub = subEl.value;
+            data.lessons[i].note = noteEl.value;
+        }
+    }
+    let dayNoteEl = document.getElementById(`admin-inline-daynote-${ds}`);
+    if(dayNoteEl) data.dayNote = dayNoteEl.value.trim();
+    
+    await docRef.set({ lessons: data.lessons, dayNote: data.dayNote, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    safeRenderAll();
+}
+
 async function renderDay(dateStr, elId, prefix) {
     const el = document.getElementById(elId); const d = new Date(dateStr); const week = ["日", "月", "火", "水", "木", "金", "土"];
     let weatherHtml = ""; let wInfo = weatherData[dateStr];
-    if (wInfo) weatherHtml = `<div class="weather-info">${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃ ${wInfo.pop>0?`☔${wInfo.pop}%`:''}</div>`;
+    if (wInfo) weatherHtml = `<div class="weather-info" style="margin-top:5px; font-weight:normal;">${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃ ${wInfo.pop>0?`☔${wInfo.pop}%`:''}</div>`;
 
     try {
         const doc = await db.collection("schedules").doc(dateStr).get(); let data = doc.exists ? doc.data() : {};
@@ -577,68 +836,118 @@ async function renderDay(dateStr, elId, prefix) {
         const regDoc = await db.collection("config").doc("regular_schedule").get(); const regWeek = regDoc.exists ? regDoc.data()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()]] : null;
         if (!data.lessons) { data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" })); if(!doc.exists && regWeek) data.lessons.forEach((l, i) => l.sub = regWeek[i] || ""); }
         
-        let html = `<div class="day-label"><span>${prefix} ${d.getMonth()+1}/${d.getDate()}（${week[d.getDay()]}）</span><br>${weatherHtml}</div>`;
+        let editBtn = isAdmin ? `<button id="admin-edit-btn-${dateStr}" onclick="startAdminInlineEdit('${dateStr}')" style="padding:2px 6px; font-size:0.8em; margin-left:10px;">編集</button>
+        <button id="admin-save-btn-${dateStr}" onclick="saveAdminInlineEdit('${dateStr}')" style="display:none; padding:2px 6px; font-size:0.8em; margin-left:10px; background:#000; color:white;">保存</button>
+        <button id="admin-revert-btn-${dateStr}" onclick="revertToRegularSchedule('${dateStr}')" style="display:none; padding:2px 6px; font-size:0.8em; color:#d32f2f;">戻す</button>
+        <button id="admin-cancel-btn-${dateStr}" onclick="safeRenderAll()" style="display:none; padding:2px 6px; font-size:0.8em;">キャンセル</button>` : '';
+        
+        let html = `<div class="day-label"><span>${prefix} ${d.getMonth()+1}/${d.getDate()}（${week[d.getDay()]}）</span>${editBtn}${weatherHtml}</div>`;
         if(data.event) html += `<div style="font-weight:bold; margin-bottom:5px;">${data.event}</div>`;
-        html += `<div class="scroll-area"><table><tr><th class="col-period">校時</th><th class="col-subject">科目</th><th class="col-note">備考</th></tr>`;
+        
+        html += `<div class="scroll-area"><table style="table-layout: fixed; width: 100%;"><tr><th style="width:80px;">科目</th><th class="col-note">備考</th></tr>`;
         
         let myRole = studentMaster[currentUserEmail]?.role || ""; let myComm = studentMaster[currentUserEmail]?.committee || "";
+        
+        let lastLessonIdx = 5;
+        while(lastLessonIdx >= 0 && !data.lessons[lastLessonIdx].sub && !data.lessons[lastLessonIdx].note) { lastLessonIdx--; }
+
         data.lessons.forEach((l, i) => {
+            let isHidden = i > lastLessonIdx;
+            let trStyle = isHidden ? 'display:none;' : '';
+            
             let noteHtml = l.note || ""; let isMySub = l.sub && (myRole.includes(l.sub) || myComm.includes(l.sub));
-            if (!isAdmin && isMySub) noteHtml = `<div id="student-note-container-${dateStr}-${i}" style="display:flex; justify-content:space-between; align-items:center;"><div style="flex:1;">${l.note || ""}</div><button class="student-edit-btn" onclick="startStudentEdit('${dateStr}', ${i}, '${String(l.note||"").replace(/'/g, "\\'")}')">✎</button></div>`;
-            html += `<tr class="${(doc.exists && regWeek && l.sub !== (regWeek[i]||""))?'changed-lesson':''}"><td>${i+1}</td><td>${l.sub || "---"}</td><td class="col-note">${noteHtml}</td></tr>`;
+            if (!isAdmin && isMySub) noteHtml = `<div id="student-note-container-${dateStr}-${i}" style="display:flex; justify-content:space-between; align-items:center;"><div style="flex:1; word-break:break-all;">${l.note || ""}</div><button class="student-edit-btn" onclick="startStudentEdit('${dateStr}', ${i}, '${String(l.note||"").replace(/'/g, "\\'")}')">✎</button></div>`;
+            let isChanged = (doc.exists && regWeek && l.sub !== (regWeek[i]||""));
+            let numDisplay = String(i+1);
+            
+            html += `<tr class="${isChanged?'changed-lesson':''} admin-editable-row-${dateStr}" data-idx="${i}" style="${trStyle}"><td class="sub-cell" style="white-space:nowrap; font-weight:bold; width:80px;">${numDisplay} ${l.sub || ""}</td><td class="col-note note-cell" style="text-align:left; word-break:break-all;">${noteHtml}</td></tr>`;
         });
         html += `</table></div><p style="text-align:right; font-weight:bold; margin-top:5px;">最終下校：${data.exitTime || getStandardExitTime(dateStr)}</p>`;
         
         let subsHtml = submissionsList.filter(s => s.deadline === dateStr).map(s => `・${s.title}`).join("<br>");
-        html += `<div style="margin-top:10px; padding:10px; border:1px solid #ccc; background:inherit; font-size:0.9em;">
-                    <strong style="display:block; border-bottom:1px solid #ccc; margin-bottom:5px;">■ 諸連絡</strong>
-                    <div>${(data.dayNote||"").replace(/\n/g, '<br>')}</div>
+        html += `<div style="margin-top:10px; padding:10px; border:1px solid #000; background:inherit; font-size:0.9em;">
+                    <strong style="display:block; border-bottom:1px solid #000; margin-bottom:5px;">■ 諸連絡</strong>
+                    <div id="day-note-container-${dateStr}" style="white-space:pre-wrap;">${data.dayNote||""}</div>
                     ${subsHtml ? `<div style="margin-top:5px; font-weight:bold;">【締切】<br>${subsHtml}</div>` : ""}
                  </div>`;
         el.innerHTML = html;
     } catch(e) { el.innerHTML = `<p style="color:red;">読込エラー: ${e.message}</p>`; console.error(e); }
 }
 
-function startStudentEdit(ds, idx, cur) { document.getElementById(`student-note-container-${ds}-${idx}`).innerHTML = `<input type="text" id="student-input-${ds}-${idx}" value="${cur}" style="width:calc(100% - 60px); padding:2px;"><button class="student-edit-btn" onclick="saveStudentEdit('${ds}', ${idx})">保存</button>`; }
+function startStudentEdit(ds, idx, cur) { document.getElementById(`student-note-container-${ds}-${idx}`).innerHTML = `<input type="text" id="student-input-${ds}-${idx}" value="${cur}" style="width:calc(100% - 60px); padding:2px; border:1px solid #000;"><button class="student-edit-btn" onclick="saveStudentEdit('${ds}', ${idx})">保存</button>`; }
+
 async function saveStudentEdit(ds, idx) {
     let val = document.getElementById(`student-input-${ds}-${idx}`).value.trim();
+    if(val === "") return alert("内容を入力してください。（空欄での保存はできません）");
+    
     let docRef = db.collection("schedules").doc(ds); let doc = await docRef.get(); let data = doc.exists ? doc.data() : {};
     if(!data.lessons) data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" }));
+    if(data.lessons[idx].note === val) { safeRenderAll(); return; } 
+    
     data.lessons[idx].note = val;
-    await docRef.set({ lessons: data.lessons, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    await db.collection("students").doc(currentUserEmail).update({ points: firebase.firestore.FieldValue.increment(5) });
-    alert("保存しました（+5 Pt✨）"); displayAllSchedules();
-}
-
-function resetWeek() { 
-    let now = new Date(); let todayStr = getLocalDateStr(now);
-    let d = new Date(now); d.setDate(d.getDate() - d.getDay()); 
-    let remainingSchoolDays = false;
-    for(let i=now.getDay(); i<=6; i++) {
-        let tempD = new Date(d); tempD.setDate(tempD.getDate() + i);
-        if(isSchoolDay(getLocalDateStr(tempD))) { remainingSchoolDays = true; break; }
+    let editors = data.lessons[idx].editedBy || [];
+    let ptMsg = "";
+    
+    let diffDays = getSchoolDaysDiff(ds);
+    if (diffDays >= 0 && diffDays <= 3) {
+        if (!editors.includes(currentUserEmail)) {
+            editors.push(currentUserEmail);
+            data.lessons[idx].editedBy = editors;
+            await addPoints("教科係（予定編集）", 5);
+            ptMsg = "（+5 Pt✨）";
+        }
     }
-    if (!remainingSchoolDays && !isSchoolDay(todayStr)) { now.setDate(now.getDate() + (7 - now.getDay())); }
-    currentWeekBaseDate = now; 
-    displayWeeklySchedule(); 
+    
+    await docRef.set({ lessons: data.lessons, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    alert("保存しました" + ptMsg); safeRenderAll();
 }
 
-function changeWeek(w) { currentWeekBaseDate.setDate(currentWeekBaseDate.getDate() + w * 7); displayWeeklySchedule(); }
-function toggleEditMyWeek() { isEditingMyWeek = !isEditingMyWeek; document.getElementById('btn-edit-my-week').style.display = isEditingMyWeek ? 'none' : 'inline-block'; document.getElementById('btn-save-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none'; document.getElementById('btn-cancel-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none'; document.getElementById('my-week-settings').style.display = isEditingMyWeek ? 'flex' : 'none'; document.getElementById('my-list-editor-area').style.display = 'none'; displayWeeklySchedule(); }
+function toggleEditMyWeek() { 
+    isEditingMyWeek = !isEditingMyWeek; 
+    document.getElementById('btn-edit-my-week').style.display = isEditingMyWeek ? 'none' : 'inline-block'; 
+    document.getElementById('btn-save-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none'; 
+    document.getElementById('btn-cancel-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none'; 
+    document.getElementById('my-week-settings').style.display = isEditingMyWeek ? 'flex' : 'none'; 
+    document.getElementById('my-list-editor-area').style.display = 'none'; 
+    safeRenderAll();
+}
+
 function editMyEventOptions() {
     let evOpts = studentMaster[currentUserEmail]?.myEventOptions || ["", "塾", "習い事", "病院"]; document.getElementById('edit-my-events-input').value = evOpts.join(',');
     let clOpts = studentMaster[currentUserEmail]?.myClubOptions || clubOptionsList; document.getElementById('edit-my-clubs-input').value = clOpts.join(',');
     document.getElementById('my-list-editor-area').style.display = 'block';
 }
+
 async function saveMyListOptions() {
     let newEvOpts = ["", ...document.getElementById('edit-my-events-input').value.split(',').map(s=>s.trim()).filter(s=>s)];
     let newClOpts = ["", ...document.getElementById('edit-my-clubs-input').value.split(',').map(s=>s.trim()).filter(s=>s)];
     await db.collection("students").doc(currentUserEmail).set({ myEventOptions: newEvOpts, myClubOptions: newClOpts }, { merge: true });
-    document.getElementById('my-list-editor-area').style.display = 'none'; displayWeeklySchedule(); 
+    document.getElementById('my-list-editor-area').style.display = 'none'; safeRenderAll(); 
 }
 function closeMyListEditor() { document.getElementById('my-list-editor-area').style.display = 'none'; }
+
+function addMyEventRow(ds) {
+    let container = document.getElementById(`my-events-rows-${ds}`);
+    let evOpts = studentMaster[currentUserEmail]?.myEventOptions || ["", "塾", "習い事", "病院"];
+    let div = document.createElement('div'); div.className = 'my-event-row'; div.style = "margin-bottom:4px; display:flex; gap:4px; align-items:center;";
+    div.innerHTML = `
+        <select class="my-ev-type" style="width:30%; padding:2px; border-radius:0;">${evOpts.map(o=>`<option value="${o}">${o||"（なし）"}</option>`).join('')}</select>
+        <input type="time" step="300" class="my-ev-time" style="width:80px !important; padding:2px; border-radius:0;">
+        <input type="text" class="my-ev-note" placeholder="備考" style="flex:1; padding:2px; border-radius:0;">
+    `;
+    container.appendChild(div);
+}
+function clearMyEvents(ds) { document.getElementById(`my-events-rows-${ds}`).innerHTML = ''; }
+
 async function saveMyWeek() {
-    let obj = {}; currentWeeklyDates.forEach(ds => { obj[`schedules.${ds}`] = { noteType: document.getElementById(`edit-my-note-type-${ds}`)?.value||"", noteDetail: document.getElementById(`edit-my-note-detail-${ds}`)?.value||"", clubType: document.getElementById(`edit-my-club-type-${ds}`)?.value||"", clubDetail: document.getElementById(`edit-my-club-detail-${ds}`)?.value||"" }; });
+    let obj = {}; 
+    currentWeeklyDates.forEach(ds => { 
+        let sd = { clubType: document.getElementById(`edit-my-club-type-${ds}`)?.value||"", clubDetail: document.getElementById(`edit-my-club-detail-${ds}`)?.value||"" }; 
+        let rows = document.querySelectorAll(`#my-events-rows-${ds} .my-event-row`);
+        sd.myEvents = [];
+        rows.forEach(r => { sd.myEvents.push({ type: r.querySelector('.my-ev-type').value, time: r.querySelector('.my-ev-time').value, note: r.querySelector('.my-ev-note').value }); });
+        obj[`schedules.${ds}`] = sd;
+    });
     await db.collection("students").doc(currentUserEmail).update(obj); toggleEditMyWeek(); 
 }
 
@@ -649,7 +958,7 @@ async function displayWeeklySchedule() {
 
     try {
         let docs = await Promise.all(currentWeeklyDates.map(ds => db.collection("schedules").doc(ds).get())); let wd = docs.map(doc => doc.exists?doc.data():{});
-        let html = `<table><tr><th style="width:11%;">日付</th><th style="${showClub?'width:30%':'width:44.5%'}">主な行事・提出物</th><th style="${showClub?'width:29%':'width:44.5%'}">個人の予定</th>${showClub?`<th style="width:30%">部活動</th>`:''}</tr>`;
+        let html = `<table><tr><th style="width:11%;">日付</th><th style="${showClub?'width:30%':'width:44.5%'}">主な行事・提出物</th><th style="${showClub?'width:29%':'width:44.5%'}">自分の予定</th>${showClub?`<th style="width:30%">部活動</th>`:''}</tr>`;
         let names = ["日","月","火","水","木","金","土"]; let ms = studentMaster[currentUserEmail]?.schedules || {};
         let evOpts = studentMaster[currentUserEmail]?.myEventOptions || ["","塾","習い事","病院"]; let clOpts = studentMaster[currentUserEmail]?.myClubOptions || clubOptionsList;
 
@@ -659,46 +968,109 @@ async function displayWeeklySchedule() {
                 let diff = getSchoolDaysDiff(s.deadline); let cls = !studentMaster[currentUserEmail]?.checks?.[s.id] ? (diff<0?'deadline-overdue':'deadline-warning') : '';
                 return `<span class="${cls}">【締切】${s.title}</span>`;
             }).join("<br>");
-            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[ds].name}</span>`:"")) : (wd[i].event||"");
-            let cEv = (aEv?`<div style="font-weight:bold;">${aEv}</div>`:'') + (subsHtml?`<div style="margin-top:3px;">${subsHtml}</div>`:'');
+            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[ds].name}</span>`:"")) : (wd[i].event||"");
+            
+            let editBtn = isAdmin ? `<button onclick="startAdminInlineEditWeek('${ds}')" style="padding:2px 4px; font-size:0.75em; margin-top:5px;">編集</button>` : '';
+            let cEv = (aEv?`<div style="font-weight:bold;">${aEv}</div>`:'') + (subsHtml?`<div style="margin-top:3px;">${subsHtml}</div>`:'') + editBtn;
 
-            let sd = ms[ds]||{noteType:"",noteDetail:"",clubType:"",clubDetail:""};
-            let myN = isEditingMyWeek ? `<select id="edit-my-note-type-${ds}" style="width:100%; padding:2px; margin-bottom:2px;">${evOpts.map(o=>`<option value="${o}" ${o===sd.noteType?'selected':''}>${o||"OFF"}</option>`).join('')}</select><input type="text" id="edit-my-note-detail-${ds}" value="${sd.noteDetail||''}" style="width:100%; padding:2px;">` : (sd.noteType?`<b>${sd.noteType}</b> `+(sd.noteDetail||""):(sd.noteDetail||""));
-            let clH = showClub ? (isEditingMyWeek ? `<td><select id="edit-my-club-type-${ds}" style="width:100%; padding:2px; margin-bottom:2px;">${clOpts.map(o=>`<option value="${o}" ${o===sd.clubType?'selected':''}>${o||"OFF"}</option>`).join('')}</select><input type="text" id="edit-my-club-detail-${ds}" value="${sd.clubDetail||''}" style="width:100%; padding:2px;"></td>` : `<td>${sd.clubType?`<b>${sd.clubType}</b> `+(sd.clubDetail||""):'<span style="color:#999;">OFF</span>'}</td>`) : '';
+            let sd = ms[ds]||{clubType:"",clubDetail:"",myEvents:[]};
+            let myN = "";
+            if (isEditingMyWeek) {
+                let evs = (sd.myEvents && sd.myEvents.length>0) ? sd.myEvents : [{type:"", time:"", note:""}];
+                myN = `<div id="my-events-rows-${ds}">`;
+                evs.forEach(e => {
+                    myN += `<div class="my-event-row" style="margin-bottom:4px; display:flex; gap:4px; align-items:center;">
+                        <select class="my-ev-type" style="width:30%; padding:2px; border-radius:0;">${evOpts.map(o=>`<option value="${o}" ${o===e.type?'selected':''}>${o||"（なし）"}</option>`).join('')}</select>
+                        <input type="time" step="300" class="my-ev-time" value="${e.time||''}" style="width:80px !important; padding:2px; border-radius:0;">
+                        <input type="text" class="my-ev-note" value="${e.note||''}" placeholder="備考" style="flex:1; padding:2px; border-radius:0;">
+                    </div>`;
+                });
+                myN += `</div><div style="display:flex; justify-content:space-between; margin-top:5px;"><button onclick="addMyEventRow('${ds}')" style="padding:2px 8px; font-size:0.8em;">＋追加</button> <button onclick="clearMyEvents('${ds}')" style="padding:2px 8px; font-size:0.8em; color:#d32f2f;">クリア</button></div>`;
+            } else {
+                myN = (sd.myEvents || []).map(e => e.type ? `<span style="display:inline-block; margin-right:10px; word-break:keep-all;"><b>${e.type}</b> ${e.time||''} ${e.note||''}</span>` : (e.note?`<span style="display:inline-block; margin-right:10px; word-break:keep-all;">${e.note}</span>`:'')).join('');
+            }
+            
+            let clH = showClub ? (isEditingMyWeek ? `<td><select id="edit-my-club-type-${ds}" style="width:100%; padding:2px; margin-bottom:2px;">${clOpts.map(o=>`<option value="${o}" ${o===sd.clubType?'selected':''}>${o||"（なし）"}</option>`).join('')}</select><input type="text" id="edit-my-club-detail-${ds}" value="${sd.clubDetail||''}" style="width:100%; padding:2px;"></td>` : `<td>${sd.clubType?`<b>${sd.clubType}</b> `+(sd.clubDetail||""):'<span style="color:#999;">（なし）</span>'}</td>`) : '';
 
-            html += `<tr class="${isHol?'holiday-row':''}"><td>${dobj.getMonth()+1}/${dobj.getDate()}<br><span style="color:${wIdx===0?'red':wIdx===6?'blue':'inherit'}; font-weight:bold;">${names[wIdx]}</span></td><td style="text-align:left; padding:5px;">${cEv}</td><td style="text-align:left; padding:5px;">${myN}</td>${clH}</tr>`;
+            let adminEditRow = isAdmin ? `<tr id="admin-week-edit-row-${ds}" style="display:none; background:#fff3cd;"><td colspan="${showClub?4:3}"><input type="text" id="admin-week-event-${ds}" value="${String(wd[i].event||'').replace(/"/g, '&quot;')}" placeholder="主な行事予定" style="width:100%; padding:4px; margin-bottom:5px; border-radius:0;"><button onclick="saveAdminInlineEditWeek('${ds}')" style="background:#000; color:white;">保存</button> <button onclick="safeRenderAll()">キャンセル</button></td></tr>` : '';
+
+            html += `<tr class="${isHol?'holiday-row':''}"><td>${dobj.getMonth()+1}/${dobj.getDate()}<br><span style="color:${wIdx===0?'red':wIdx===6?'blue':'inherit'}; font-weight:bold;">${names[wIdx]}</span></td><td style="text-align:left; padding:5px;">${cEv}</td><td style="text-align:left; padding:5px; line-height:1.6;">${myN}</td>${clH}</tr>` + adminEditRow;
         });
         document.getElementById('weekly-schedule-display').innerHTML = html + "</table>";
     } catch(e) { document.getElementById('weekly-schedule-display').innerHTML = "読込エラー: " + e.message; console.error(e); }
+}
+
+function startAdminInlineEditWeek(ds) {
+    document.getElementById(`admin-week-edit-row-${ds}`).style.display = 'table-row';
+}
+async function saveAdminInlineEditWeek(ds) {
+    let ev = document.getElementById(`admin-week-event-${ds}`).value.trim();
+    await db.collection("schedules").doc(ds).set({ event: ev, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    safeRenderAll();
 }
 
 function renderSubmissionsUI() {
     if(submissionsList.length===0){ document.getElementById('submission-list').innerHTML="<p>提出物はありません。</p>"; return; }
     let html = `<table><tr><th style="width:50px;">完了</th><th>提出物名</th><th>締め切り</th></tr>`;
     const week = ["日", "月", "火", "水", "木", "金", "土"];
+    let totalStudents = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL).length;
+
     submissionsList.forEach(s => {
         let d = new Date(s.deadline); 
         let ds = isNaN(d) ? s.deadline : `${d.getMonth()+1}/${d.getDate()}(${week[d.getDay()]})`;
         let chk = studentMaster[currentUserEmail]?.checks?.[s.id];
-        let diff = getSchoolDaysDiff(s.deadline); let cls = !chk ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : '';
-        html += `<tr class="${chk?'checked-item':''}"><td><input type="checkbox" onchange="toggleSubm('${s.id}', this.checked)" ${chk?'checked':''}></td><td style="text-align:left; font-weight:bold;" class="${cls}">${s.title}</td><td class="${cls}">${ds}</td></tr>`;
+        
+        let unsubmittedCount = 0; let unsubmittedNames = [];
+        for(let em in studentMaster) {
+            if(em === TEACHER_EMAIL) continue;
+            if(!studentMaster[em].checks || !studentMaster[em].checks[s.id]) {
+                unsubmittedCount++; unsubmittedNames.push(studentMaster[em].name || em);
+            }
+        }
+        let isComplete = (unsubmittedCount === 0 && totalStudents > 0);
+        let diff = getSchoolDaysDiff(s.deadline); 
+        
+        let cls = '';
+        if(isAdmin) { cls = (unsubmittedCount>0) ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : ''; } 
+        else { cls = !chk ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : ''; }
+
+        let titleHtml = isComplete ? `<span style="color:#d81b60; font-weight:bold;">🌸</span> ${s.title} <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : s.title;
+        
+        if (!isComplete) {
+            if(isAdmin) { titleHtml += ` <span style="font-size:0.85em; font-weight:normal; color:#d32f2f; margin-left:10px;">(残り${unsubmittedCount}人) ${unsubmittedNames.join('、')}</span>`; } 
+            else { titleHtml += ` <span style="font-size:0.85em; font-weight:normal; color:#666; margin-left:10px;">残り ${unsubmittedCount} 人</span>`; }
+        }
+        
+        html += `<tr id="subm-row-${s.id}" class="${chk?'checked-item':''}"><td><input type="checkbox" onchange="toggleSubm('${s.id}', this.checked)" ${chk?'checked':''}></td><td style="text-align:left; font-weight:bold;" class="${cls}">${titleHtml}</td><td class="${cls}">${ds}</td></tr>`;
     });
     document.getElementById('submission-list').innerHTML = html + "</table>";
 }
-async function toggleSubm(id, chk) { savedScrollY = window.scrollY; isRestoringScroll = true; await db.collection("students").doc(currentUserEmail).set({ checks: { [id]: chk } }, { merge: true }); }
 
-// ★自分の投稿は常に表示、いいね数は投稿者と管理者のみ
+// ★ 画面の揺れを防ぐためDOM操作してからFirebase更新
+function toggleSubm(id, chk) { 
+    let trs = document.querySelectorAll(`#subm-row-${id}`);
+    trs.forEach(tr => {
+        if(chk) tr.classList.add('checked-item');
+        else tr.classList.remove('checked-item');
+        let cb = tr.querySelector('input[type="checkbox"]');
+        if(cb) cb.checked = chk;
+    });
+    db.collection("students").doc(currentUserEmail).set({ checks: { [id]: chk } }, { merge: true }); 
+}
+
 function renderCommitteePosts() {
     let sorted = [...allCommitteePosts].sort((a, b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
     let html = ""; let td = getLocalDateStr(new Date());
     sorted.forEach(d => {
         let isMyPost = d.authorEmail === currentUserEmail;
-        let isApprovedActive = d.status === 'approved' && (d.isAdminPost || (d.startDate <= td && d.endDate >= td));
+        let isApprovedActive = d.status === 'approved' && (d.isAdminPost || (!d.startDate && !d.endDate) || (d.startDate <= td && (!d.endDate || d.endDate >= td)));
         
         if (isApprovedActive || isMyPost) {
             let bg = d.bgColor && d.bgColor !== '#ffffff' ? `background-color:${d.bgColor}; color:#000;` : '';
             let isLiked = (d.likes || []).includes(currentUserEmail);
             let likesCount = (d.likes || []).length;
+            let totalStudents = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL).length;
+            let isAllChecked = (likesCount === totalStudents && totalStudents > 0);
             
             let statusBadge = "";
             if(isMyPost) {
@@ -707,14 +1079,23 @@ function renderCommitteePosts() {
                 else if(d.status === 'approved') statusBadge = `<span style="color:#388e3c; border:1px solid #388e3c; padding:2px 4px; margin-left:10px; font-size:0.8em;">公開中</span>`;
             }
 
-            let btnText = isMyPost ? `👍 いいね (${likesCount})` : `👍 いいね`;
+            let btnText = isMyPost ? (isAllChecked ? `全員確認` : `確認者数 (${likesCount})`) : (isLiked ? `確認済✌` : `OK`);
+            let btnClass = isMyPost ? (isAllChecked ? "like-btn all-checked" : "like-btn") : (isLiked ? "like-btn liked" : "like-btn");
+            
             let infoText = d.isAdminPost ? `${d.createdAt ? formatDateTime(d.createdAt.toDate()) : ''} 管理者` : `${d.createdAt ? formatDateTime(d.createdAt.toDate()) : ''} 【${d.roleName}】${d.authorName} ${statusBadge}`;
 
-            html += `<div class="post-item" style="${bg}">
+            let actionBtns = "";
+            if (isMyPost || isAdmin) {
+                actionBtns = `<button onclick="editMyCommitteePost('${d.id}')" style="font-size:0.8em; padding:2px 6px;">再編集(承認待ちへ)</button> 
+                              <button onclick="deleteMyCommitteePost('${d.id}')" style="font-size:0.8em; padding:2px 6px; color:#d32f2f;">削除</button>`;
+            }
+
+            html += `<div id="comm-post-${d.id}" class="post-item comm-box" style="${bg}">
                         <div class="post-date">${infoText}</div>
                         <div style="white-space:pre-wrap;">${d.content}</div>
                         <div style="text-align:right; margin-top:5px;">
-                            <button class="like-btn ${isLiked?'liked':''}" onclick="likePost('${d.id}')" ${isLiked?'disabled':''}>${btnText}</button>
+                            ${actionBtns}
+                            <button class="${btnClass}" onclick="likePost('${d.id}')" ${isMyPost||isLiked?'disabled':''}>${btnText}</button>
                         </div>
                      </div>`;
         }
@@ -722,13 +1103,50 @@ function renderCommitteePosts() {
     document.getElementById('committee-posts-display').innerHTML = html || "<p>連絡はありません。</p>";
 }
 
+// ★ 自分の投稿の再編集をインライン化
+function editMyCommitteePost(id) {
+    let post = allCommitteePosts.find(p => p.id === id);
+    if(!post) return;
+    let container = document.getElementById(`comm-post-${id}`);
+    container.innerHTML = `
+        <div style="background:#fff3cd; padding:10px; border:1px solid #000; color:black;">
+            <h4 style="margin-top:0;">連絡の再編集</h4>
+            <textarea id="student-edit-comm-input-${id}" style="width:100%; height:80px; padding:5px;">${post.content}</textarea>
+            <div style="text-align:right; margin-top:5px;">
+                <button onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white;">保存して承認待ちへ</button>
+                <button onclick="renderCommitteePosts()">キャンセル</button>
+            </div>
+        </div>
+    `;
+}
+
+async function saveStudentEditCommitteePost(id) {
+    let val = document.getElementById(`student-edit-comm-input-${id}`).value.trim();
+    if(!val) return alert("内容を入力してください");
+    await db.collection("committee_posts").doc(id).update({
+        content: val, status: 'pending', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("再編集しました。承認待ちになります。");
+}
+
+async function deleteMyCommitteePost(id) {
+    if(confirm("この連絡を削除しますか？")) {
+        await db.collection("committee_posts").doc(id).delete();
+    }
+}
+
 async function postCommitteeMessage() {
     if(studentMaster[currentUserEmail]?.isBanned) return alert("投稿機能が制限されています。");
     const val = document.getElementById('committee-input').value.trim(); if(!val) return;
     let rSel = document.getElementById('post-role-select'); let rFix = document.getElementById('post-role-fixed');
     let rName = rSel ? rSel.value : (rFix ? rFix.getAttribute('data-role') : "生徒");
-    await db.collection("committee_posts").add({ authorEmail: currentUserEmail, authorName: studentMaster[currentUserEmail]?.name||"生徒", roleName: rName, content: val, bgColor: document.getElementById('committee-color').value, priority: parseInt(document.getElementById('committee-priority').value,10), startDate: document.getElementById('committee-start').value, endDate: document.getElementById('committee-end').value, status: 'pending', likes: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    document.getElementById('committee-input').value = ""; document.getElementById('committee-form-area').style.display='none'; document.getElementById('btn-show-committee-form').style.display='block'; alert("送信しました。先生の承認後に公開されます。");
+    
+    let stat = isAdmin ? 'approved' : 'pending';
+    
+    await db.collection("committee_posts").add({ authorEmail: currentUserEmail, authorName: studentMaster[currentUserEmail]?.name||"生徒", roleName: rName, content: val, bgColor: document.getElementById('committee-color').value, priority: parseInt(document.getElementById('committee-priority').value,10), startDate: document.getElementById('committee-start').value, endDate: document.getElementById('committee-end').value, status: stat, isAdminPost: isAdmin, likes: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    
+    document.getElementById('committee-input').value = ""; document.getElementById('committee-form-area').style.display='none'; document.getElementById('btn-show-committee-form').style.display='block'; 
+    if(isAdmin) alert("投稿しました。"); else alert("送信しました。先生の承認後に公開されます。");
 }
 function updateCommitteeInputColor(c) { document.getElementById('committee-input').style.backgroundColor = c==='#ffffff'?'':c; }
 
