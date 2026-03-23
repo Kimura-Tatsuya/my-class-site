@@ -248,9 +248,10 @@
                     <div style="margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px;">
                         <b>クラス全体の背景色の強制設定（体育祭の団色など）</b><br>
                         <p style="font-size:0.85em; margin:0 0 5px 0;">※有効にすると、生徒の「明るさ設定」を上書きして指定色を適用します。</p>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                             <input type="color" id="force-bg-color" value="#f7f9fc" style="width:50px; height:30px; padding:0; margin:0; cursor:pointer;">
                             <label><input type="checkbox" id="enable-force-bg" style="margin:0;"> この色を生徒全員の画面に適用する</label>
+                            <button type="button" onclick="resetForceBg()" style="margin:0; font-size:0.85em; padding:4px 8px; color:#d32f2f;">元に戻す</button>
                         </div>
                     </div>
                     <button type="button" onclick="saveRegularSetting()" style="margin-top:15px; background:#000; color:white;">標準設定を保存</button>
@@ -938,6 +939,13 @@
             await db.collection("config").doc("regular_schedule").set(newData, { merge: true }); 
             recordSystemUpdate(); 
             alert("標準時間割・各種設定を保存しました。"); 
+        }
+        
+        async function resetForceBg() {
+            if(!confirm("クラス全体の背景色強制設定を解除しますか？")) return;
+            document.getElementById('force-bg-color').value = "#f7f9fc";
+            document.getElementById('enable-force-bg').checked = false;
+            await saveRegularSetting();
         }
         
         async function saveVacation() { vacationData.push({ start: document.getElementById('vac-start').value, end: document.getElementById('vac-end').value }); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
