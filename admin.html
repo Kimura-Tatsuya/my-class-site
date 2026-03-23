@@ -34,8 +34,8 @@
         .deadline-warning { color: #f57c00 !important; font-weight: bold; } 
         .deadline-overdue { color: #d32f2f !important; font-weight: bold; } 
         
-        /* 提出物グレーアウト（共通クラス） */
-        .checked-item { background-color: #e0e0e0 !important; color: #666 !important; text-decoration: none !important; }
+        /* ★ 提出物グレーアウト（文字色も薄くする） */
+        .checked-item { background-color: #e0e0e0 !important; color: #888 !important; text-decoration: none !important; }
         
         .msg-unread { background-color: #e3f2fd; }
         .msg-protected { background-color: #fff3cd; }
@@ -49,11 +49,14 @@
         #admin-dashboard h3 { margin-top: 0; color: #d32f2f; border-bottom: 1px solid #000; }
         #admin-dashboard li a { color: #d32f2f; cursor: pointer; text-decoration: underline; }
         
-        .edit-box { background:#f9f9f9; padding:10px; border:2px dashed #000; margin-bottom:10px; }
+        .comm-box { background: white; color: #000; }
+        
+        /* 編集ボックス */
+        .edit-box { background:#f9f9f9; padding:10px; border:2px dashed #000; margin-bottom:10px; color: #000; }
 
         /* --- ダークモード --- */
         body.dark-mode { background-color: #121212; color: #e0e0e0; }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item { border-color: #555 !important; color: #e0e0e0 !important; }
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header { border-color: #555 !important; color: #e0e0e0 !important; }
         body.dark-mode section, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
         body.dark-mode input:not([type="checkbox"]), body.dark-mode textarea, body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode button { background-color: #333 !important; color: #e0e0e0 !important; border-color: #555 !important; }
@@ -61,9 +64,10 @@
         body.dark-mode th { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode td { border-color: #555 !important; color: #e0e0e0 !important; }
         body.dark-mode details.admin-form-box summary { color: #e0e0e0 !important; border-bottom-color: #555 !important; }
+        
         body.dark-mode .msg-unread { background-color: #0d47a1 !important; color: #fff !important; }
         body.dark-mode .msg-protected { background-color: #4a401c !important; color: #fff !important; }
-        body.dark-mode .msg-read { background-color: #1e1e1e !important; }
+        body.dark-mode .msg-read { background-color: #1e1e1e !important; color: #e0e0e0 !important; }
         body.dark-mode .post-date, body.dark-mode footer, body.dark-mode #copyright-year-container { color: #e0e0e0 !important; }
         
         body.dark-mode #admin-dashboard { background-color: #3e2723 !important; border-color: #555 !important; color: #e0e0e0 !important; }
@@ -73,21 +77,20 @@
         body.dark-mode .tr-custom { background-color: #4a401c !important; }
         body.dark-mode .tr-changed { background-color: #1e3a5f !important; }
         
-        body.dark-mode .checked-item { background-color: #333333 !important; color: #888888 !important; }
+        /* ★ ダークモードでのグレーアウト仕様（文字色も薄く） */
+        body.dark-mode .checked-item { background-color: #2a2a2a !important; color: #666 !important; }
+
+        /* 投稿項目のダークモード背景強制 */
+        body.dark-mode .post-item,
+        body.dark-mode .post-item[style] { background-color: #1e1e1e !important; color: #e0e0e0 !important; border-color: #555 !important; }
+        body.dark-mode .admin-actions button { color: #fff !important; }
         
-        body.dark-mode .post-item, body.dark-mode .post-item[style] { background-color: #1e1e1e !important; color: #e0e0e0 !important; border-color: #555 !important; }
-        body.dark-mode .edit-box { background-color: #1e1e1e; border-color: #555; }
+        /* ダークモード時の編集ボックス */
+        body.dark-mode .edit-box { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
         
         /* モーダルのダークモード対応 */
         body.dark-mode #admin-point-modal-overlay > div { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
         body.dark-mode #admin-point-modal-overlay button.close-btn { color: #e0e0e0 !important; }
-
-        .like-btn { background: transparent; border: 1px solid #000; color: #000; padding: 2px 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
-        .like-btn.liked { background: #000; color: white; border-color: #000; }
-        .like-btn.all-checked { background: #388e3c; color: white; border-color: #388e3c; }
-        body.dark-mode .like-btn { border-color: #e0e0e0; color: #e0e0e0; }
-        body.dark-mode .like-btn.liked { background: #e0e0e0; color: #000; border-color: #e0e0e0; }
-        body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border-color: #388e3c; }
 
         @media screen and (max-width: 650px) {
             body { padding: 10px; }
@@ -640,6 +643,7 @@
         function renderCustomHolidays() {
             let html = `<table style="width:100%;"><tr><th style="width:90px;">日付</th><th>名称</th><th style="width:120px;">操作</th></tr>`;
             
+            // 独自の記念日
             let keys = Object.keys(customHolidays).sort();
             keys.forEach(k => {
                 let nameVal = String(customHolidays[k].name).replace(/'/g, "\\'");
@@ -651,6 +655,7 @@
                          </tr>`;
             });
             
+            // 国民の祝日（API取得分）
             let allHol = Object.keys(holidays).sort();
             allHol.forEach(k => {
                 if (!customHolidays[k]) {
@@ -884,9 +889,12 @@
         async function rejectCommitteePost(id) { if(confirm("不承認（差し戻し）にしますか？")) await db.collection("committee_posts").doc(id).update({ status: 'rejected' }); }
         async function deleteCommitteePost(id) { if(confirm("削除しますか？")) await db.collection("committee_posts").doc(id).delete(); }
 
+        // ★ 管理画面側の再編集機能（すべての項目を編集可能にする）
+        let editingCommitteeId = null;
         function startAdminEditCommitteePost(id) {
             const post = allCommitteePosts.find(p => p.id === id);
             if (!post) return;
+            editingCommitteeId = id;
             const container = document.getElementById(`admin-comm-post-${id}`);
             
             let colorOpts = `<option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>White</option><option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>Green</option><option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>Blue</option><option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>Red</option><option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>Yellow</option><option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>Orange</option><option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>Purple</option><option value="#e0e0e0" ${post.bgColor==='#e0e0e0'?'selected':''}>Ash</option>`;
@@ -914,9 +922,15 @@
             const newContent = document.getElementById(`edit-comm-input-${id}`).value.trim();
             if (!newContent) return alert("内容を入力してください");
             await db.collection("committee_posts").doc(id).update({
-                content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
-                startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'pending', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                content: newContent, 
+                bgColor: document.getElementById(`edit-comm-color-${id}`).value, 
+                priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
+                startDate: document.getElementById(`edit-comm-start-${id}`).value, 
+                endDate: document.getElementById(`edit-comm-end-${id}`).value, 
+                status: 'pending', 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+            editingCommitteeId = null;
             alert("再編集し、承認待ち状態にしました。");
         }
         
@@ -925,8 +939,13 @@
             if (!newContent) return alert("内容を入力してください");
             let post = allCommitteePosts.find(p => p.id === id);
             await db.collection("committee_posts").doc(id).update({
-                content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
-                startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'approved', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                content: newContent, 
+                bgColor: document.getElementById(`edit-comm-color-${id}`).value, 
+                priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
+                startDate: document.getElementById(`edit-comm-start-${id}`).value, 
+                endDate: document.getElementById(`edit-comm-end-${id}`).value, 
+                status: 'approved', 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             if (post && post.authorEmail && !post.isAdminPost) {
                 let todayStr = getLocalDateStr(new Date());
@@ -938,6 +957,7 @@
                 details.history.push({ reason: "連絡の投稿が承認されました！", points: 10, time: formatDateTime(new Date()) });
                 await studentRef.update({ points: firebase.firestore.FieldValue.increment(10), pointDetails: details }).catch(()=>{});
             }
+            editingCommitteeId = null;
             alert("編集して承認しました。投稿者にボーナスポイント（+10 Pt）が付与されました！");
         }
 

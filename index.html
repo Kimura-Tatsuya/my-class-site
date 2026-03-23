@@ -24,8 +24,8 @@ th { background-color: #f2f2f2; }
 .holiday-row { background-color: #f9f9f9; }
 .scroll-area { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
 
-/* ★ 提出物のグレーアウト仕様（ダークモードでもはっきりわかるように変更） */
-.checked-item { background-color: #e0e0e0 !important; color: #666 !important; text-decoration: none !important; }
+/* ★提出物のグレーアウト仕様（フォントの色も薄く） */
+.checked-item { background-color: #e0e0e0 !important; color: #888 !important; text-decoration: none !important; }
 
 .deadline-warning { color: #f57c00 !important; font-weight: bold; }
 .deadline-overdue { color: #d32f2f !important; font-weight: bold; }
@@ -44,7 +44,10 @@ th { background-color: #f2f2f2; }
 .point-badge { background: #ffd700; color: #000; padding: 2px 8px; font-weight: bold; font-size: 0.9em; margin-left: 10px; border: 1px solid #000; cursor: pointer; }
 .spinner-btn { background: #ff9800; color: white; border: 1px solid #000; padding: 4px 10px; font-weight: bold; cursor: pointer; }
 
-/* ダークモード */
+/* 再編集用のインラインボックス */
+.edit-box { background:#f9f9f9; padding:10px; border:2px dashed #000; margin-bottom:10px; color: #000; }
+
+/* --- ダークモード --- */
 body.dark-mode { background-color: #121212; color: #e0e0e0; }
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item, body.dark-mode .day-label { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode section, body.dark-mode .day-box, body.dark-mode .foldable-section { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
@@ -62,8 +65,8 @@ body.dark-mode .changed-lesson { background-color: #4a401c !important; color: #e
 body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color: #555; }
 body.dark-mode .comm-box { background: #1e1e1e !important; border-color: #555 !important; }
 
-/* ★ ダークモードでのグレーアウト仕様 */
-body.dark-mode .checked-item { background-color: #333333 !important; color: #888888 !important; }
+/* ★ ダークモードでのグレーアウト仕様（フォント色も薄く） */
+body.dark-mode .checked-item { background-color: #2a2a2a !important; color: #666 !important; }
 
 /* ダークモード設定画面・投稿画面の色反映 */
 body.dark-mode #settings-modal-content { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
@@ -72,6 +75,7 @@ body.dark-mode #settings-modal-content ul { background-color: #2a2a2a !important
 body.dark-mode #settings-modal-content li { border-color: #555 !important; }
 body.dark-mode #committee-form-area { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #committee-form-area h3, body.dark-mode #my-role-name-container { color: #e0e0e0 !important; }
+body.dark-mode .edit-box { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 
 .like-btn { background: transparent; border: 1px solid #000; color: #000; padding: 2px 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
 .like-btn.liked { background: #000; color: white; border-color: #000; }
@@ -211,7 +215,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
     <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #000; font-size: 0.85em; color: #000;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div>
-                <button type="button" onclick="toggleDeviceView()">Smartphone / PC</button>
+                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">📱 スマホ表示 (切替)</button>
                 <button type="button" onclick="toggleTheme()">Light / Dark</button>
                 <button type="button" id="btn-lightness" onclick="toggleLightness()">明るさ調整</button>
                 <button type="button" onclick="openSettingsModal()">設定</button>
@@ -300,6 +304,7 @@ let countdownSettings = {}, bonusTimeSettings = {}, myPoints = 0, myStreak = 0, 
 let todayScheduleData = null; 
 let isRendering = false, pendingRender = false;
 let isProcessingPoints = false;
+let isPcView = false; // ★ スマホ・PC切替用
 
 let userSettings = { order: ['sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' }, cdVisible: true, cdSize: 'normal' };
 const SECTION_NAMES = { 'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等', 'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡' };
@@ -368,19 +373,49 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('copyright-year').innerText = new Date().getFullYear();
     document.getElementById('login-copyright-year').innerText = new Date().getFullYear();
     
-    // 天気取得後に描画を確実に実行する
     fetchWeather().then(() => { if(typeof safeRenderAll === 'function') safeRenderAll(); });
     resetInactivityTimer();
 });
 
+// ★ PC/スマホ表示切替ボタンの状態変更
+function toggleDeviceView() { 
+    let meta = document.getElementById('viewport-meta'); 
+    isPcView = !isPcView; 
+    meta.setAttribute('content', isPcView ? 'width=850' : 'width=device-width, initial-scale=1.0'); 
+    
+    let btn = document.getElementById('btn-device-view');
+    if(btn) {
+        btn.innerText = isPcView ? '💻 PC表示 (切替)' : '📱 スマホ表示 (切替)';
+        btn.style.backgroundColor = isPcView ? '#e0f7fa' : '';
+        btn.style.color = isPcView ? '#000' : '';
+        if(document.body.classList.contains('dark-mode') && isPcView) {
+            btn.style.backgroundColor = '#004d40';
+            btn.style.color = '#fff';
+        }
+    }
+}
+
 function toggleTheme() { 
     document.body.classList.toggle('dark-mode'); 
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+    
     let lightBtn = document.getElementById('btn-lightness');
     if(document.body.classList.contains('dark-mode')) { lightBtn.style.display = 'none'; } else { lightBtn.style.display = 'inline-block'; }
+    
+    let btn = document.getElementById('btn-device-view');
+    if(btn) {
+        if(isPcView) {
+            btn.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#004d40' : '#e0f7fa';
+            btn.style.color = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+        } else {
+            btn.style.backgroundColor = '';
+            btn.style.color = '';
+        }
+    }
+    
     applyLightness(); applyUserSettings(); 
 }
-function toggleDeviceView() { let meta=document.getElementById('viewport-meta'); isPcView=!isPcView; meta.setAttribute('content', isPcView?'width=850':'width=device-width, initial-scale=1.0'); }
+
 function resetInactivityTimer() { clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ if(firebase.auth().currentUser){ alert("タイムアウトしました"); logout(); } }, 3600000); }
 ['mousemove','keydown','click','scroll','touchstart'].forEach(e=>window.addEventListener(e, resetInactivityTimer, {passive:true}));
 
@@ -400,7 +435,6 @@ async function fetchWeather() {
     } catch(e) { console.error(e); }
 }
 
-// ★ 描画エンジン: 強制スクロールバグ撲滅のため、描画中も高さを固定しチラツキをなくす
 async function safeRenderAll() {
     if(isRendering) { pendingRender = true; return; }
     isRendering = true;
@@ -478,7 +512,6 @@ async function initApp(user) {
         
         let todayStr = getLocalDateStr(new Date());
         
-        // ルーレットの倍率維持
         if(myD.spinnerUsedDate === todayStr && myD.todaySpinnerMulti) {
             spinnerMulti = myD.todaySpinnerMulti;
         } else {
@@ -502,7 +535,6 @@ async function initApp(user) {
         const hr = new Date().getHours(); let gr = (hr>=17||hr<6)?"こんばんは":(hr>=6&&hr<11)?"おはようございます":"こんにちは";
         document.getElementById('welcome-msg').innerText = `${gr}、${myD.name||(isAdmin?"先生":"生徒")}さん！`;
         
-        // ★ 管理者から付与された特別ポイントの処理
         if (!isAdmin && myD.pendingPoints && myD.pendingPoints.length > 0) {
             processPendingPoints(myD.pendingPoints);
         }
@@ -521,7 +553,6 @@ async function initApp(user) {
     db.collection("committee_posts").onSnapshot(snap => { allCommitteePosts = []; snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()})); renderCommitteePosts(); });
 }
 
-// ★ 特別ポイント付与処理（生徒ログイン時）
 async function processPendingPoints(pendingArray) {
     if(isProcessingPoints) return;
     isProcessingPoints = true;
@@ -553,7 +584,6 @@ async function processPendingPoints(pendingArray) {
     }
 }
 
-// --- ポイント詳細 ---
 async function addPoints(reason, pts) {
     if(isAdmin) return;
     let todayStr = getLocalDateStr(new Date());
@@ -882,7 +912,7 @@ async function saveStudentEdit(ds, idx) {
     
     let docRef = db.collection("schedules").doc(ds); let doc = await docRef.get(); let data = doc.exists ? doc.data() : {};
     if(!data.lessons) data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" }));
-    if(data.lessons[idx].note === val) { safeRenderAll(); return; } 
+    if(data.lessons[idx].note === val) { safeRenderAll(); return; } // 変更なし
     
     data.lessons[idx].note = val;
     let editors = data.lessons[idx].editedBy || [];
@@ -1024,7 +1054,7 @@ function renderSubmissionsUI() {
         for(let em in studentMaster) {
             if(em === TEACHER_EMAIL) continue;
             if(!studentMaster[em].checks || !studentMaster[em].checks[s.id]) {
-                unsubmittedCount++; unsubmittedNames.push(studentMaster[em].name || em);
+                unsubmittedCount++; unsubmittedNames.push(studentMaster[em].name || email);
             }
         }
         let isComplete = (unsubmittedCount === 0 && totalStudents > 0);
@@ -1046,7 +1076,6 @@ function renderSubmissionsUI() {
     document.getElementById('submission-list').innerHTML = html + "</table>";
 }
 
-// ★ 画面の揺れを防ぐためDOM操作してからFirebase更新
 function toggleSubm(id, chk) { 
     let trs = document.querySelectorAll(`#subm-row-${id}`);
     trs.forEach(tr => {
@@ -1103,17 +1132,26 @@ function renderCommitteePosts() {
     document.getElementById('committee-posts-display').innerHTML = html || "<p>連絡はありません。</p>";
 }
 
-// ★ 自分の投稿の再編集をインライン化
+// ★ 自分の投稿の再編集をインライン化（背景・重要度・日付も編集可能に）
 function editMyCommitteePost(id) {
     let post = allCommitteePosts.find(p => p.id === id);
     if(!post) return;
+    
+    let colorOpts = `<option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>White</option><option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>Green</option><option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>Blue</option><option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>Red</option><option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>Yellow</option><option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>Orange</option><option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>Purple</option><option value="#e0e0e0" ${post.bgColor==='#e0e0e0'?'selected':''}>Ash</option>`;
+    let priorityOpts = `<option value="3" ${post.priority==3?'selected':''}>★★★</option><option value="2" ${post.priority==2?'selected':''}>★★</option><option value="1" ${post.priority==1?'selected':''}>★</option>`;
+
     let container = document.getElementById(`comm-post-${id}`);
     container.innerHTML = `
-        <div style="background:#fff3cd; padding:10px; border:1px solid #000; color:black;">
+        <div class="edit-box">
             <h4 style="margin-top:0;">連絡の再編集</h4>
-            <textarea id="student-edit-comm-input-${id}" style="width:100%; height:80px; padding:5px;">${post.content}</textarea>
+            <textarea id="student-edit-comm-input-${id}" style="width:100%; height:80px; padding:5px; border-radius:0;">${post.content}</textarea>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size:0.9em; align-items:center;">
+                <div>背景色: <select id="student-edit-comm-color-${id}" style="width:120px; margin-bottom:0; border-radius:0;">${colorOpts}</select></div>
+                <div>重要度: <select id="student-edit-comm-priority-${id}" style="width:80px; margin-bottom:0; border-radius:0;">${priorityOpts}</select></div>
+                <div>公開: <input type="date" id="student-edit-comm-start-${id}" value="${post.startDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"> 〜 <input type="date" id="student-edit-comm-end-${id}" value="${post.endDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"></div>
+            </div>
             <div style="text-align:right; margin-top:5px;">
-                <button onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white;">保存して承認待ちへ</button>
+                <button onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white; border-color:#ff9800;">保存して承認待ちへ</button>
                 <button onclick="renderCommitteePosts()">キャンセル</button>
             </div>
         </div>
@@ -1124,7 +1162,13 @@ async function saveStudentEditCommitteePost(id) {
     let val = document.getElementById(`student-edit-comm-input-${id}`).value.trim();
     if(!val) return alert("内容を入力してください");
     await db.collection("committee_posts").doc(id).update({
-        content: val, status: 'pending', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        content: val, 
+        bgColor: document.getElementById(`student-edit-comm-color-${id}`).value, 
+        priority: parseInt(document.getElementById(`student-edit-comm-priority-${id}`).value, 10),
+        startDate: document.getElementById(`student-edit-comm-start-${id}`).value, 
+        endDate: document.getElementById(`student-edit-comm-end-${id}`).value, 
+        status: 'pending', 
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     alert("再編集しました。承認待ちになります。");
 }
