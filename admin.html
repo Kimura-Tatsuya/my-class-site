@@ -117,7 +117,7 @@
 
                 <details class="admin-form-box" open>
                     <summary>［設定］学校・クラス情報の設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">※ここで設定した情報がポータルのタイトル等に反映されます。</p>
+                    <p style="font-size:0.85em; margin-top:5px;">ここで設定した情報がポータルのタイトル等に反映されます。</p>
                     <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <div>
                             年度: 
@@ -125,12 +125,10 @@
                                 </select>
                         </div>
                         <div>
-                            元号: <input type="text" id="set-school-era" placeholder="例: 令和" style="width:80px; margin-bottom:0; border-radius:0;">
-                        </div>
-                        <div>
                             クラス名: <input type="text" id="set-school-class" placeholder="例: 1年1組" style="width:150px; margin-bottom:0; border-radius:0;">
                         </div>
                         <button type="button" onclick="saveSchoolInfo()" style="margin-bottom:0; background:#000; color:white;">設定を保存</button>
+                        <button type="button" onclick="clearSchoolInfo()" style="margin-bottom:0;">クリア</button>
                     </div>
                 </details>
 
@@ -139,13 +137,13 @@
                     <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール（朝・昼休・清掃・放課後の有無を含む）、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
                     <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #000;">
                         <b>1. エクスポート（ダウンロード）</b><br>
-                        <span style="font-size:0.85em;">※指定した月のスケジュールを含めて出力します。</span><br>
+                        <span style="font-size:0.85em;">指定した月のスケジュールを含めて出力します。</span><br>
                         スケジュール出力月：<input type="month" id="excel-month-input" style="width:150px; margin-right:10px;">
                         <button type="button" onclick="exportExcel()">現在の設定をダウンロード</button>
                     </div>
                     <div style="margin-top:15px;">
                         <b>2. インポート（一括更新・プレビュー付き）</b><br>
-                        <span style="font-size:0.85em;">※Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
+                        <span style="font-size:0.85em;">Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
                         <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:1px solid #000; padding:4px;" onchange="handleExcelFileChange(event)">
                         <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
                             <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
@@ -157,7 +155,7 @@
                 </details>
 
                 <details class="admin-form-box" style="border: 2px solid #d32f2f;">
-                    <summary style="color:#d32f2f;">［危険］システムのフルバックアップと全データリセット</summary>
+                    <summary style="color:#d32f2f;">［注意］システムのフルバックアップと全データリセット</summary>
                     <div style="padding-bottom:15px; border-bottom:1px dashed #000;">
                         <b>1. JSON フルバックアップの保存</b>
                         <p style="font-size:0.85em; margin:5px 0;">現在のすべての設定・名簿・投稿・スケジュール等の全データを1つのファイルとして保存します。</p>
@@ -167,24 +165,31 @@
                         <b>2. バックアップファイル（JSON）から復元</b>
                         <p style="font-size:0.85em; margin:5px 0;">保存したJSONファイルからシステムを復元します。現在のデータは上書きされます。</p>
                         <input type="file" id="backup-file-input" accept=".json" style="width:250px; border:1px solid #000; padding:4px;">
-                        <button type="button" onclick="importFullBackup()">復元を実行する</button>
+                        <div id="backup-restore-options" style="display:none; margin-top:10px; font-size:0.9em;">
+                            <label><input type="checkbox" id="restore-opt-config" checked> 設定 (時間割・役割等)</label><br>
+                            <label><input type="checkbox" id="restore-opt-students" checked> 生徒名簿・ポイント</label><br>
+                            <label><input type="checkbox" id="restore-opt-schedules" checked> スケジュール</label><br>
+                            <label><input type="checkbox" id="restore-opt-blogs" checked> 担任のやつ</label><br>
+                            <label><input type="checkbox" id="restore-opt-others" checked> その他(連絡・提出物等)</label><br>
+                            <button type="button" onclick="importFullBackup()" style="margin-top:10px;">選択した項目を復元する</button>
+                        </div>
                     </div>
                     <div style="padding-top:15px;">
                         <b style="color:#d32f2f;">3. 次年度用 システムフルリセット</b>
-                        <p style="font-size:0.85em; margin:5px 0; font-weight:bold;">※現在の生徒データ、ポイント、投稿、スケジュール、アクセスログなどを完全に消去し、システムを初期化します。</p>
+                        <p style="font-size:0.85em; margin:5px 0; font-weight:bold;">現在の生徒データ、ポイント、投稿、スケジュール、標準時間割、アクセスログなどを完全に消去し、システムを初期化します。</p>
                         <button type="button" onclick="resetEntireSystem()" style="background:#d32f2f; color:white; border-color:#b71c1c;">システム全リセットを実行</button>
                     </div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［エクスポート］担任のやつ（ブログ）の過去投稿</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">※過去に投稿したブログ記事の一覧をExcel形式でダウンロードします。</p>
+                    <summary>［エクスポート］「担任のやつ」のログ管理</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">過去に投稿したブログ記事の一覧をExcel形式でダウンロードします。</p>
                     <button type="button" onclick="exportBlogs()">過去の投稿をエクスポート</button>
                 </details>
                 
                 <details class="admin-form-box">
                     <summary>［設定］天気予報の地域設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">※トップ画面に表示する天気予報の地域を設定します。</p>
+                    <p style="font-size:0.85em; margin-top:5px;">トップ画面に表示する天気予報の地域を設定します。</p>
                     <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <select id="weather-pref-select" style="width:150px; margin-bottom:0; border-radius:0;" onchange="loadCitiesForWeather()"></select>
                         <select id="weather-city-select" style="width:150px; margin-bottom:0; border-radius:0;"><option value="">市町村を選択</option></select>
@@ -194,7 +199,7 @@
                 </details>
 
                 <details class="admin-form-box" id="admin-form-box-access">
-                    <summary>［確認］アクセス状況・未確認者チェック</summary>
+                    <summary>［確認］アクセス状況等の確認</summary>
                     <p style="margin-bottom:5px;">最終情報更新日時：<span id="last-update-time">---</span></p>
                     <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
                     <hr style="border-top:1px dashed #000; margin:15px 0;">
@@ -212,17 +217,17 @@
                 </details>
 
                 <details class="admin-form-box" id="admin-form-box-committee" open>
-                    <summary>［要確認］生徒からの「係・委員会」連絡（承認待ち・差戻し）</summary>
+                    <summary>［確認］係委員会連絡の承認と差戻し</summary>
                     <div id="admin-pending-committee" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
                 
                 <details class="admin-form-box" id="admin-form-box-messages" open>
-                    <summary>［確認］受信したメッセージ（担任へ連絡）</summary>
+                    <summary>［確認］受信箱</summary>
                     <div id="admin-message-list" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］祝日・記念日の登録・説明文編集</summary>
+                    <summary>［設定］祝日・休日等の登録</summary>
                     <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; align-items:baseline;">
                         <input type="date" id="holiday-edit-date" style="width:150px; margin:0;">
                         <input type="text" id="holiday-edit-name" placeholder="名称 (国民の祝日の場合は空欄で可)" style="width:240px; margin:0;">
@@ -235,13 +240,13 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］カウントダウン表示</summary>
+                    <summary>［設定］カウントダウン表示設定</summary>
                     <div id="admin-countdown-list" class="scroll-area" style="margin-top:10px;"></div>
                     <button type="button" onclick="saveCountdowns()" style="margin-top:10px;">カウントダウン設定を保存</button>
                 </details>
 
                 <details class="admin-form-box" id="admin-form-box-submissions">
-                    <summary>［設定］回収物・提出物の管理</summary>
+                    <summary>［設定］提出物・課題等の管理</summary>
                     <div style="margin-top:10px;">
                         提出物名：<input type="text" id="subm-title" style="width:200px;" placeholder="例：〇〇申込書"><br>
                         締め切り：<input type="date" id="subm-deadline" style="width:150px;"><br>
@@ -251,7 +256,7 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］標準の最終下校時刻（期間指定）</summary>
+                    <summary>［設定］標準最終下校時刻</summary>
                     <div style="margin-top:10px;">
                         開始：<input type="date" id="exit-period-start" style="width:130px;">
                         終了：<input type="date" id="exit-period-end" style="width:130px;">
@@ -262,13 +267,13 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］予定の個別編集・旧形式</summary>
+                    <summary>［設定］日付指定編集</summary>
                     <div style="margin-top:10px;">
                         日付：<input type="date" id="edit-date-select" style="width:200px;">
                         <button type="button" onclick="loadScheduleEdit()">呼出</button>
                         
                         <div id="edit-form" class="edit-box" style="display:none; margin-top:15px;">
-                            <h4 style="margin-top:0;">■ 旧形式インラインエディタ</h4>
+                            <h4 style="margin-top:0;">■ 日付指定エディタ</h4>
                             <div id="edit-table-container" class="scroll-area"></div>
                             <div style="margin-top:10px;">
                                 最終下校時刻：<select id="edit-exit-time" style="width:150px;"></select>
@@ -282,31 +287,36 @@
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］標準（レギュラー）の時間割・各種設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">※月曜日から金曜日までの標準時間割、昼休みの時間帯、帰りの会の時間帯を一括設定できます。</p>
+                    <summary>［設定］標準時間割の設定</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">月曜日から金曜日までの標準時間割、昼休みの時間帯、帰りの会の時間帯を一括設定できます。</p>
                     <div class="scroll-area">
                         <table id="reg-table" style="min-width: 700px;"></table>
                     </div>
                     <label style="display:flex; align-items:center; gap:5px; margin-top:10px;">
                         <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（チェック中は時間や曜日を問わず常にボーナス発生）</span>
                     </label>
-                    <div style="margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px;">
-                        <b>クラス全体の背景色の強制設定（体育祭の団色など）</b><br>
-                        <p style="font-size:0.85em; margin:0 0 5px 0;">※有効にすると、生徒の「明るさ設定」を上書きして指定色を適用します。</p>
-                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <input type="color" id="force-bg-color" value="#f7f9fc" style="width:50px; height:30px; padding:0; margin:0; cursor:pointer;">
-                            <label><input type="checkbox" id="enable-force-bg" style="margin:0;"> この色を生徒全員の画面に適用する</label>
-                            <button type="button" onclick="resetForceBg()" style="margin:0; font-size:0.85em; padding:4px 8px; color:#d32f2f;">元に戻す</button>
-                        </div>
-                    </div>
                     <button type="button" onclick="saveRegularSetting()" style="margin-top:15px; background:#000; color:white;">標準設定を保存</button>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］長期休業・臨時休校</summary>
-                    開始：<input type="date" id="vac-start" style="width:160px;"> 終了：<input type="date" id="vac-end" style="width:160px;">
+                    <summary>［設定］ページ背景色の強制設定</summary>
+                    <p style="font-size:0.85em; margin:0 0 5px 0;">ページの背景色を強制変更します。</p>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <input type="color" id="force-bg-color" value="#f7f9fc" style="width:50px; height:30px; padding:0; margin:0; cursor:pointer;">
+                        <button type="button" onclick="saveForceBgSetting()" style="margin:0; font-size:0.85em; padding:4px 8px; background:#000; color:white;">背景色設定を保存</button>
+                        <button type="button" onclick="resetForceBg()" style="margin:0; font-size:0.85em; padding:4px 8px; color:#d32f2f;">元に戻す</button>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］長期休業・臨時休校の設定</summary>
+                    <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:baseline;">
+                        開始：<input type="date" id="vac-start" style="width:140px; margin-bottom:5px;"> 
+                        終了：<input type="date" id="vac-end" style="width:140px; margin-bottom:5px;">
+                        備考：<input type="text" id="vac-note" placeholder="例: 夏季休業日" style="width:180px; margin-bottom:5px;">
+                    </div>
                     <button type="button" onclick="saveVacation()">期間を登録</button>
-                    <div id="vacation-list" style="margin-top:10px;"></div>
+                    <div id="vacation-list" style="margin-top:10px; line-height: 1.8;"></div>
                 </details>
             </section>
 
@@ -315,7 +325,7 @@
                     <h2 style="color:inherit;">名簿・役割個別管理</h2>
                 </div>
                 <div class="admin-form-box" style="margin-top:15px;">
-                    <h3 style="margin-top:0;">係・委員会の種類設定（手動登録）</h3>
+                    <h3 style="margin-top:0;">係・委員会の登録</h3>
                     <div style="display:flex; gap:20px; flex-wrap:wrap;">
                         <div style="flex:1; min-width:200px;">
                             <p style="font-weight:bold; margin-bottom:5px;">係の登録</p>
@@ -339,7 +349,7 @@
                     <select id="direct-committee" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">委員会</option></select>
                     <button type="button" onclick="registerDirect()">新規登録</button>
                 </div>
-                <h3>登録済み一覧（直接編集可能）</h3>
+                <h3>登録済み生徒の管理</h3>
                 <div id="student-list-area" class="scroll-area"></div>
             </section>
         </main>
@@ -405,7 +415,8 @@
         let countdownSettings = {}, regularScheduleData = {};
         let accessChartInstance = null;
         let inactivityTimer;
-        let schoolInfo = { year: new Date().getFullYear(), era: "令和", className: "" };
+        let schoolInfo = { year: new Date().getFullYear(), className: "" };
+        let parsedBackupData = null;
 
         const COUNTDOWN_PRESETS = [
             { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
@@ -426,6 +437,34 @@
         }
         function getSchoolDaysDiff(tStr) { let t1=new Date(); t1.setHours(0,0,0,0); let t2=new Date(tStr); t2.setHours(0,0,0,0); if(t2<t1) return -1; let d=0, c=new Date(t1); while(c<t2){ c.setDate(c.getDate()+1); if(isSchoolDay(getLocalDateStr(c))) d++; } return d; }
         function isSchoolDay(ds) { let d=new Date(ds).getDay(); if(d===0||d===6||holidays[ds]||customHolidays[ds]||(vacationData&&vacationData.find(v=>ds>=v.start&&ds<=v.end))) return false; return true; }
+
+        function getDefaultHolidayDesc(name, dateStr) {
+            if (!name) return "国民の祝日です。";
+            if (name === "振替休日") {
+                let d = new Date(dateStr); d.setDate(d.getDate() - 1);
+                let prevStr = getLocalDateStr(d); let prevName = holidays[prevStr] || "祝日";
+                return `${prevName.replace(" 振替休日", "")}の振替休業日です。`;
+            }
+            if (name.includes("元日")) return "年のはじめを祝う日です。";
+            if (name.includes("成人")) return "おとなになったことを自覚し、みずから生き抜こうとする青年を祝いはげます日です。";
+            if (name.includes("建国記念")) return "建国をしのび、国を愛する心を養う日です。";
+            if (name.includes("天皇誕生日")) return "天皇の誕生日を祝う日です。";
+            if (name.includes("春分")) return "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。";
+            if (name.includes("昭和")) return "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。";
+            if (name.includes("憲法記念")) return "日本国憲法の施行を記念し、国の成長を期する日です。";
+            if (name.includes("みどり")) return "自然に親しむとともにその恩恵に感謝し、豊かな心をはぐくむ日です。";
+            if (name.includes("こども")) return "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。";
+            if (name.includes("海の日")) return "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。";
+            if (name.includes("山の日")) return "山の恩恵に感謝し、自然に親しむ機会とする日です。";
+            if (name.includes("敬老")) return "多年にわたり社会につくしてきた老人を敬愛し、長寿を祝う日です。";
+            if (name.includes("秋分")) return "祖先をうやまい、なくなった人々をしのぶ日です。";
+            if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身をつちかう日です。";
+            if (name.includes("文化の日")) return "自由と平和を愛し、文化をすすめる日です。";
+            if (name.includes("勤労感謝")) return "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日です。";
+            if (name.includes("振替休日")) { let baseName = name.replace(" 振替休日", ""); return `${baseName}の振替休業日です。`; }
+            if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となった日です。";
+            return "国民の祝日です。";
+        }
 
         function checkAutoLogout() {
             let lastAct = localStorage.getItem('lastActivity');
@@ -490,10 +529,13 @@
         async function recordSystemUpdate() { await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); }
 
         function updatePortalTitle() {
-            let t = "My Class Portal";
-            if (schoolInfo.era && schoolInfo.year) {
-                let w = schoolInfo.year - 2018;
-                t = `${schoolInfo.era}${w}年度 ${schoolInfo.className} ${t}`;
+            let t = "Class Portal";
+            if (schoolInfo.year && schoolInfo.className) {
+                t = `${schoolInfo.year} ${schoolInfo.className} ${t}`;
+            } else if (schoolInfo.year) {
+                t = `${schoolInfo.year} ${t}`;
+            } else {
+                t = `My Class Portal`;
             }
             document.getElementById('login-portal-title').innerHTML = `${t}<br><span style="font-size: 0.6em;">管理者ログイン</span>`;
             document.getElementById('main-portal-title').innerText = t;
@@ -514,7 +556,6 @@
                 if(s.exists) { 
                     schoolInfo = s.data(); 
                     document.getElementById('set-school-year').value = schoolInfo.year || 2026;
-                    document.getElementById('set-school-era').value = schoolInfo.era || "令和";
                     document.getElementById('set-school-class').value = schoolInfo.className || "";
                     updatePortalTitle(); 
                 }
@@ -522,6 +563,8 @@
 
             const now = new Date(); 
             document.getElementById('excel-month-input').value = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
+            document.getElementById('edit-date-select').value = getLocalDateStr(now);
+
             initExitTimeOptions(document.getElementById('exit-period-time'), false);
             initWeatherSetting();
 
@@ -534,6 +577,7 @@
             db.collection("config").doc("regular_schedule").onSnapshot(snap => {
                 regularScheduleData = snap.exists ? snap.data() : {};
                 loadRegularSetting();
+                document.getElementById('force-bg-color').value = regularScheduleData.forceGlobalBgColor || "#f7f9fc";
             });
 
             fetch('https://holidays-jp.github.io/api/v1/date.json').then(r=>r.json()).then(hRes => {
@@ -589,14 +633,16 @@
 
         async function saveSchoolInfo() {
             let y = document.getElementById('set-school-year').value;
-            let e = document.getElementById('set-school-era').value.trim();
             let c = document.getElementById('set-school-class').value.trim();
-            if(!y || !e) return alert("年度と元号は必須です。");
-            
-            schoolInfo = { year: parseInt(y), era: e, className: c };
+            schoolInfo = { year: parseInt(y), className: c };
             await db.collection("config").doc("school_info").set(schoolInfo);
             alert("学校・クラス情報を保存しました。");
             recordSystemUpdate();
+        }
+        
+        async function clearSchoolInfo() {
+            document.getElementById('set-school-year').value = new Date().getFullYear();
+            document.getElementById('set-school-class').value = "";
         }
 
         function initWeatherSetting() {
@@ -885,7 +931,6 @@
                 content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
                 startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'pending', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            editingCommitteeId = null;
             alert("再編集し、承認待ち状態にしました。");
         }
         
@@ -905,7 +950,6 @@
                 details.history.push({ reason: "連絡の投稿が承認されました！", points: 10, time: formatDateTime(new Date()) });
                 await studentRef.update({ points: firebase.firestore.FieldValue.increment(10), pointDetails: details }).catch(()=>{});
             }
-            editingCommitteeId = null;
             alert("編集して承認しました。");
         }
 
@@ -1001,9 +1045,6 @@
 
             document.getElementById('reg-table').innerHTML = html;
             document.getElementById('bonus-test-mode').checked = data.testMode || false;
-            
-            document.getElementById('force-bg-color').value = data.forceGlobalBgColor || "#f7f9fc";
-            document.getElementById('enable-force-bg').checked = !!data.useForceBg;
         }
 
         async function saveRegularSetting() { 
@@ -1016,18 +1057,24 @@
                 newData[day] = { subs: subs, lunchStart: ls, lunchEnd: le, bonusStart: bs, bonusEnd: be };
             }
             newData.testMode = document.getElementById('bonus-test-mode').checked;
-            newData.forceGlobalBgColor = document.getElementById('force-bg-color').value;
-            newData.useForceBg = document.getElementById('enable-force-bg').checked;
             
             await db.collection("config").doc("regular_schedule").set(newData, { merge: true }); 
             recordSystemUpdate(); 
             alert("標準時間割・各種設定を保存しました。"); 
         }
+
+        async function saveForceBgSetting() {
+            let currentData = regularScheduleData || {};
+            currentData.forceGlobalBgColor = document.getElementById('force-bg-color').value;
+            currentData.useForceBg = true;
+            await db.collection("config").doc("regular_schedule").set(currentData, { merge: true }); 
+            recordSystemUpdate(); 
+            alert("背景色の設定を保存しました。"); 
+        }
         
         async function resetForceBg() {
-            if(!confirm("クラス全体の背景色強制設定を解除しますか？")) return;
+            if(!confirm("ページ背景色の強制設定を解除し、初期設定に戻しますか？")) return;
             document.getElementById('force-bg-color').value = "#f7f9fc";
-            document.getElementById('enable-force-bg').checked = false;
             
             let currentData = regularScheduleData || {};
             currentData.useForceBg = false;
@@ -1037,9 +1084,30 @@
             alert("背景色を元に戻しました。");
         }
         
-        async function saveVacation() { vacationData.push({ start: document.getElementById('vac-start').value, end: document.getElementById('vac-end').value }); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
-        function renderVacationList() { document.getElementById('vacation-list').innerHTML = vacationData.map((v,i)=>`${v.start} 〜 ${v.end} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>'); }
-        async function deleteVac(i) { vacationData.splice(i,1); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
+        async function saveVacation() { 
+            vacationData.push({ 
+                start: document.getElementById('vac-start').value, 
+                end: document.getElementById('vac-end').value,
+                note: document.getElementById('vac-note').value.trim()
+            }); 
+            await db.collection("config").doc("vacations").set({ periods: vacationData }); 
+            document.getElementById('vac-start').value = "";
+            document.getElementById('vac-end').value = "";
+            document.getElementById('vac-note').value = "";
+            renderVacationList(); 
+            recordSystemUpdate(); 
+        }
+        
+        function renderVacationList() { 
+            document.getElementById('vacation-list').innerHTML = vacationData.map((v,i)=>`${v.start} 〜 ${v.end} ${v.note ? `(<b>${v.note}</b>)` : ""} <button type="button" onclick="deleteVac(${i})">削除</button>`).join('<br>'); 
+        }
+        
+        async function deleteVac(i) { 
+            vacationData.splice(i,1); 
+            await db.collection("config").doc("vacations").set({ periods: vacationData }); 
+            renderVacationList(); 
+            recordSystemUpdate(); 
+        }
         
         async function loadScheduleEdit() {
             const date = document.getElementById('edit-date-select').value; if(!date) return;
@@ -1166,7 +1234,7 @@
 
         async function clearPointHistory() {
             let email = document.getElementById('pt-modal-email').value;
-            if(!confirm("この生徒のポイント獲得履歴をすべて削除しますか？\n（※総ポイント数は変わりません）")) return;
+            if(!confirm("この生徒のポイント獲得履歴をすべて削除しますか？\n（総ポイント数は変わりません）")) return;
             await db.collection("students").doc(email).update({ pointDetails: firebase.firestore.FieldValue.delete() });
             alert("履歴を削除しました。"); document.getElementById('admin-point-modal-overlay').style.display = 'none';
         }
@@ -1261,15 +1329,32 @@
         async function importFullBackup() {
             let fileInput = document.getElementById('backup-file-input');
             if (!fileInput.files.length) return alert("バックアップファイル(.json)を選択してください。");
-            if (!confirm("警告: 現在のシステムデータに上書き復元します。\n本当によろしいですか？")) return;
+            
+            let cnf = document.getElementById('restore-opt-config').checked;
+            let std = document.getElementById('restore-opt-students').checked;
+            let sch = document.getElementById('restore-opt-schedules').checked;
+            let blg = document.getElementById('restore-opt-blogs').checked;
+            let oth = document.getElementById('restore-opt-others').checked;
+            
+            if (!cnf && !std && !sch && !blg && !oth) return alert("復元する項目を選択してください。");
+            
+            if (!confirm("警告: 選択した項目の現在のシステムデータに上書き復元します。\n本当によろしいですか？")) return;
             
             let file = fileInput.files[0]; let reader = new FileReader();
             reader.onload = async function(e) {
                 try {
                     let backupData = JSON.parse(e.target.result);
                     if (!backupData.collections) throw new Error("無効なバックアップファイルです。");
-                    let colNames = Object.keys(backupData.collections);
+                    
+                    let colNames = [];
+                    if (cnf) colNames.push("config");
+                    if (std) colNames.push("students");
+                    if (sch) colNames.push("schedules");
+                    if (blg) colNames.push("blogs");
+                    if (oth) colNames.push("submissions", "committee_posts", "messages", "access_logs");
+
                     for (let cName of colNames) {
+                        if(!backupData.collections[cName]) continue;
                         let docs = backupData.collections[cName];
                         for (let docId in docs) {
                             let data = docs[docId];
@@ -1287,9 +1372,18 @@
             reader.readAsText(file);
         }
 
+        // 復元オプション表示用
+        document.getElementById('backup-file-input').addEventListener('change', function(e) {
+            if(e.target.files.length > 0) {
+                document.getElementById('backup-restore-options').style.display = 'block';
+            } else {
+                document.getElementById('backup-restore-options').style.display = 'none';
+            }
+        });
+
         // ★ 次年度用 システム全リセット
         async function resetEntireSystem() {
-            let msg = "【※非常に危険な操作です※】\n\n・生徒のアカウント、ポイント、名簿データ\n・すべてのスケジュール（時間割・行事・備考）\n・提出物、委員会連絡、メッセージ、アクセスログ\n・ブログ記事（担任のやつ）\n\nこれらのすべてのデータが完全に削除され、初期状態に戻ります。\n\n本当に実行してよろしいですか？（※管理者の設定は一部残ります）";
+            let msg = "【非常に危険な操作です】\n\n・生徒のアカウント、ポイント、名簿データ\n・すべてのスケジュール（時間割・行事・備考）\n・標準時間割の設定\n・提出物、委員会連絡、メッセージ、アクセスログ\n・ブログ記事（担任のやつ）\n\nこれらのすべてのデータが完全に削除され、初期状態に戻ります。\n\n本当に実行してよろしいですか？（管理者の設定は一部残ります）";
             if (!confirm(msg)) return;
             let msg2 = "最終確認です。\n実行後にデータを取り戻すことはできません（事前にフルバックアップを推奨します）。\nよろしいですか？";
             if (!confirm(msg2)) return;
@@ -1302,6 +1396,7 @@
                         let batch = db.batch();
                         snap.forEach(doc => {
                             if (cName === "students" && doc.id === TEACHER_EMAIL) {
+                                // 管理者アカウント自体は残し、設定等はリセットする
                                 batch.set(doc.ref, { name: "管理者", isSubAdmin: false, isBanned: false });
                             } else {
                                 batch.delete(doc.ref);
@@ -1310,8 +1405,14 @@
                         await batch.commit();
                     }
                 }
+                
+                // 標準時間割のリセット
+                await db.collection("config").doc("regular_schedule").delete();
+                
                 alert("全データのリセットが完了しました。\n新年度の運用を開始できます。ページをリロードします。"); location.reload();
-            } catch (err) { alert("リセット中にエラーが発生しました: " + err.message); }
+            } catch (err) {
+                alert("リセット中にエラーが発生しました: " + err.message);
+            }
         }
 
         function handleExcelFileChange(e) {
