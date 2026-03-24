@@ -114,9 +114,9 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                 <div class="section-header">
                     <h2>◆ 直近の予定</h2>
                     <div>
-                        <button type="button" onclick="changeScheduleDate(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 戻る</button>
+                        <button type="button" onclick="changeScheduleDate(-1)" style="padding: 4px 8px; font-size: 0.85em;">◄ 戻る</button>
                         <button type="button" onclick="resetScheduleDate()" style="padding: 4px 8px; font-size: 0.85em;">今日</button>
-                        <button type="button" onclick="changeScheduleDate(1)" style="padding: 4px 8px; font-size: 0.85em;">進む ▶</button>
+                        <button type="button" onclick="changeScheduleDate(1)" style="padding: 4px 8px; font-size: 0.85em;">進む ►</button>
                     </div>
                 </div>
                 <div id="bonus-check-area" style="display:none; text-align:center; background:#fff3cd; padding:10px; border:1px solid #000; margin-bottom:10px;">
@@ -137,24 +137,24 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                         <button type="button" id="btn-save-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em; background:#000; color:white;" onclick="saveMyWeek()">保存</button>
                         <button type="button" id="btn-cancel-my-week" style="display: none; padding: 4px 8px; font-size: 0.85em;" onclick="toggleEditMyWeek()">キャンセル</button>
                         <span style="margin: 0 5px;">|</span>
-                        <button type="button" onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◀ 前週</button>
+                        <button type="button" onclick="changeWeek(-1)" style="padding: 4px 8px; font-size: 0.85em;">◄ 前週</button>
                         <button type="button" onclick="resetWeek()" style="padding: 4px 8px; font-size: 0.85em;">今週</button>
-                        <button type="button" onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ▶</button>
+                        <button type="button" onclick="changeWeek(1)" style="padding: 4px 8px; font-size: 0.85em;">次週 ►</button>
                     </div>
                 </div>
                 <div id="my-week-settings" style="display: none; margin-top: 10px; margin-bottom: 10px; font-size: 0.9em; gap: 15px; flex-wrap: wrap; background:rgba(0,0,0,0.05); padding:8px; border:1px solid #000; align-items: center; color: inherit;">
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-weekend" onchange="safeRenderAll()">土日表示</label>
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-morning" onchange="safeRenderAll()">朝練</label>
-                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-lunch" onchange="safeRenderAll()">昼休み</label>
+                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-lunch" onchange="safeRenderAll()">昼休</label>
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-clean" onchange="safeRenderAll()">清掃</label>
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-club-status" onchange="safeRenderAll()">放練</label>
                     <span style="margin: 0 5px;">|</span>
-                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-my-event" onchange="safeRenderAll()">個人予定</label>
+                    <label style="cursor: pointer;"><input type="checkbox" id="toggle-my-event" onchange="safeRenderAll()">自分の予定</label>
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-club" onchange="safeRenderAll()">部活動詳細</label>
                     <button type="button" onclick="editMyEventOptions()" style="padding: 2px 8px; font-size: 0.9em; margin-left:auto;">予定リストの編集</button>
                 </div>
                 <div id="my-list-editor-area" style="display: none; background:#fff3cd; border:1px solid #000; padding:10px; margin-bottom:10px; color:black;">
-                    <h4 style="margin-top:0;">予定リストの編集 (カンマ区切り)</h4>
+                    <h4 style="margin-top:0;">予定リストの編集 (カンマで区切ってください)</h4>
                     <p style="margin:0 0 5px 0; font-size:0.85em;">自分の予定：</p><input type="text" id="edit-my-events-input" style="width:100%;">
                     <p style="margin:10px 0 5px 0; font-size:0.85em;">部活動の予定：</p><input type="text" id="edit-my-clubs-input" style="width:100%;">
                     <div style="text-align:right; margin-top:5px;"><button type="button" onclick="saveMyListOptions()">保存</button> <button type="button" onclick="closeMyListEditor()">閉じる</button></div>
@@ -175,7 +175,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                 </div>
                 <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #000; margin-bottom:15px; background:rgba(0,0,0,0.02);">
                     <h3 style="margin-top:0; font-size:1em; color:inherit;">■ 連絡を投稿する</h3>
-                    <p style="font-size:0.85em; color:inherit; margin:0 0 10px 0;">■ 連絡の際は具体的な日時を知らせましょう。<br>（悪い例：明日まで、よい例：3/1(月)まで）</p>
+                    <p style="font-size:0.85em; color:inherit; margin:0 0 10px 0;">■ 具体的な日時を書きましょう。<br>（悪い例：明日まで、よい例：５/１(月)まで）</p>
                     <div style="margin-bottom: 10px; font-size: 0.9em; color: inherit;">投稿者（役職）: <span id="my-role-name-container"></span></div>
                     <input type="text" id="committee-title" placeholder="記事のタイトル（任意）" style="width:100%; margin-bottom:5px;">
                     <textarea id="committee-input" placeholder="連絡内容を入力してください..." style="height:80px;"></textarea>
@@ -230,12 +230,12 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
     <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #000; font-size: 0.85em; color: inherit;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div>
-                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">Smartphone</button>
+                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">Mobile View</button>
                 <button type="button" onclick="toggleTheme()">Light / Dark</button>
-                <button type="button" id="btn-lightness" onclick="toggleLightness()">明るさ調整</button>
-                <button type="button" onclick="openSettingsModal()">設定</button>
+                <button type="button" id="btn-lightness" onclick="toggleLightness()">Brightness</button>
+                <button type="button" onclick="openSettingsModal()">Settings</button>
             </div>
-            <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
+            <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T. Kimura All Rights Reserved.</div>
         </div>
     </footer>
 </div>
@@ -259,7 +259,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
     <div id="settings-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #000;">
         <button type="button" onclick="closeSettingsModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:inherit;">✖</button>
         <h2 style="margin-top:0; border-bottom:1px solid #000; padding-bottom:5px;">設定</h2>
-        <h4 style="margin-bottom:5px;">■ セクションの並び替え</h4>
+        <h4 style="margin-bottom:5px;">■ セクションの並びかえ</h4>
         <ul id="sortable-list" style="list-style-type:none; padding:0; margin:0 0 20px 0; border:1px solid #000; background:rgba(0,0,0,0.02);"></ul>
         <h4 style="margin-bottom:5px;">■ セクションの背景色</h4>
         <table style="width:100%; font-size:0.9em; margin-bottom:20px;">
@@ -284,7 +284,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
             <div style="margin-top:10px; font-size:0.9em;">
                 <input type="password" id="old-password" placeholder="現在のパスワード"><br>
                 <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）"><br>
-                <input type="password" id="new-password-confirm" placeholder="確認用"><br>
+                <input type="password" id="new-password-confirm" placeholder="最終確認のための再入力"><br>
                 <button type="button" id="change-pw-btn" style="background:#000; color:white;">変更する</button>
             </div>
         </details>
@@ -305,7 +305,7 @@ const firebaseConfig = {
     appId: "1:125594983188:web:129aa54e9d3a39ca700001"
 };
 const TEACHER_EMAIL = "administrator@class.jp";
-const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "行事等"];
+const SUBJECTS = ["", "国語", "社会", "数学", "理科", "英語", "音楽", "美術", "保体", "技家", "学活", "総合", "道徳", "自習", "行事等"];
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -327,7 +327,7 @@ let schoolInfo = { year: new Date().getFullYear(), className: "" };
 
 let userSettings = { order: ['sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' }, cdVisible: true, cdSize: 'normal', showMyEventColumn: true, showClubColumn: true, showMorning: true, showLunch: true, showClean: true, showClubStatus: true };
 const SECTION_NAMES = { 'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等', 'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡' };
-const COUNTDOWN_PRESETS = [{id:"kenritsu",label:"県立入試"},{id:"shiritsu",label:"私立入試"},{id:"exam",label:"定期試験"},{id:"sports",label:"体育祭"},{id:"chorus",label:"合唱祭"},{id:"soutai",label:"学総"},{id:"shinjin",label:"新人戦"},{id:"school_trip",label:"修学旅行"},{id:"camp",label:"宿泊学習"},{id:"field_trip",label:"校外学習"},{id:"term2_start",label:"2学期始業式"},{id:"term3_start",label:"3学期始業式"},{id:"graduation",label:"卒業式"},{id:"summer",label:"夏休み"},{id:"winter",label:"冬休み"},{id:"custom1",isCustom:true},{id:"custom2",isCustom:true},{id:"custom3",isCustom:true}];
+const COUNTDOWN_PRESETS = [{id:"kenritsu",label:"公立入試"},{id:"shiritsu",label:"私立入試"},{id:"exam",label:"定期試験"},{id:"sports",label:"体育祭"},{id:"chorus",label:"合唱祭"},{id:"soutai",label:"学総"},{id:"shinjin",label:"新人戦"},{id:"school_trip",label:"修学旅行"},{id:"camp",label:"宿泊学習"},{id:"field_trip",label:"校外学習"},{id:"term2_start",label:"2学期始業式"},{id:"term3_start",label:"3学期始業式"},{id:"graduation",label:"卒業式"},{id:"summer",label:"夏休み"},{id:"winter",label:"冬休み"},{id:"custom1",isCustom:true},{id:"custom2",isCustom:true},{id:"custom3",isCustom:true}];
 
 function getLocalDateStr(d) { return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`; }
 function formatDateTime(d) { return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${('0'+d.getHours()).slice(-2)}:${('0'+d.getMinutes()).slice(-2)}`; }
@@ -421,7 +421,7 @@ function toggleDeviceView() {
     let meta = document.getElementById('viewport-meta'); isPcView = !isPcView; meta.setAttribute('content', isPcView ? 'width=850' : 'width=device-width, initial-scale=1.0'); 
     let btn = document.getElementById('btn-device-view');
     if(btn) {
-        btn.innerText = isPcView ? 'PC版' : 'スマホ版'; btn.style.backgroundColor = isPcView ? '#e0f7fa' : ''; btn.style.color = isPcView ? '#000' : '';
+        btn.innerText = isPcView ? 'PC View' : 'Mobile View'; btn.style.backgroundColor = isPcView ? '#e0f7fa' : ''; btn.style.color = isPcView ? '#000' : '';
         if(document.body.classList.contains('dark-mode') && isPcView) { btn.style.backgroundColor = '#004d40'; btn.style.color = '#fff'; }
     }
 }
@@ -640,11 +640,11 @@ async function claimDailyBonus() {
 
 async function spinRoulette() {
     let myD = studentMaster[currentUserEmail] || {}; let todayStr = getLocalDateStr(new Date());
-    if(myD.spinnerUsedDate === todayStr) return alert("本日のルーレットは終了しています。");
+    if(myD.spinnerUsedDate === todayStr) return alert("本日のボーナスチャレンジは終了しています。");
     let r = Math.random() * 100; let result = 1; let msg = "";
-    if(r < 5) { result = 4; msg = "大当たり！本日のボーナスが 4倍！🎉"; } else if(r < 20) { result = 3; msg = "当たり！本日のボーナスが 3倍！✨"; } else if(r < 50) { result = 2; msg = "小当たり！本日のボーナスが 2倍！👍"; } else { result = 1; msg = "残念... 本日のボーナスは 1倍 です。"; }
+    if(r < 5) { result = 4; msg = "大当たり！本日のボーナスが４倍！🎉"; } else if(r < 20) { result = 3; msg = "当たり！本日のボーナスが３倍！✨"; } else if(r < 50) { result = 2; msg = "小当たり！本日のボーナスが２倍！👍"; } else { result = 1; msg = "残念... 本日のボーナスは１倍 です。"; }
     spinnerMulti = result; await db.collection("students").doc(currentUserEmail).update({ spinnerUsedDate: todayStr, todaySpinnerMulti: spinnerMulti });
-    document.getElementById('spinner-btn').style.display='none'; alert(`🎯 ルーレット結果\n\n${msg}`);
+    document.getElementById('spinner-btn').style.display='none'; alert(`ボーナスチャレンジ結果\n\n${msg}`);
 }
 
 async function likePost(postId) {
@@ -664,13 +664,13 @@ function updateTopReminder() {
             if (isUnsubmitted) {
                 let dayStr = ""; let colorStyle = "";
                 if (diffDays < 0) { dayStr = "【期限超過】"; colorStyle = "color: #d32f2f;"; } else if (diffDays === 0) { dayStr = "【本日締切】"; colorStyle = "color: #f57c00;"; } else if (diffDays <= 3) { dayStr = `【あと${diffDays}日】`; colorStyle = "color: #f57c00;"; }
-                if (dayStr) msgs.push(`<span style="${colorStyle}">🚨 ${dayStr}「${sub.title}」</span>`);
+                if (dayStr) msgs.push(`<span style="${colorStyle}">⚠ ${dayStr}「${sub.title}」</span>`);
             }
         });
     }
     reminderEl.innerHTML = msgs.join('<br>');
     let todayStr = getLocalDateStr(new Date()); let hMsg = holidays[todayStr] || (customHolidays[todayStr] ? customHolidays[todayStr].name : null);
-    if(hMsg) { let displayName = hMsg.includes("振替休日") ? "振替休日" : hMsg; let el = document.getElementById('holiday-msg'); el.innerText = `㊗️ ${displayName}`; el.style.display = 'inline-block'; el.dataset.date = todayStr; } else { document.getElementById('holiday-msg').style.display = 'none'; }
+    if(hMsg) { let displayName = hMsg.includes("振替休日") ? "振替休日" : hMsg; let el = document.getElementById('holiday-msg'); el.innerText = `㊗ ${displayName}`; el.style.display = 'inline-block'; el.dataset.date = todayStr; } else { document.getElementById('holiday-msg').style.display = 'none'; }
 }
 
 function openHolidayModal() {
@@ -813,7 +813,7 @@ function startAdminInlineEdit(ds) {
 }
 
 async function revertToRegularSchedule(ds) {
-    if(!confirm("標準時間割に戻しますか？（備考欄は空欄になります）")) return;
+    if(!confirm("標準時間割に戻し、備考欄を消去しますか？")) return;
     const d = new Date(ds);
     const dayKey = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()];
     const regWeek = regularScheduleData[dayKey] && regularScheduleData[dayKey].subs ? regularScheduleData[dayKey].subs : (regularScheduleData[dayKey]||[]);
@@ -848,7 +848,7 @@ function startStudentEdit(ds, idx, cur) {
 
 async function saveStudentEdit(ds, idx) {
     let val = document.getElementById(`student-input-${ds}-${idx}`).value.trim();
-    if(val === "") return alert("内容を入力してください。（空欄での保存はできません）");
+    if(val === "") return alert("内容を入力してください。");
     let docRef = db.collection("schedules").doc(ds); let doc = await docRef.get(); let data = doc.exists ? doc.data() : {};
     if(!data.lessons) data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" }));
     if(data.lessons[idx].note === val) { safeRenderAll(); return; } 
@@ -1104,7 +1104,7 @@ function renderSubmissionsUI() {
         let diff = getSchoolDaysDiff(s.deadline); 
         let cls = ''; if(isAdmin) { cls = (unsubmittedCount>0) ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : ''; } else { cls = !chk ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : ''; }
 
-        let titleHtml = isComplete ? `<span style="color:#d81b60; font-weight:bold;">🌸</span> ${s.title} <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : s.title;
+        let titleHtml = isComplete ? `<span style="color:#d81b60; font-weight:bold;">✿</span> ${s.title} <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : s.title;
         if (!isComplete) { if(isAdmin) { titleHtml += ` <span style="font-size:0.85em; font-weight:normal; color:#d32f2f; margin-left:10px;">(残り${unsubmittedCount}人) ${unsubmittedNames.join('、')}</span>`; } else { titleHtml += ` <span style="font-size:0.85em; font-weight:normal; color:#666; margin-left:10px;">残り ${unsubmittedCount} 人</span>`; } }
         
         html += `<tr id="subm-row-${s.id}" class="${chk?'checked-item':''}"><td><input type="checkbox" onchange="toggleSubm('${s.id}', this.checked)" ${chk?'checked':''}></td><td style="text-align:left; font-weight:bold;" class="${cls}">${titleHtml}</td><td class="${cls}">${ds}</td></tr>`;
@@ -1189,7 +1189,7 @@ function editMyCommitteePost(id) {
                 <div>公開: <input type="date" id="student-edit-comm-start-${id}" value="${post.startDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"> 〜 <input type="date" id="student-edit-comm-end-${id}" value="${post.endDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"></div>
             </div>
             <div style="text-align:right; margin-top:5px;">
-                <button type="button" onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white; border-color:#ff9800;">${isAdmin?'保存して承認(公開)':'保存して承認待ちへ'}</button>
+                <button type="button" onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white; border-color:#ff9800;">${isAdmin?'投稿する':'保存して承認待ちへ'}</button>
                 <button type="button" onclick="renderCommitteePosts()">キャンセル</button>
             </div>
         </div>
