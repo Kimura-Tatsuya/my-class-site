@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理画面 - My Class Portal</title>
+    <title>Admin Panel - Class Portal</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { background-color: #888888; color: #000; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; transition: background-color 0.3s; }
@@ -15,8 +15,8 @@
         input[type="checkbox"] { width: auto; cursor: pointer; transform: scale(1.2); }
         button { padding: 6px 12px; cursor: pointer; background: white; color: #000; border: 1px solid #000; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; border-radius: 0; }
         button:hover { background: #eee; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em; background: inherit; }
-        th, td { border: 1px solid #000; padding: 6px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: clamp(0.75em, 2.5vw, 0.95em); background: inherit; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: center; word-break: keep-all; }
         th { background-color: rgba(0,0,0,0.05); } 
         .admin-form-box { background: #ffffff; padding: 15px; border: 1px solid #000; margin-bottom: 20px; overflow-x: auto; }
         details.admin-form-box summary { cursor: pointer; outline: none; border-bottom: 1px solid #000; padding-bottom: 5px; font-weight: bold; font-size: 1.1em; margin-bottom: 10px; display: block; color: inherit; }
@@ -79,10 +79,10 @@
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1 id="login-portal-title" style="color:#000;">My Class Portal<br><span style="font-size: 0.6em;">管理者ログイン</span></h1>
-        <input type="email" id="login-email" placeholder="メールアドレス"><br>
-        <input type="password" id="login-password" placeholder="パスワード"><br>
-        <button type="button" id="login-btn">ログイン</button>
+        <h1 id="login-portal-title" style="color:#000;">Class Portal<br><span style="font-size: 0.6em;">Admin Login</span></h1>
+        <input type="email" id="login-email" placeholder="E-Mail Address"><br>
+        <input type="password" id="login-password" placeholder="Password"><br>
+        <button type="button" id="login-btn">Login</button>
     </div>
 
     <div id="loading-section" style="text-align: center; margin-top: 50px; display: none;">
@@ -93,18 +93,18 @@
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
             <div>
-                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;">管理画面</h1>
-                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">ログイン中: <span id="admin-email-display"></span></div>
+                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;">Admin Panel</h1>
+                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">logging in: <span id="admin-email-display"></span></div>
             </div>
             <div style="display: flex; gap: 5px; flex-direction:column; align-items:flex-end;">
-                <button type="button" onclick="location.href='index.html'">ポータルへ</button>
-                <button type="button" onclick="logout()" style="margin-top:0;">ログアウト</button>
+                <button type="button" onclick="location.href='index.html'">Return</button>
+                <button type="button" onclick="logout()" style="margin-top:0;">Logout</button>
             </div>
         </header>
 
         <main>
             <div id="admin-dashboard">
-                <h3>🚨 要確認事項</h3>
+                <h3>⚠ 要確認事項</h3>
                 <ul style="margin: 0; padding-left: 20px; font-weight: bold; line-height: 1.8;" id="dashboard-list">
                     <li>確認中...</li>
                 </ul>
@@ -117,12 +117,11 @@
 
                 <details class="admin-form-box" open>
                     <summary>［設定］学校・クラス情報の設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">ここで設定した情報がポータルのタイトル等に反映されます。</p>
+                    <p style="font-size:0.85em; margin-top:5px;">ポータルのタイトル等に反映されます。</p>
                     <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <div>
                             年度: 
-                            <select id="set-school-year" style="width:100px; margin-bottom:0; border-radius:0;">
-                                </select>
+                            <select id="set-school-year" style="width:100px; margin-bottom:0; border-radius:0;"></select>
                         </div>
                         <div>
                             クラス名: <input type="text" id="set-school-class" placeholder="例: 1年1組" style="width:150px; margin-bottom:0; border-radius:0;">
@@ -134,7 +133,7 @@
 
                 <details class="admin-form-box" id="admin-form-box-excel">
                     <summary>［一括管理］全設定のExcelインポート/エクスポート</summary>
-                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール（朝・昼休・清掃・放課後の有無を含む）、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
+                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、予定、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
                     <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #000;">
                         <b>1. エクスポート（ダウンロード）</b><br>
                         <span style="font-size:0.85em;">指定した月のスケジュールを含めて出力します。</span><br>
@@ -142,11 +141,11 @@
                         <button type="button" onclick="exportExcel()">現在の設定をダウンロード</button>
                     </div>
                     <div style="margin-top:15px;">
-                        <b>2. インポート（一括更新・プレビュー付き）</b><br>
+                        <b>2. インポート（アップロード）</b><br>
                         <span style="font-size:0.85em;">Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
                         <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:1px solid #000; padding:4px;" onchange="handleExcelFileChange(event)">
                         <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
-                            <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
+                            <h4 style="margin-top:0; color:#d9534f; border:none;">⚠ インポートプレビュー（まだ更新されていません）</h4>
                             <div id="import-preview-content" style="font-size:0.9em; margin-bottom:10px; line-height:1.6;"></div>
                             <button type="button" onclick="commitExcelImport()" style="background:#d9534f; color:white; font-weight:bold; border:1px solid #000;">この内容で更新を実行する</button>
                             <button type="button" onclick="cancelExcelImport()">キャンセル</button>
@@ -293,9 +292,12 @@
                         <table id="reg-table" style="min-width: 700px;"></table>
                     </div>
                     <label style="display:flex; align-items:center; gap:5px; margin-top:10px;">
-                        <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（チェック中は時間や曜日を問わず常にボーナス発生）</span>
+                        <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（ボーナス∞）</span>
                     </label>
-                    <button type="button" onclick="saveRegularSetting()" style="margin-top:15px; background:#000; color:white;">標準設定を保存</button>
+                    <div style="display:flex; justify-content:space-between; margin-top:15px;">
+                        <button type="button" onclick="saveRegularSetting()" style="background:#000; color:white;">保存</button>
+                        <button type="button" onclick="clearRegularSetting()" style="color:#d32f2f;">すべて消去</button>
+                    </div>
                 </details>
 
                 <details class="admin-form-box">
@@ -335,14 +337,14 @@
                         </div>
                         <div style="flex:1; min-width:200px;">
                             <p style="font-weight:bold; margin-bottom:5px;">委員会の登録</p>
-                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書）" style="width:150px; display:inline-block;">
+                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書委員）" style="width:150px; display:inline-block;">
                             <button type="button" onclick="addCommittee()">追加</button>
                             <div id="comm-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
                         </div>
                     </div>
                 </div>
                 <div class="admin-form-box" style="margin-top:15px;">
-                    <h3 style="margin-top:0;">生徒の新規登録 (1件ずつ手動)</h3>
+                    <h3 style="margin-top:0;">生徒の新規登録</h3>
                     <input type="email" id="direct-email" placeholder="メールアドレス" style="width:200px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
                     <select id="direct-role" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">係</option></select>
@@ -419,7 +421,7 @@
         let parsedBackupData = null;
 
         const COUNTDOWN_PRESETS = [
-            { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
+            { id: "kenritsu", defaultLabel: "公立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
             { id: "sports", defaultLabel: "体育祭" }, { id: "chorus", defaultLabel: "合唱祭" }, { id: "soutai", defaultLabel: "学校総合体育大会" },
             { id: "shinjin", defaultLabel: "新人戦" }, { id: "school_trip", defaultLabel: "修学旅行" }, { id: "camp", defaultLabel: "宿泊学習" },
             { id: "field_trip", defaultLabel: "校外学習" }, { id: "term2_start", defaultLabel: "2学期始業式" }, { id: "term3_start", defaultLabel: "3学期始業式" },
@@ -440,10 +442,20 @@
 
         function getDefaultHolidayDesc(name, dateStr) {
             if (!name) return "国民の祝日です。";
-            if (name === "振替休日") {
-                let d = new Date(dateStr); d.setDate(d.getDate() - 1);
-                let prevStr = getLocalDateStr(d); let prevName = holidays[prevStr] || "祝日";
-                return `${prevName.replace(" 振替休日", "")}の振替休業日です。`;
+            if (name.includes("振替休日")) {
+                let baseName = name.replace(" 振替休日", "").replace("振替休日", "").trim();
+                if (baseName) {
+                    return `${baseName}の振替休日です。`;
+                } else {
+                    let d = new Date(dateStr); d.setDate(d.getDate() - 1);
+                    let prevStr = getLocalDateStr(d); let prevName = holidays[prevStr];
+                    for (let i=0; i<4; i++) {
+                        if (prevName) break;
+                        d.setDate(d.getDate() - 1); prevStr = getLocalDateStr(d); prevName = holidays[prevStr];
+                    }
+                    if(prevName) return `${prevName.replace(" 振替休日", "").replace("振替休日", "").trim()}の振替休日です。`;
+                    else return `国民の祝日の振替休日です。`;
+                }
             }
             if (name.includes("元日")) return "年のはじめを祝う日です。";
             if (name.includes("成人")) return "おとなになったことを自覚し、みずから生き抜こうとする青年を祝いはげます日です。";
@@ -461,7 +473,6 @@
             if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身をつちかう日です。";
             if (name.includes("文化の日")) return "自由と平和を愛し、文化をすすめる日です。";
             if (name.includes("勤労感謝")) return "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日です。";
-            if (name.includes("振替休日")) { let baseName = name.replace(" 振替休日", ""); return `${baseName}の振替休業日です。`; }
             if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となった日です。";
             return "国民の祝日です。";
         }
@@ -537,7 +548,7 @@
             } else {
                 t = `My Class Portal`;
             }
-            document.getElementById('login-portal-title').innerHTML = `${t}<br><span style="font-size: 0.6em;">管理者ログイン</span>`;
+            document.getElementById('login-portal-title').innerHTML = `${t}<br><span style="font-size: 0.6em;">Admin Login</span>`;
             document.getElementById('main-portal-title').innerText = t;
             document.title = "管理画面 - " + t;
         }
@@ -703,7 +714,7 @@
                         if(unsubmittedCount > 0 && totalStudents > 0) unsubmittedTaskCount++;
                     }
                 });
-                if(unsubmittedTaskCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-submissions')">未提出者がいる課題（または期限間近）が ${unsubmittedTaskCount} 件あります。</a></li>`;
+                if(unsubmittedTaskCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-submissions')">未提出者がいる課題が ${unsubmittedTaskCount} 件あります。</a></li>`;
                 
                 let pendingCount = allCommitteePosts.filter(p => p.status === 'pending').length;
                 if(pendingCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-committee')">承認待ちの連絡が ${pendingCount} 件あります。</a></li>`;
@@ -782,7 +793,7 @@
         }
 
         function renderAdminCountdowns() {
-            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
+            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;"></th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾</th></tr>`;
             let colorOpts = `<option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#fce4ec">Pink</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option>`;
             let iconOpts = `<option value="">(なし)</option><option value="🎯">🎯的</option><option value="🌸">🌸桜</option><option value="🎄">🎄ﾂﾘｰ</option><option value="🏃">🏃運動</option><option value="⚽">⚽球技</option><option value="🎵">🎵音楽</option><option value="🎓">🎓卒業</option><option value="🎒">🎒ｶﾊﾞﾝ</option><option value="🚌">🚌ﾊﾞｽ</option><option value="🔥">🔥炎</option>`;
             COUNTDOWN_PRESETS.forEach(p => {
@@ -801,7 +812,7 @@
         function renderAdminSubmissionsUI() {
             const adminTable = document.getElementById('admin-submission-table');
             if (submissionsList.length === 0) { adminTable.innerHTML = "<p>提出物はありません。</p>"; return; }
-            let adminHtml = `<table style="width:100%; min-width:500px;"><tr><th>提出物名</th><th>締め切り</th><th>未提出者</th><th>操作</th></tr>`;
+            let adminHtml = `<table style="width:100%; min-width:500px;"><tr><th>提出物名</th><th>締切日</th><th>未提出者</th><th>操作</th></tr>`;
             const week = ["日", "月", "火", "水", "木", "金", "土"];
             submissionsList.forEach(sub => {
                 const dObj = new Date(sub.deadline); 
@@ -931,6 +942,7 @@
                 content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
                 startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'pending', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+            editingCommitteeId = null;
             alert("再編集し、承認待ち状態にしました。");
         }
         
@@ -950,13 +962,14 @@
                 details.history.push({ reason: "連絡の投稿が承認されました！", points: 10, time: formatDateTime(new Date()) });
                 await studentRef.update({ points: firebase.firestore.FieldValue.increment(10), pointDetails: details }).catch(()=>{});
             }
+            editingCommitteeId = null;
             alert("編集して承認しました。");
         }
 
         function markMessageRead(id, isRead) { if (!isRead) db.collection("messages").doc(id).update({ isRead: true }).catch(e => console.error(e)); }
         async function toggleProtectMessage(id, currentStatus) { await db.collection("messages").doc(id).update({ isProtected: !currentStatus }); }
         async function deleteMessage(id, isProtected) {
-            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に「保護を解除」してください。");
+            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に保護を解除してください。");
             if (confirm("削除しますか？")) await db.collection("messages").doc(id).delete();
         }
 
@@ -1061,6 +1074,23 @@
             await db.collection("config").doc("regular_schedule").set(newData, { merge: true }); 
             recordSystemUpdate(); 
             alert("標準時間割・各種設定を保存しました。"); 
+        }
+
+        function clearRegularSetting() {
+            if(!confirm("標準時間割の設定をすべて消去しますか？")) return;
+            const days = ["mon", "tue", "wed", "thu", "fri"];
+            for(let day of days) {
+                for(let i=0; i<6; i++) {
+                    let el = document.getElementById(`reg-sub-${day}-${i}`);
+                    if(el) el.value = "";
+                }
+                if(document.getElementById(`reg-ls-${day}`)) document.getElementById(`reg-ls-${day}`).value = "";
+                if(document.getElementById(`reg-le-${day}`)) document.getElementById(`reg-le-${day}`).value = "";
+                if(document.getElementById(`reg-bs-${day}`)) document.getElementById(`reg-bs-${day}`).value = "";
+                if(document.getElementById(`reg-be-${day}`)) document.getElementById(`reg-be-${day}`).value = "";
+            }
+            if(document.getElementById('bonus-test-mode')) document.getElementById('bonus-test-mode').checked = false;
+            alert("入力欄を消去しました。「保存」ボタンを押すと設定が反映されます。");
         }
 
         async function saveForceBgSetting() {
