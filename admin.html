@@ -11,7 +11,7 @@
         .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; margin-top: 0; padding-bottom: 5px; color: #000; }
         .section-header h2 { border: none; margin: 0; padding: 0; }
         section { background: #ffffff; margin-bottom: 30px; border: 1px solid #000; padding: 15px; transition: 0.3s; border-radius: 0; }
-        input:not([type="checkbox"]):not([type="color"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #000; font-family: inherit; box-sizing: border-box; background: white; color: black; transition: 0.3s; border-radius: 0; }
+        input:not([type="checkbox"]):not([type="color"]):not([type="file"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #000; font-family: inherit; box-sizing: border-box; background: white; color: black; transition: 0.3s; border-radius: 0; }
         input[type="checkbox"] { width: auto; cursor: pointer; transform: scale(1.2); }
         button { padding: 6px 12px; cursor: pointer; background: white; color: #000; border: 1px solid #000; font-weight: bold; font-family: inherit; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; border-radius: 0; }
         button:hover { background: #eee; }
@@ -42,7 +42,7 @@
         body.dark-mode { background-color: #121212; color: #e0e0e0; }
         body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header { border-color: #555 !important; color: #e0e0e0 !important; }
         body.dark-mode section, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
-        body.dark-mode input:not([type="checkbox"]):not([type="color"]), body.dark-mode textarea, body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
+        body.dark-mode input:not([type="checkbox"]):not([type="color"]):not([type="file"]), body.dark-mode textarea, body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode button { background-color: #333 !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode button:hover { background-color: #555 !important; color: #fff !important; }
         body.dark-mode th { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
@@ -79,7 +79,7 @@
 <body>
 
     <div id="login-section" style="text-align: center; margin-top: 50px;">
-        <h1 style="color:#000;">My Class Portal<br><span style="font-size: 0.6em;">管理者ログイン</span></h1>
+        <h1 id="login-portal-title" style="color:#000;">My Class Portal<br><span style="font-size: 0.6em;">管理者ログイン</span></h1>
         <input type="email" id="login-email" placeholder="メールアドレス"><br>
         <input type="password" id="login-password" placeholder="パスワード"><br>
         <button type="button" id="login-btn">ログイン</button>
@@ -93,10 +93,10 @@
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
             <div>
-                <h1 style="border:none; margin:0; font-size:1.5em; color:inherit;">管理画面</h1>
+                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;">管理画面</h1>
                 <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">ログイン中: <span id="admin-email-display"></span></div>
             </div>
-            <div style="display: flex; gap: 5px;">
+            <div style="display: flex; gap: 5px; flex-direction:column; align-items:flex-end;">
                 <button type="button" onclick="location.href='index.html'">ポータルへ</button>
                 <button type="button" onclick="logout()" style="margin-top:0;">ログアウト</button>
             </div>
@@ -115,9 +115,28 @@
                     <h2 style="border-bottom:none; color:inherit;">管理者用メニュー</h2>
                 </div>
 
+                <details class="admin-form-box" open>
+                    <summary>［設定］学校・クラス情報の設定</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※ここで設定した情報がポータルのタイトル等に反映されます。</p>
+                    <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <div>
+                            年度: 
+                            <select id="set-school-year" style="width:100px; margin-bottom:0; border-radius:0;">
+                                </select>
+                        </div>
+                        <div>
+                            元号: <input type="text" id="set-school-era" placeholder="例: 令和" style="width:80px; margin-bottom:0; border-radius:0;">
+                        </div>
+                        <div>
+                            クラス名: <input type="text" id="set-school-class" placeholder="例: 1年1組" style="width:150px; margin-bottom:0; border-radius:0;">
+                        </div>
+                        <button type="button" onclick="saveSchoolInfo()" style="margin-bottom:0; background:#000; color:white;">設定を保存</button>
+                    </div>
+                </details>
+
                 <details class="admin-form-box" id="admin-form-box-excel">
                     <summary>［一括管理］全設定のExcelインポート/エクスポート</summary>
-                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール（朝・昼休・清掃・部活の有無を含む）、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
+                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール（朝・昼休・清掃・放課後の有無を含む）、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
                     <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #000;">
                         <b>1. エクスポート（ダウンロード）</b><br>
                         <span style="font-size:0.85em;">※指定した月のスケジュールを含めて出力します。</span><br>
@@ -127,7 +146,7 @@
                     <div style="margin-top:15px;">
                         <b>2. インポート（一括更新・プレビュー付き）</b><br>
                         <span style="font-size:0.85em;">※Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
-                        <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:none; padding:0;" onchange="handleExcelFileChange(event)">
+                        <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:1px solid #000; padding:4px;" onchange="handleExcelFileChange(event)">
                         <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
                             <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
                             <div id="import-preview-content" style="font-size:0.9em; margin-bottom:10px; line-height:1.6;"></div>
@@ -135,6 +154,32 @@
                             <button type="button" onclick="cancelExcelImport()">キャンセル</button>
                         </div>
                     </div>
+                </details>
+
+                <details class="admin-form-box" style="border: 2px solid #d32f2f;">
+                    <summary style="color:#d32f2f;">［危険］システムのフルバックアップと全データリセット</summary>
+                    <div style="padding-bottom:15px; border-bottom:1px dashed #000;">
+                        <b>1. JSON フルバックアップの保存</b>
+                        <p style="font-size:0.85em; margin:5px 0;">現在のすべての設定・名簿・投稿・スケジュール等の全データを1つのファイルとして保存します。</p>
+                        <button type="button" onclick="exportFullBackup()">フルバックアップをダウンロード</button>
+                    </div>
+                    <div style="padding-top:15px; padding-bottom:15px; border-bottom:1px dashed #000;">
+                        <b>2. バックアップファイル（JSON）から復元</b>
+                        <p style="font-size:0.85em; margin:5px 0;">保存したJSONファイルからシステムを復元します。現在のデータは上書きされます。</p>
+                        <input type="file" id="backup-file-input" accept=".json" style="width:250px; border:1px solid #000; padding:4px;">
+                        <button type="button" onclick="importFullBackup()">復元を実行する</button>
+                    </div>
+                    <div style="padding-top:15px;">
+                        <b style="color:#d32f2f;">3. 次年度用 システムフルリセット</b>
+                        <p style="font-size:0.85em; margin:5px 0; font-weight:bold;">※現在の生徒データ、ポイント、投稿、スケジュール、アクセスログなどを完全に消去し、システムを初期化します。</p>
+                        <button type="button" onclick="resetEntireSystem()" style="background:#d32f2f; color:white; border-color:#b71c1c;">システム全リセットを実行</button>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［エクスポート］担任のやつ（ブログ）の過去投稿</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">※過去に投稿したブログ記事の一覧をExcel形式でダウンロードします。</p>
+                    <button type="button" onclick="exportBlogs()">過去の投稿をエクスポート</button>
                 </details>
                 
                 <details class="admin-form-box">
@@ -148,7 +193,7 @@
                     <div id="current-weather-location" style="margin-top:10px; font-weight:bold; font-size:0.9em; color:#0d47a1;">現在の設定: 取得中...</div>
                 </details>
 
-                <details class="admin-form-box" id="admin-form-box-access" style="margin-top:15px;">
+                <details class="admin-form-box" id="admin-form-box-access">
                     <summary>［確認］アクセス状況・未確認者チェック</summary>
                     <p style="margin-bottom:5px;">最終情報更新日時：<span id="last-update-time">---</span></p>
                     <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
@@ -359,6 +404,8 @@
         let rolesList = [], committeesList = [], pendingExcelData = {};
         let countdownSettings = {}, regularScheduleData = {};
         let accessChartInstance = null;
+        let inactivityTimer;
+        let schoolInfo = { year: new Date().getFullYear(), era: "令和", className: "" };
 
         const COUNTDOWN_PRESETS = [
             { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
@@ -380,38 +427,21 @@
         function getSchoolDaysDiff(tStr) { let t1=new Date(); t1.setHours(0,0,0,0); let t2=new Date(tStr); t2.setHours(0,0,0,0); if(t2<t1) return -1; let d=0, c=new Date(t1); while(c<t2){ c.setDate(c.getDate()+1); if(isSchoolDay(getLocalDateStr(c))) d++; } return d; }
         function isSchoolDay(ds) { let d=new Date(ds).getDay(); if(d===0||d===6||holidays[ds]||customHolidays[ds]||(vacationData&&vacationData.find(v=>ds>=v.start&&ds<=v.end))) return false; return true; }
 
-        function getDefaultHolidayDesc(name, dateStr) {
-            if (!name) return "国民の祝日です。";
-            if (name === "振替休日") {
-                let d = new Date(dateStr); d.setDate(d.getDate() - 1);
-                let prevStr = getLocalDateStr(d); let prevName = holidays[prevStr] || "祝日";
-                return `${prevName.replace(" 振替休日", "")}の振替休業日です。`;
+        function checkAutoLogout() {
+            let lastAct = localStorage.getItem('lastActivity');
+            if (lastAct && (Date.now() - parseInt(lastAct) > 3600000)) {
+                firebase.auth().signOut().then(() => { localStorage.removeItem('lastActivity'); location.reload(); });
+                return true;
             }
-            if (name.includes("元日")) return "年のはじめを祝う日です。";
-            if (name.includes("成人")) return "おとなになったことを自覚し、みずから生き抜こうとする青年を祝いはげます日です。";
-            if (name.includes("建国記念")) return "建国をしのび、国を愛する心を養う日です。";
-            if (name.includes("天皇誕生日")) return "天皇の誕生日を祝う日です。";
-            if (name.includes("春分")) return "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。";
-            if (name.includes("昭和")) return "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。";
-            if (name.includes("憲法記念")) return "日本国憲法の施行を記念し、国の成長を期する日です。";
-            if (name.includes("みどり")) return "自然に親しむとともにその恩恵に感謝し、豊かな心をはぐくむ日です。";
-            if (name.includes("こども")) return "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。";
-            if (name.includes("海の日")) return "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。";
-            if (name.includes("山の日")) return "山の恩恵に感謝し、自然に親しむ機会とする日です。";
-            if (name.includes("敬老")) return "多年にわたり社会につくしてきた老人を敬愛し、長寿を祝う日です。";
-            if (name.includes("秋分")) return "祖先をうやまい、なくなった人々をしのぶ日です。";
-            if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身をつちかう日です。";
-            if (name.includes("文化の日")) return "自由と平和を愛し、文化をすすめる日です。";
-            if (name.includes("勤労感謝")) return "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日です。";
-            if (name.includes("振替休日")) { let baseName = name.replace(" 振替休日", ""); return `${baseName}の振替休業日です。`; }
-            if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となった日です。";
-            return "国民の祝日です。";
+            return false;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            if (checkAutoLogout()) return;
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') document.body.classList.add('dark-mode');
             document.getElementById('copyright-year').innerText = new Date().getFullYear();
+            resetInactivityTimer();
         });
         
         function toggleTheme() {
@@ -423,6 +453,13 @@
             const el = document.getElementById(id);
             if(el) { el.open = true; el.scrollIntoView({behavior: 'smooth', block: 'start'}); }
         }
+
+        function resetInactivityTimer() { 
+            localStorage.setItem('lastActivity', Date.now().toString());
+            clearTimeout(inactivityTimer); 
+            inactivityTimer = setTimeout(()=>{ if(firebase.auth().currentUser){ alert("タイムアウトしました"); logout(); } }, 3600000); 
+        }
+        ['mousemove','keydown','click','scroll','touchstart'].forEach(e=>window.addEventListener(e, resetInactivityTimer, {passive:true}));
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -448,11 +485,41 @@
                 .catch(err => alert("ログイン失敗: " + err.message)); 
         };
         
-        function logout() { firebase.auth().signOut().then(() => window.location.href = "index.html"); }
+        function logout() { firebase.auth().signOut().then(() => { localStorage.removeItem('lastActivity'); window.location.href = "index.html"; }); }
 
         async function recordSystemUpdate() { await db.collection("config").doc("system").set({ lastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); }
 
+        function updatePortalTitle() {
+            let t = "My Class Portal";
+            if (schoolInfo.era && schoolInfo.year) {
+                let w = schoolInfo.year - 2018;
+                t = `${schoolInfo.era}${w}年度 ${schoolInfo.className} ${t}`;
+            }
+            document.getElementById('login-portal-title').innerHTML = `${t}<br><span style="font-size: 0.6em;">管理者ログイン</span>`;
+            document.getElementById('main-portal-title').innerText = t;
+            document.title = "管理画面 - " + t;
+        }
+
+        function initSchoolYearOptions() {
+            let select = document.getElementById('set-school-year');
+            let html = "";
+            for(let i=2026; i<=2050; i++) { html += `<option value="${i}">${i}</option>`; }
+            select.innerHTML = html;
+        }
+
         function initAdminApp() {
+            initSchoolYearOptions();
+            
+            db.collection("config").doc("school_info").onSnapshot(s => {
+                if(s.exists) { 
+                    schoolInfo = s.data(); 
+                    document.getElementById('set-school-year').value = schoolInfo.year || 2026;
+                    document.getElementById('set-school-era').value = schoolInfo.era || "令和";
+                    document.getElementById('set-school-class').value = schoolInfo.className || "";
+                    updatePortalTitle(); 
+                }
+            });
+
             const now = new Date(); 
             document.getElementById('excel-month-input').value = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}`;
             initExitTimeOptions(document.getElementById('exit-period-time'), false);
@@ -518,6 +585,18 @@
             });
 
             drawAccessChart(); 
+        }
+
+        async function saveSchoolInfo() {
+            let y = document.getElementById('set-school-year').value;
+            let e = document.getElementById('set-school-era').value.trim();
+            let c = document.getElementById('set-school-class').value.trim();
+            if(!y || !e) return alert("年度と元号は必須です。");
+            
+            schoolInfo = { year: parseInt(y), era: e, className: c };
+            await db.collection("config").doc("school_info").set(schoolInfo);
+            alert("学校・クラス情報を保存しました。");
+            recordSystemUpdate();
         }
 
         function initWeatherSetting() {
@@ -770,9 +849,11 @@
         async function rejectCommitteePost(id) { if(confirm("不承認（差し戻し）にしますか？")) await db.collection("committee_posts").doc(id).update({ status: 'rejected' }); }
         async function deleteCommitteePost(id) { if(confirm("削除しますか？")) await db.collection("committee_posts").doc(id).delete(); }
 
+        let editingCommitteeId = null;
         function startAdminEditCommitteePost(id) {
             const post = allCommitteePosts.find(p => p.id === id);
             if (!post) return;
+            editingCommitteeId = id;
             const container = document.getElementById(`admin-comm-post-${id}`);
             let colorOpts = `<option value="#ffffff" ${post.bgColor==='#ffffff'?'selected':''}>White</option><option value="#e8f5e9" ${post.bgColor==='#e8f5e9'?'selected':''}>Green</option><option value="#e3f2fd" ${post.bgColor==='#e3f2fd'?'selected':''}>Blue</option><option value="#ffebee" ${post.bgColor==='#ffebee'?'selected':''}>Red</option><option value="#fff8e1" ${post.bgColor==='#fff8e1'?'selected':''}>Yellow</option><option value="#fff3e0" ${post.bgColor==='#fff3e0'?'selected':''}>Orange</option><option value="#f3e5f5" ${post.bgColor==='#f3e5f5'?'selected':''}>Purple</option><option value="#e0e0e0" ${post.bgColor==='#e0e0e0'?'selected':''}>Ash</option>`;
             let priorityOpts = `<option value="3" ${post.priority==3?'selected':''}>★★★</option><option value="2" ${post.priority==2?'selected':''}>★★</option><option value="1" ${post.priority==1?'selected':''}>★</option>`;
@@ -804,6 +885,7 @@
                 content: newContent, bgColor: document.getElementById(`edit-comm-color-${id}`).value, priority: parseInt(document.getElementById(`edit-comm-priority-${id}`).value, 10),
                 startDate: document.getElementById(`edit-comm-start-${id}`).value, endDate: document.getElementById(`edit-comm-end-${id}`).value, status: 'pending', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+            editingCommitteeId = null;
             alert("再編集し、承認待ち状態にしました。");
         }
         
@@ -823,6 +905,7 @@
                 details.history.push({ reason: "連絡の投稿が承認されました！", points: 10, time: formatDateTime(new Date()) });
                 await studentRef.update({ points: firebase.firestore.FieldValue.increment(10), pointDetails: details }).catch(()=>{});
             }
+            editingCommitteeId = null;
             alert("編集して承認しました。");
         }
 
@@ -945,7 +1028,13 @@
             if(!confirm("クラス全体の背景色強制設定を解除しますか？")) return;
             document.getElementById('force-bg-color').value = "#f7f9fc";
             document.getElementById('enable-force-bg').checked = false;
-            await saveRegularSetting();
+            
+            let currentData = regularScheduleData || {};
+            currentData.useForceBg = false;
+            currentData.forceGlobalBgColor = "#f7f9fc";
+            await db.collection("config").doc("regular_schedule").set(currentData, { merge: true });
+            recordSystemUpdate();
+            alert("背景色を元に戻しました。");
         }
         
         async function saveVacation() { vacationData.push({ start: document.getElementById('vac-start').value, end: document.getElementById('vac-end').value }); await db.collection("config").doc("vacations").set({ periods: vacationData }); renderVacationList(); recordSystemUpdate(); }
@@ -965,7 +1054,7 @@
                         <div>朝: <select id="edit-has-morning" style="width:60px;"><option value="〇" ${hm==='〇'?'selected':''}>〇</option><option value="×" ${hm==='×'?'selected':''}>×</option><option value="" ${hm===''?'selected':''}> </option></select></div>
                         <div>昼: <select id="edit-has-lunch" style="width:60px;"><option value="〇" ${hl==='〇'?'selected':''}>〇</option><option value="×" ${hl==='×'?'selected':''}>×</option><option value="" ${hl===''?'selected':''}> </option></select></div>
                         <div>掃: <select id="edit-has-clean" style="width:60px;"><option value="〇" ${hcl==='〇'?'selected':''}>〇</option><option value="×" ${hcl==='×'?'selected':''}>×</option><option value="" ${hcl===''?'selected':''}> </option></select></div>
-                        <div>部: <select id="edit-has-club" style="width:60px;"><option value="〇" ${hc==='〇'?'selected':''}>〇</option><option value="×" ${hc==='×'?'selected':''}>×</option><option value="" ${hc===''?'selected':''}> </option></select></div>
+                        <div>放: <select id="edit-has-club" style="width:60px;"><option value="〇" ${hc==='〇'?'selected':''}>〇</option><option value="×" ${hc==='×'?'selected':''}>×</option><option value="" ${hc===''?'selected':''}> </option></select></div>
                      </div>`;
                      
             html += `<div style="margin-bottom:10px;">全体備考：<textarea id="edit-daynote" style="height:60px; width:100%; border-radius:0;">${data.dayNote||""}</textarea></div>`;
@@ -1113,13 +1202,116 @@
                     let exitT = ext[dateStr]?.exitTime !== undefined ? ext[dateStr].exitTime : "";
                     let data = ext[dateStr] || { event:"", dayNote:"", exitTime:exitT, hasMorning:"〇", hasLunch:"〇", hasClean:"〇", hasClub:"〇", lessons:Array.from({length:6}, (_,i)=>({sub:regWeek[i]||"", note:""})) };
                     
-                    schedData.push({ "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum], "行事予定": data.event||"", "朝練": data.hasMorning||"〇", "昼休": data.hasLunch||"〇", "清掃": data.hasClean||"〇", "部活": data.hasClub||"〇", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub, "下校時刻": data.exitTime||"", "全体備考": data.dayNote||"" });
+                    schedData.push({ "日付": dateStr, "曜日": ["日","月","火","水","木","金","土"][dNum], "行事予定": data.event||"", "朝練": data.hasMorning||"〇", "昼休": data.hasLunch||"〇", "清掃": data.hasClean||"〇", "放課後": data.hasClub||"〇", "1限": data.lessons[0].sub, "2限": data.lessons[1].sub, "3限": data.lessons[2].sub, "4限": data.lessons[3].sub, "5限": data.lessons[4].sub, "6限": data.lessons[5].sub, "下校時刻": data.exitTime||"", "全体備考": data.dayNote||"" });
                 }
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedData), "スケジュール");
                 let vacData = vacationData.map(v => ({"開始日": v.start, "終了日": v.end})); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vacData), "長期休業");
                 let exitsData = exitTimePeriods.map(e => ({"開始日": e.start, "終了日": e.end, "時刻": e.time})); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exitsData), "下校時刻設定");
                 XLSX.writeFile(wb, `ClassSettings_${y}_${m}.xlsx`);
             });
+        }
+
+        // ★ 過去のブログ投稿をエクスポート
+        async function exportBlogs() {
+            let snap = await db.collection("blogs").orderBy("createdAt", "asc").get();
+            if (snap.empty) return alert("エクスポートする投稿がありません。");
+            
+            let data = [];
+            snap.forEach(doc => {
+                let d = doc.data();
+                data.push({
+                    "投稿日時": d.createdAt ? formatDateTime(d.createdAt.toDate()) : "",
+                    "内容": d.content || ""
+                });
+            });
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "担任のやつ");
+            XLSX.writeFile(wb, `Blogs_Export.xlsx`);
+        }
+
+        // ★ フルバックアップ（JSONエクスポート）
+        async function exportFullBackup() {
+            try {
+                let backupData = {
+                    metadata: { exportedAt: new Date().toISOString(), version: "1.0" },
+                    collections: { config: {}, students: {}, schedules: {}, submissions: {}, committee_posts: {}, messages: {}, blogs: {}, access_logs: {} }
+                };
+                let colNames = ["config", "students", "schedules", "submissions", "committee_posts", "messages", "blogs", "access_logs"];
+                for (let cName of colNames) {
+                    let snap = await db.collection(cName).get();
+                    snap.forEach(doc => {
+                        let data = doc.data();
+                        for (let key in data) {
+                            if (data[key] && typeof data[key].toDate === 'function') {
+                                data[key] = { _isTimestamp: true, value: data[key].toDate().toISOString() };
+                            }
+                        }
+                        backupData.collections[cName][doc.id] = data;
+                    });
+                }
+                let dataStr = JSON.stringify(backupData, null, 2);
+                let blob = new Blob([dataStr], { type: "application/json" });
+                let url = URL.createObjectURL(blob);
+                let a = document.createElement("a"); a.href = url; a.download = `MyClassPortal_Backup_${getLocalDateStr(new Date())}.json`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            } catch (e) { alert("バックアップの作成に失敗しました: " + e.message); }
+        }
+
+        // ★ フルバックアップ（JSONインポート）
+        async function importFullBackup() {
+            let fileInput = document.getElementById('backup-file-input');
+            if (!fileInput.files.length) return alert("バックアップファイル(.json)を選択してください。");
+            if (!confirm("警告: 現在のシステムデータに上書き復元します。\n本当によろしいですか？")) return;
+            
+            let file = fileInput.files[0]; let reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    let backupData = JSON.parse(e.target.result);
+                    if (!backupData.collections) throw new Error("無効なバックアップファイルです。");
+                    let colNames = Object.keys(backupData.collections);
+                    for (let cName of colNames) {
+                        let docs = backupData.collections[cName];
+                        for (let docId in docs) {
+                            let data = docs[docId];
+                            for (let key in data) {
+                                if (data[key] && data[key]._isTimestamp) {
+                                    data[key] = firebase.firestore.Timestamp.fromDate(new Date(data[key].value));
+                                }
+                            }
+                            await db.collection(cName).doc(docId).set(data);
+                        }
+                    }
+                    alert("システムの復元が完了しました。ページをリロードしてください。"); location.reload();
+                } catch (err) { alert("復元中にエラーが発生しました: " + err.message); }
+            };
+            reader.readAsText(file);
+        }
+
+        // ★ 次年度用 システム全リセット
+        async function resetEntireSystem() {
+            let msg = "【※非常に危険な操作です※】\n\n・生徒のアカウント、ポイント、名簿データ\n・すべてのスケジュール（時間割・行事・備考）\n・提出物、委員会連絡、メッセージ、アクセスログ\n・ブログ記事（担任のやつ）\n\nこれらのすべてのデータが完全に削除され、初期状態に戻ります。\n\n本当に実行してよろしいですか？（※管理者の設定は一部残ります）";
+            if (!confirm(msg)) return;
+            let msg2 = "最終確認です。\n実行後にデータを取り戻すことはできません（事前にフルバックアップを推奨します）。\nよろしいですか？";
+            if (!confirm(msg2)) return;
+            
+            try {
+                let colNamesToWipe = ["students", "schedules", "submissions", "committee_posts", "messages", "blogs", "access_logs"];
+                for (let cName of colNamesToWipe) {
+                    let snap = await db.collection(cName).get();
+                    if (!snap.empty) {
+                        let batch = db.batch();
+                        snap.forEach(doc => {
+                            if (cName === "students" && doc.id === TEACHER_EMAIL) {
+                                batch.set(doc.ref, { name: "管理者", isSubAdmin: false, isBanned: false });
+                            } else {
+                                batch.delete(doc.ref);
+                            }
+                        });
+                        await batch.commit();
+                    }
+                }
+                alert("全データのリセットが完了しました。\n新年度の運用を開始できます。ページをリロードします。"); location.reload();
+            } catch (err) { alert("リセット中にエラーが発生しました: " + err.message); }
         }
 
         function handleExcelFileChange(e) {
@@ -1172,7 +1364,7 @@
                                 hasMorning: s["朝練"]?.toString() || "〇",
                                 hasLunch: s["昼休"]?.toString() || "〇",
                                 hasClean: s["清掃"]?.toString() || "〇",
-                                hasClub: s["部活"]?.toString() || "〇",
+                                hasClub: s["放課後"]?.toString() || s["部活"]?.toString() || "〇",
                                 lessons: [ {sub: s["1限"]?.toString()||"", note:""}, {sub: s["2限"]?.toString()||"", note:""}, {sub: s["3限"]?.toString()||"", note:""}, {sub: s["4限"]?.toString()||"", note:""}, {sub: s["5限"]?.toString()||"", note:""}, {sub: s["6限"]?.toString()||"", note:""} ], 
                                 exitTime: s["下校時刻"]?.toString() || "", 
                                 dayNote: s["全体備考"]?.toString() || "", 
