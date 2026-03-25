@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Class Portal</title>
+    <title>管理画面 - Class Portal</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { background-color: #888888; color: #000; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; transition: background-color 0.3s; }
         h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #000; }
         .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; margin-top: 0; padding-bottom: 5px; color: #000; }
         .section-header h2 { border: none; margin: 0; padding: 0; }
+        .category-title { background: #333; color: #fff; padding: 10px 15px; margin-top: 30px; margin-bottom: 15px; border-left: 5px solid #d32f2f; font-size: 1.1em; font-weight: bold; }
         section { background: #ffffff; margin-bottom: 30px; border: 1px solid #000; padding: 15px; transition: 0.3s; border-radius: 0; }
         input:not([type="checkbox"]):not([type="color"]):not([type="file"]), textarea, select { width: 100%; max-width: 500px; padding: 8px; margin-bottom: 10px; border: 1px solid #000; font-family: inherit; box-sizing: border-box; background: white; color: black; transition: 0.3s; border-radius: 0; }
         input[type="checkbox"] { width: auto; cursor: pointer; transform: scale(1.2); }
@@ -41,6 +42,7 @@
         /* --- ダークモード --- */
         body.dark-mode { background-color: #121212; color: #e0e0e0; }
         body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header { border-color: #555 !important; color: #e0e0e0 !important; }
+        body.dark-mode .category-title { background-color: #222 !important; color: #e0e0e0 !important; border-left-color: #ff8a80 !important; }
         body.dark-mode section, body.dark-mode th, body.dark-mode td, body.dark-mode button, body.dark-mode .admin-form-box { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
         body.dark-mode input:not([type="checkbox"]):not([type="color"]):not([type="file"]), body.dark-mode textarea, body.dark-mode select { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
         body.dark-mode button { background-color: #333 !important; color: #e0e0e0 !important; border-color: #555 !important; }
@@ -93,18 +95,18 @@
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
             <div>
-                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;">Admin Panel</h1>
-                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">logging in: <span id="admin-email-display"></span></div>
+                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;">管理画面</h1>
+                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">ログイン中: <span id="admin-email-display"></span></div>
             </div>
             <div style="display: flex; gap: 5px; flex-direction:column; align-items:flex-end;">
-                <button type="button" onclick="location.href='index.html'">Return</button>
+                <button type="button" onclick="location.href='index.html'">ポータルへ</button>
                 <button type="button" onclick="logout()" style="margin-top:0;">Logout</button>
             </div>
         </header>
 
         <main>
             <div id="admin-dashboard">
-                <h3>⚠ 要確認事項</h3>
+                <h3>🚨 要確認事項</h3>
                 <ul style="margin: 0; padding-left: 20px; font-weight: bold; line-height: 1.8;" id="dashboard-list">
                     <li>確認中...</li>
                 </ul>
@@ -115,13 +117,16 @@
                     <h2 style="border-bottom:none; color:inherit;">管理者用メニュー</h2>
                 </div>
 
+                <div class="category-title">■ システム・学校基本設定</div>
+
                 <details class="admin-form-box" open>
                     <summary>［設定］学校・クラス情報の設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">ポータルのタイトル等に反映されます。</p>
+                    <p style="font-size:0.85em; margin-top:5px;">ここで設定した情報がポータルのタイトル等に反映されます。</p>
                     <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <div>
                             年度: 
-                            <select id="set-school-year" style="width:100px; margin-bottom:0; border-radius:0;"></select>
+                            <select id="set-school-year" style="width:100px; margin-bottom:0; border-radius:0;">
+                            </select>
                         </div>
                         <div>
                             クラス名: <input type="text" id="set-school-class" placeholder="例: 1年1組" style="width:150px; margin-bottom:0; border-radius:0;">
@@ -133,7 +138,7 @@
 
                 <details class="admin-form-box" id="admin-form-box-excel">
                     <summary>［一括管理］全設定のExcelインポート/エクスポート</summary>
-                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、予定、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
+                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール（朝・昼休・清掃・放課後の有無を含む）、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
                     <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #000;">
                         <b>1. エクスポート（ダウンロード）</b><br>
                         <span style="font-size:0.85em;">指定した月のスケジュールを含めて出力します。</span><br>
@@ -141,11 +146,11 @@
                         <button type="button" onclick="exportExcel()">現在の設定をダウンロード</button>
                     </div>
                     <div style="margin-top:15px;">
-                        <b>2. インポート（アップロード）</b><br>
+                        <b>2. インポート（一括更新・プレビュー付き）</b><br>
                         <span style="font-size:0.85em;">Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
                         <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:1px solid #000; padding:4px;" onchange="handleExcelFileChange(event)">
                         <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
-                            <h4 style="margin-top:0; color:#d9534f; border:none;">⚠ インポートプレビュー（まだ更新されていません）</h4>
+                            <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
                             <div id="import-preview-content" style="font-size:0.9em; margin-bottom:10px; line-height:1.6;"></div>
                             <button type="button" onclick="commitExcelImport()" style="background:#d9534f; color:white; font-weight:bold; border:1px solid #000;">この内容で更新を実行する</button>
                             <button type="button" onclick="cancelExcelImport()">キャンセル</button>
@@ -179,12 +184,6 @@
                         <button type="button" onclick="resetEntireSystem()" style="background:#d32f2f; color:white; border-color:#b71c1c;">システム全リセットを実行</button>
                     </div>
                 </details>
-
-                <details class="admin-form-box">
-                    <summary>［エクスポート］「担任のやつ」のログ管理</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">過去に投稿したブログ記事の一覧をExcel形式でダウンロードします。</p>
-                    <button type="button" onclick="exportBlogs()">過去の投稿をエクスポート</button>
-                </details>
                 
                 <details class="admin-form-box">
                     <summary>［設定］天気予報の地域設定</summary>
@@ -215,25 +214,110 @@
                     <div id="access-log-list" class="scroll-area" style="margin-top: 10px; max-height: 250px;"></div>
                 </details>
 
-                <details class="admin-form-box" id="admin-form-box-committee" open>
+                <div class="category-title">■ メッセージ・目標・ポイント</div>
+
+                <details class="admin-form-box">
+                    <summary>［設定］緊急メッセージ（お知らせ）の配信</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">ページ最上部に目立つようにメッセージを表示します。タイトルの入力がない場合は「⚠ 重要なお知らせ」と表示します。</p>
+                    <div style="margin-top:10px;">
+                        <label><input type="checkbox" id="emergency-active"> 表示を有効にする</label><br>
+                        タイトル（任意）: <input type="text" id="emergency-title" placeholder="⚠ 重要なお知らせ" style="width:100%; margin-bottom:5px;"><br>
+                        内容: <textarea id="emergency-content" placeholder="メッセージ内容..." style="height:60px; width:100%;"></textarea><br>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:5px; align-items:center;">
+                            <div>配色: 
+                                <select id="emergency-color-theme" style="width:150px; margin-bottom:0;">
+                                    <option value="yellow">注意 (黄色)</option>
+                                    <option value="red">緊急 (赤色)</option>
+                                    <option value="blue">情報 (青色)</option>
+                                    <option value="green">成功 (緑色)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" onclick="saveEmergencyMsg()" style="background:#000; color:white;">配信・保存</button>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］生徒の目標（ステータスメッセージ）の設定</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">生徒に目標を提出させるための入力枠をポータルに表示します。提出後、承認すると生徒のページ上部に固定表示されます。</p>
+                    <div style="margin-top:10px;">
+                        <label><input type="checkbox" id="goal-active"> 表示を有効にする</label><br>
+                        生徒へのタイトル: <input type="text" id="goal-title" placeholder="例: 1学期の目標を考えましょう" style="width:100%; margin-bottom:5px;"><br>
+                        生徒への説明文: <textarea id="goal-desc" placeholder="例: 今学期の目標を考えて提出してください。" style="height:60px; width:100%;"></textarea><br>
+                        <button type="button" onclick="saveGoalSetting()" style="background:#000; color:white;">保存</button>
+                    </div>
+                </details>
+
+                <details class="admin-form-box" id="admin-form-box-goals">
+                    <summary>［確認］生徒のステータスメッセージ（目標）管理</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">生徒から提出された目標の承認、差戻し、または公開中データの削除を行えます。</p>
+                    <div id="admin-pending-goals" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］行事・クラスの目標</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">ポータル上部に表示するクラス全体の目標や行事の目標を管理します。複数登録し、任意のタイミングで表示・非表示を切り替えられます。</p>
+                    
+                    <div style="background:#f9f9f9; padding:10px; border:1px dashed #000; margin-bottom:15px; color:inherit;">
+                        <h4 style="margin-top:0; border-bottom:none;">新規追加</h4>
+                        見出し: <input type="text" id="new-cg-label" placeholder="例: 体育祭の目標" style="width:100%; margin-bottom:5px;"><br>
+                        内容: <textarea id="new-cg-text" placeholder="目標の内容を入力..." style="height:60px; width:100%;"></textarea><br>
+                        配色: 
+                        <select id="new-cg-color" style="width:150px; margin-bottom:5px;">
+                            <option value="blue">通常 (青系)</option>
+                            <option value="red">重要 (赤系)</option>
+                            <option value="green">成功 (緑系)</option>
+                            <option value="yellow">注意 (黄系)</option>
+                        </select><br>
+                        <button type="button" onclick="addClassGoal()">追加</button>
+                    </div>
+
+                    <h4 style="margin-top:0; border-bottom:none;">登録済み目標の管理</h4>
+                    <div id="class-goals-list-area" class="scroll-area">確認中...</div>
+                    <div style="margin-top:10px; text-align:right;">
+                        <button type="button" onclick="saveClassGoalsChanges()" style="background:#000; color:white;">変更を保存</button>
+                    </div>
+                </details>
+
+                <details class="admin-form-box">
+                    <summary>［設定］ポイント付与ルールのプリセット</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">ポイント付与時によく使う「理由」と「ポイント数」を登録しておけます。</p>
+                    <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap; align-items:baseline;">
+                        理由: <input type="text" id="new-pt-rule-reason" placeholder="例: 提出物期限内提出" style="width:200px; margin-bottom:5px;">
+                        Pt数: <input type="number" id="new-pt-rule-amount" placeholder="10" style="width:80px; margin-bottom:5px;">
+                        <button type="button" onclick="addPointRule()">追加</button>
+                    </div>
+                    <div id="point-rules-list" style="margin-top:10px; line-height: 1.8;"></div>
+                </details>
+
+                <details class="admin-form-box" id="admin-form-box-committee">
                     <summary>［確認］係委員会連絡の承認と差戻し</summary>
                     <div id="admin-pending-committee" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
                 
-                <details class="admin-form-box" id="admin-form-box-messages" open>
+                <details class="admin-form-box" id="admin-form-box-messages">
                     <summary>［確認］受信箱</summary>
                     <div id="admin-message-list" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
 
                 <details class="admin-form-box">
+                    <summary>［エクスポート］「担任のやつ」のログ管理</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">過去に投稿したブログ記事の一覧をExcel形式でダウンロードします。</p>
+                    <button type="button" onclick="exportBlogs()">過去の投稿をエクスポート</button>
+                </details>
+
+                <div class="category-title">■ スケジュール・課題・背景設定</div>
+
+                <details class="admin-form-box">
                     <summary>［設定］祝日・休日等の登録</summary>
+                    <p style="font-size:0.85em; margin-bottom:5px;">祝日の説明文を編集したり、独自の休日を登録したりできます。</p>
                     <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; align-items:baseline;">
                         <input type="date" id="holiday-edit-date" style="width:150px; margin:0;">
-                        <input type="text" id="holiday-edit-name" placeholder="名称 (国民の祝日の場合は空欄で可)" style="width:240px; margin:0;">
+                        <input type="text" id="holiday-edit-name" placeholder="名称 (独自休日の場合)" style="width:240px; margin:0;">
                     </div>
                     <div style="margin-top:5px;">
                         <textarea id="holiday-edit-desc" placeholder="ポップアップで表示される説明文を入力..." style="height:60px; margin-bottom:5px;"></textarea>
-                        <button type="button" onclick="saveHolidaySetting()">登録・保存する</button>
+                        <button type="button" onclick="saveHolidaySetting()">独自休日として追加保存する</button>
                     </div>
                     <div id="custom-holiday-list" class="scroll-area" style="margin-top:15px; max-height: 400px;"></div>
                 </details>
@@ -292,7 +376,7 @@
                         <table id="reg-table" style="min-width: 700px;"></table>
                     </div>
                     <label style="display:flex; align-items:center; gap:5px; margin-top:10px;">
-                        <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（ボーナス∞）</span>
+                        <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（チェック中は時間や曜日を問わず常にボーナス発生）</span>
                     </label>
                     <div style="display:flex; justify-content:space-between; margin-top:15px;">
                         <button type="button" onclick="saveRegularSetting()" style="background:#000; color:white;">保存</button>
@@ -337,15 +421,15 @@
                         </div>
                         <div style="flex:1; min-width:200px;">
                             <p style="font-weight:bold; margin-bottom:5px;">委員会の登録</p>
-                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書委員）" style="width:150px; display:inline-block;">
+                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書）" style="width:150px; display:inline-block;">
                             <button type="button" onclick="addCommittee()">追加</button>
                             <div id="comm-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
                         </div>
                     </div>
                 </div>
                 <div class="admin-form-box" style="margin-top:15px;">
-                    <h3 style="margin-top:0;">生徒の新規登録</h3>
-                    <input type="email" id="direct-email" placeholder="メールアドレス" style="width:200px;">
+                    <h3 style="margin-top:0;">生徒の新規登録 (1件ずつ手動)</h3>
+                    <input type="email" id="direct-email" placeholder="E-Mail Address" style="width:200px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
                     <select id="direct-role" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">係</option></select>
                     <select id="direct-committee" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">委員会</option></select>
@@ -373,6 +457,9 @@
             
             <div style="border:1px dashed #000; padding:10px; margin-bottom:15px;">
                 <h4 style="margin-top:0; margin-bottom:5px;">◆ 特別ポイントの付与（減点も可）</h4>
+                <select id="pt-rule-select" onchange="applyPointRule()" style="width:100%; margin-bottom:5px; padding:4px;">
+                    <option value="">（プリセットから選択）</option>
+                </select><br>
                 理由: <input type="text" id="pt-modal-reason" placeholder="例: 委員会活動の貢献 / 提出物未了など" style="width:100%; margin-bottom:5px;"><br>
                 Pt数: <input type="number" id="pt-modal-amount" placeholder="例: 10 または -10" style="width:100px; margin-bottom:5px;">
                 <button type="button" onclick="grantSpecialPoints()" style="background:#ff9800; color:white; border-color:#e65100;">付与予約する</button>
@@ -419,9 +506,11 @@
         let inactivityTimer;
         let schoolInfo = { year: new Date().getFullYear(), className: "" };
         let parsedBackupData = null;
+        let classGoalsList = [];
+        let pointRules = [];
 
         const COUNTDOWN_PRESETS = [
-            { id: "kenritsu", defaultLabel: "公立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
+            { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
             { id: "sports", defaultLabel: "体育祭" }, { id: "chorus", defaultLabel: "合唱祭" }, { id: "soutai", defaultLabel: "学校総合体育大会" },
             { id: "shinjin", defaultLabel: "新人戦" }, { id: "school_trip", defaultLabel: "修学旅行" }, { id: "camp", defaultLabel: "宿泊学習" },
             { id: "field_trip", defaultLabel: "校外学習" }, { id: "term2_start", defaultLabel: "2学期始業式" }, { id: "term3_start", defaultLabel: "3学期始業式" },
@@ -532,7 +621,7 @@
 
         document.getElementById('login-btn').onclick = () => { 
             firebase.auth().signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value)
-                .catch(err => alert("ログイン失敗: " + err.message)); 
+                .catch(err => alert("Login Failed: " + err.message)); 
         };
         
         function logout() { firebase.auth().signOut().then(() => { localStorage.removeItem('lastActivity'); window.location.href = "index.html"; }); }
@@ -545,8 +634,6 @@
                 t = `${schoolInfo.year} ${schoolInfo.className} ${t}`;
             } else if (schoolInfo.year) {
                 t = `${schoolInfo.year} ${t}`;
-            } else {
-                t = `My Class Portal`;
             }
             document.getElementById('login-portal-title').innerHTML = `${t}<br><span style="font-size: 0.6em;">Admin Login</span>`;
             document.getElementById('main-portal-title').innerText = t;
@@ -555,7 +642,7 @@
 
         function initSchoolYearOptions() {
             let select = document.getElementById('set-school-year');
-            let html = "";
+            let html = "<option value=''>未設定</option>";
             for(let i=2026; i<=2050; i++) { html += `<option value="${i}">${i}</option>`; }
             select.innerHTML = html;
         }
@@ -566,7 +653,7 @@
             db.collection("config").doc("school_info").onSnapshot(s => {
                 if(s.exists) { 
                     schoolInfo = s.data(); 
-                    document.getElementById('set-school-year').value = schoolInfo.year || 2026;
+                    document.getElementById('set-school-year').value = schoolInfo.year || "";
                     document.getElementById('set-school-class').value = schoolInfo.className || "";
                     updatePortalTitle(); 
                 }
@@ -578,6 +665,36 @@
 
             initExitTimeOptions(document.getElementById('exit-period-time'), false);
             initWeatherSetting();
+
+            db.collection("config").doc("emergency_msg").onSnapshot(s => {
+                let data = s.exists ? s.data() : null;
+                if(data) {
+                    document.getElementById('emergency-active').checked = !!data.isActive;
+                    document.getElementById('emergency-title').value = data.title || "";
+                    document.getElementById('emergency-content').value = data.content || "";
+                    if(data.theme) document.getElementById('emergency-color-theme').value = data.theme;
+                }
+            });
+
+            db.collection("config").doc("student_goal_setting").onSnapshot(s => {
+                let data = s.exists ? s.data() : null;
+                if(data) {
+                    document.getElementById('goal-active').checked = !!data.isActive;
+                    document.getElementById('goal-title').value = data.title || "";
+                    document.getElementById('goal-desc').value = data.description || "";
+                }
+            });
+
+            db.collection("config").doc("class_goals").onSnapshot(s => {
+                classGoalsList = s.exists ? (s.data().items || []) : [];
+                renderAdminClassGoals();
+            });
+
+            db.collection("config").doc("point_rules").onSnapshot(snap => {
+                pointRules = snap.exists ? (snap.data().items || []) : [];
+                renderPointRules();
+                updatePointRuleSelect();
+            });
 
             db.collection("config").doc("countdowns").onSnapshot(snap => { countdownSettings = snap.exists ? snap.data() : {}; renderAdminCountdowns(); });
             db.collection("config").doc("exit_times").onSnapshot(snap => { exitTimePeriods = snap.exists ? (snap.data().periods || []) : []; renderExitTimePeriods(); });
@@ -605,7 +722,7 @@
 
             db.collection("students").onSnapshot(snap => {
                 studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
-                renderStudentListUI(); loadUnreadStudents(); renderAdminSubmissionsUI(); updateAdminDashboard();
+                renderStudentListUI(); loadUnreadStudents(); renderAdminSubmissionsUI(); renderPendingGoals(); updateAdminDashboard();
             });
 
             db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => {
@@ -642,51 +759,244 @@
             drawAccessChart(); 
         }
 
-        async function saveSchoolInfo() {
-            let y = document.getElementById('set-school-year').value;
-            let c = document.getElementById('set-school-class').value.trim();
-            schoolInfo = { year: parseInt(y), className: c };
-            await db.collection("config").doc("school_info").set(schoolInfo);
-            alert("学校・クラス情報を保存しました。");
+        async function saveEmergencyMsg() {
+            let isActive = document.getElementById('emergency-active').checked;
+            let title = document.getElementById('emergency-title').value.trim() || "⚠ 重要なお知らせ";
+            let content = document.getElementById('emergency-content').value.trim();
+            let theme = document.getElementById('emergency-color-theme').value;
+            
+            const emColors = {
+                'yellow': { bg: '#fffde7', border: '#fdd835' },
+                'red': { bg: '#ffebee', border: '#e53935' },
+                'blue': { bg: '#e3f2fd', border: '#1e88e5' },
+                'green': { bg: '#e8f5e9', border: '#43a047' }
+            };
+            
+            let bg = emColors[theme].bg;
+            let border = emColors[theme].border;
+            
+            if (isActive && !content) return alert("内容を入力してください。");
+            
+            await db.collection("config").doc("emergency_msg").set({
+                isActive: isActive,
+                title: title,
+                content: content,
+                theme: theme,
+                bgColor: bg,
+                borderColor: border
+            });
+            alert("緊急メッセージの設定を保存しました。");
             recordSystemUpdate();
         }
-        
-        async function clearSchoolInfo() {
-            document.getElementById('set-school-year').value = new Date().getFullYear();
-            document.getElementById('set-school-class').value = "";
+
+        async function saveGoalSetting() {
+            let isActive = document.getElementById('goal-active').checked;
+            let title = document.getElementById('goal-title').value.trim() || "目標を考えましょう";
+            let desc = document.getElementById('goal-desc').value.trim();
+            
+            await db.collection("config").doc("student_goal_setting").set({
+                isActive: isActive,
+                title: title,
+                description: desc
+            });
+            alert("生徒の目標提出設定を保存しました。");
+            recordSystemUpdate();
         }
 
-        function initWeatherSetting() {
-            let prefHtml = `<option value="">都道府県を選択</option>`;
-            PREFECTURES.forEach(p => prefHtml += `<option value="${p}">${p}</option>`);
-            document.getElementById('weather-pref-select').innerHTML = prefHtml;
-            db.collection("config").doc("weather").onSnapshot(s => {
-                if(s.exists && s.data().cityName) { document.getElementById('current-weather-location').innerText = `現在の設定: ${s.data().cityName}`; } 
-                else { document.getElementById('current-weather-location').innerText = `現在の設定: 未設定（デフォルト: 埼玉県川越市）`; }
+        function renderAdminClassGoals() {
+            let html = `<table style="width:100%; min-width:400px;"><tr><th style="width:40px;">表示</th><th style="width:50px;">順</th><th>見出し</th><th>内容</th><th style="width:90px;">操作</th></tr>`;
+            if (classGoalsList.length === 0) {
+                html += `<tr><td colspan="5">登録されていません。</td></tr>`;
+            } else {
+                classGoalsList.forEach((g, i) => {
+                    let themeLabels = { 'blue': '青', 'red': '赤', 'green': '緑', 'yellow': '黄' };
+                    let themeLabel = themeLabels[g.theme || 'blue'] || '青';
+                    
+                    html += `<tr id="cg-row-${g.id}">
+                        <td><input type="checkbox" id="cg-vis-${g.id}" ${g.isVisible ? 'checked' : ''} style="margin:0;"></td>
+                        <td><input type="number" id="cg-ord-${g.id}" value="${g.order||0}" style="width:40px; padding:2px; margin:0; text-align:center;"></td>
+                        <td style="text-align:left;">${String(g.label).replace(/</g,'&lt;')}<br><span style="font-size:0.8em; color:#666;">(${themeLabel})</span></td>
+                        <td style="text-align:left; font-size:0.9em; white-space:pre-wrap;">${String(g.text).replace(/</g,'&lt;')}</td>
+                        <td>
+                            <button type="button" onclick="startEditAdminClassGoal('${g.id}')" style="font-size:0.8em; padding:2px 4px;">編集</button>
+                            <button type="button" onclick="deleteClassGoal('${g.id}')" style="font-size:0.8em; padding:2px 4px; color:#d32f2f;">削除</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            html += `</table>`;
+            document.getElementById('class-goals-list-area').innerHTML = html;
+        }
+
+        async function addClassGoal() {
+            let label = document.getElementById('new-cg-label').value.trim();
+            let text = document.getElementById('new-cg-text').value.trim();
+            let theme = document.getElementById('new-cg-color').value;
+            
+            if (!label || !text) return alert("見出しと内容を入力してください。");
+            
+            let newId = "cg_" + Date.now();
+            classGoalsList.push({
+                id: newId,
+                label: label,
+                text: text,
+                theme: theme,
+                isVisible: false,
+                order: classGoalsList.length
             });
+            await db.collection("config").doc("class_goals").set({ items: classGoalsList });
+            document.getElementById('new-cg-label').value = "";
+            document.getElementById('new-cg-text').value = "";
+            document.getElementById('new-cg-color').value = "blue";
+            recordSystemUpdate();
         }
-        async function loadCitiesForWeather() {
-            let pref = document.getElementById('weather-pref-select').value; if(!pref) return;
-            try {
-                let res = await fetch(`https://geoapi.heartrails.com/api/json?method=getCities&prefecture=${encodeURIComponent(pref)}`);
-                let data = await res.json();
-                let cityHtml = `<option value="">市町村を選択</option>`;
-                if(data.response && data.response.location) { data.response.location.forEach(c => { cityHtml += `<option value="${c.city}">${c.city}</option>`; }); }
-                document.getElementById('weather-city-select').innerHTML = cityHtml;
-            } catch(e) { alert("市町村の取得に失敗しました。"); }
+
+        async function deleteClassGoal(id) {
+            if(!confirm("削除しますか？")) return;
+            classGoalsList = classGoalsList.filter(g => g.id !== id);
+            await db.collection("config").doc("class_goals").set({ items: classGoalsList });
+            recordSystemUpdate();
         }
-        async function saveWeatherLocation() {
-            let pref = document.getElementById('weather-pref-select').value; let city = document.getElementById('weather-city-select').value;
-            if(!pref || !city) return alert("都道府県と市町村を選択してください。");
-            try {
-                let res = await fetch(`https://geoapi.heartrails.com/api/json?method=getTowns&city=${encodeURIComponent(city)}`);
-                let data = await res.json();
-                if(data.response && data.response.location && data.response.location.length > 0) {
-                    let lat = data.response.location[0].y; let lng = data.response.location[0].x;
-                    await db.collection("config").doc("weather").set({ lat: parseFloat(lat), lng: parseFloat(lng), cityName: `${pref}${city}` });
-                    alert(`${pref}${city} の天気予報地域を保存しました。`); recordSystemUpdate();
-                } else { alert("座標の取得に失敗しました。"); }
-            } catch(e) { alert("座標の取得に失敗しました。"); }
+
+        function startEditAdminClassGoal(id) {
+            let g = classGoalsList.find(x => x.id === id);
+            if(!g) return;
+            let row = document.getElementById(`cg-row-${id}`);
+            
+            let colorOpts = `<option value="blue" ${g.theme==='blue'?'selected':''}>通常 (青系)</option>
+                             <option value="red" ${g.theme==='red'?'selected':''}>重要 (赤系)</option>
+                             <option value="green" ${g.theme==='green'?'selected':''}>成功 (緑系)</option>
+                             <option value="yellow" ${g.theme==='yellow'?'selected':''}>注意 (黄系)</option>`;
+                             
+            row.innerHTML = `
+                <td><input type="checkbox" id="edit-cg-vis-${id}" ${g.isVisible ? 'checked' : ''} style="margin:0;"></td>
+                <td><input type="number" id="edit-cg-ord-${id}" value="${g.order||0}" style="width:40px; padding:2px; margin:0; text-align:center;"></td>
+                <td>
+                    <input type="text" id="edit-cg-lbl-${id}" value="${String(g.label).replace(/"/g,'&quot;')}" style="width:100%; padding:2px; margin-bottom:2px;"><br>
+                    <select id="edit-cg-theme-${id}" style="width:100%; padding:2px; margin:0; font-size:0.85em;">${colorOpts}</select>
+                </td>
+                <td><textarea id="edit-cg-txt-${id}" style="width:100%; height:60px; padding:2px; margin:0;">${g.text}</textarea></td>
+                <td>
+                    <button type="button" onclick="saveAdminClassGoalInline('${id}')" style="font-size:0.8em; padding:2px 4px; background:#000; color:white;">保存</button>
+                    <button type="button" onclick="renderAdminClassGoals()" style="font-size:0.8em; padding:2px 4px;">ｷｬﾝｾﾙ</button>
+                </td>
+            `;
+        }
+
+        async function saveAdminClassGoalInline(id) {
+            let idx = classGoalsList.findIndex(x => x.id === id);
+            if(idx === -1) return;
+            
+            classGoalsList[idx].isVisible = document.getElementById(`edit-cg-vis-${id}`).checked;
+            classGoalsList[idx].order = parseInt(document.getElementById(`edit-cg-ord-${id}`).value, 10) || 0;
+            classGoalsList[idx].label = document.getElementById(`edit-cg-lbl-${id}`).value.trim();
+            classGoalsList[idx].text = document.getElementById(`edit-cg-txt-${id}`).value.trim();
+            classGoalsList[idx].theme = document.getElementById(`edit-cg-theme-${id}`).value;
+            
+            await db.collection("config").doc("class_goals").set({ items: classGoalsList });
+            recordSystemUpdate();
+        }
+
+        async function saveClassGoalsChanges() {
+            let inputs = document.querySelectorAll('#class-goals-list-area input[type="number"]');
+            inputs.forEach(inp => {
+                let id = inp.id.replace('cg-ord-', '');
+                let g = classGoalsList.find(x => x.id === id);
+                if(g) {
+                    g.order = parseInt(inp.value, 10) || 0;
+                    g.isVisible = document.getElementById(`cg-vis-${id}`).checked;
+                }
+            });
+            await db.collection("config").doc("class_goals").set({ items: classGoalsList });
+            alert("表示状態と順序を保存しました。");
+            recordSystemUpdate();
+        }
+
+        function renderPendingGoals() {
+            let html = "";
+            for(let email in studentMaster) {
+                if(email === TEACHER_EMAIL) continue;
+                let d = studentMaster[email];
+                if(d.goal && (d.goal.status === 'pending' || d.goal.status === 'approved' || d.goal.status === 'rejected')) {
+                    let statusLabel = "";
+                    if(d.goal.status === 'pending') statusLabel = '<span style="color:#f57c00;">[承認待ち]</span>';
+                    else if(d.goal.status === 'approved') statusLabel = '<span style="color:#388e3c;">[公開中]</span>';
+                    else if(d.goal.status === 'rejected') statusLabel = '<span style="color:#d32f2f;">[差戻し・非表示]</span>';
+                    
+                    html += `<div style="border:1px solid #000; padding:10px; margin-bottom:10px;">
+                        <div style="font-weight:bold; margin-bottom:5px;">${d.name} (${email}) ${statusLabel}</div>
+                        <div style="font-size:0.85em; color:#555;">見出し: ${d.goal.label}</div>
+                        <div style="white-space:pre-wrap; font-size:1.1em; margin-bottom:5px;">${d.goal.text}</div>
+                        <div style="text-align:right; margin-top:5px;">`;
+                    
+                    if (d.goal.status === 'pending') {
+                        html += `<button type="button" onclick="approveGoal('${email}')" style="background:#4caf50; color:white; border-color:#4caf50;">承認</button>
+                                 <button type="button" onclick="rejectGoal('${email}')">差戻し</button>`;
+                    } else if (d.goal.status === 'approved') {
+                        html += `<button type="button" onclick="rejectGoal('${email}')">非表示(差戻し)にする</button>
+                                 <button type="button" onclick="deleteStudentGoal('${email}')" style="color:#d32f2f;">削除</button>`;
+                    } else if (d.goal.status === 'rejected') {
+                        html += `<button type="button" onclick="approveGoal('${email}')" style="background:#4caf50; color:white; border-color:#4caf50;">承認</button>
+                                 <button type="button" onclick="deleteStudentGoal('${email}')" style="color:#d32f2f;">削除</button>`;
+                    }
+                    html += `</div></div>`;
+                }
+            }
+            document.getElementById('admin-pending-goals').innerHTML = html || "<p>提出された目標はありません。</p>";
+        }
+
+        async function approveGoal(email) {
+            if(confirm("承認して表示させますか？")) {
+                await db.collection("students").doc(email).update({"goal.status": "approved"});
+                recordSystemUpdate();
+            }
+        }
+        async function rejectGoal(email) {
+            if(confirm("差し戻し（非表示）にしますか？")) {
+                await db.collection("students").doc(email).update({"goal.status": "rejected"});
+                recordSystemUpdate();
+            }
+        }
+        async function deleteStudentGoal(email) {
+            if(confirm("この生徒の目標データを完全に削除しますか？")) {
+                await db.collection("students").doc(email).update({"goal": firebase.firestore.FieldValue.delete()});
+                recordSystemUpdate();
+            }
+        }
+
+        async function addPointRule() {
+            let reason = document.getElementById('new-pt-rule-reason').value.trim();
+            let amount = parseInt(document.getElementById('new-pt-rule-amount').value, 10);
+            if(!reason || isNaN(amount)) return alert("理由とポイント数を入力してください。");
+            pointRules.push({ reason, amount });
+            await db.collection("config").doc("point_rules").set({ items: pointRules });
+            document.getElementById('new-pt-rule-reason').value = "";
+            document.getElementById('new-pt-rule-amount').value = "";
+        }
+
+        async function deletePointRule(idx) {
+            if(!confirm("このプリセットを削除しますか？")) return;
+            pointRules.splice(idx, 1);
+            await db.collection("config").doc("point_rules").set({ items: pointRules });
+        }
+
+        function renderPointRules() {
+            document.getElementById('point-rules-list').innerHTML = pointRules.map((r, i) => `・${r.reason} (${r.amount > 0 ? '+' : ''}${r.amount} Pt) <button type="button" onclick="deletePointRule(${i})" style="padding:2px 8px; font-size:0.8em; margin-left:10px;">削除</button>`).join('<br>');
+        }
+
+        function updatePointRuleSelect() {
+            let sel = document.getElementById('pt-rule-select');
+            if(!sel) return;
+            sel.innerHTML = `<option value="">（プリセットから選択）</option>` + pointRules.map((r, i) => `<option value="${i}">${r.reason} (${r.amount > 0 ? '+' : ''}${r.amount} Pt)</option>`).join('');
+        }
+
+        function applyPointRule() {
+            let sel = document.getElementById('pt-rule-select');
+            if(sel.value === "") return;
+            let rule = pointRules[sel.value];
+            document.getElementById('pt-modal-reason').value = rule.reason;
+            document.getElementById('pt-modal-amount').value = rule.amount;
+            sel.value = "";
         }
 
         function updateAdminDashboard() {
@@ -714,11 +1024,17 @@
                         if(unsubmittedCount > 0 && totalStudents > 0) unsubmittedTaskCount++;
                     }
                 });
-                if(unsubmittedTaskCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-submissions')">未提出者がいる課題が ${unsubmittedTaskCount} 件あります。</a></li>`;
+                if(unsubmittedTaskCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-submissions')">未提出者がいる課題（または期限間近）が ${unsubmittedTaskCount} 件あります。</a></li>`;
                 
                 let pendingCount = allCommitteePosts.filter(p => p.status === 'pending').length;
                 if(pendingCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-committee')">承認待ちの連絡が ${pendingCount} 件あります。</a></li>`;
                 
+                let pendingGoalCount = 0;
+                for(let email in studentMaster) {
+                    if (studentMaster[email].goal && studentMaster[email].goal.status === 'pending') pendingGoalCount++;
+                }
+                if(pendingGoalCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-goals')">承認待ちの生徒の目標が ${pendingGoalCount} 件あります。</a></li>`;
+
                 let unreadMessageCount = document.querySelectorAll('.msg-unread').length;
                 if(unreadMessageCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-messages')">未読のメッセージが ${unreadMessageCount} 件あります。</a></li>`;
 
@@ -736,19 +1052,52 @@
             targetEl.innerHTML = html;
         }
 
+        function startInlineEditHoliday(dateStr, isCustom) {
+            let tr = document.querySelector(`.admin-hol-row-${dateStr}`);
+            let contentCell = tr.querySelector('.hol-content-cell');
+            let actionCell = tr.querySelector('.hol-action-cell');
+            
+            let nameVal = "", descVal = "";
+            if (isCustom) {
+                nameVal = customHolidays[dateStr].name;
+                descVal = customHolidays[dateStr].desc;
+            } else {
+                nameVal = holidays[dateStr].includes("振替休日") ? "振替休日" : holidays[dateStr];
+                descVal = holidayDescs[dateStr] || getDefaultHolidayDesc(holidays[dateStr], dateStr);
+            }
+            
+            nameVal = String(nameVal).replace(/"/g, '&quot;');
+            
+            let nameInput = isCustom ? `<input type="text" id="inline-hol-name-${dateStr}" value="${nameVal}" style="width:100%; padding:2px; margin-bottom:2px;" placeholder="名称">` : `<b>${nameVal}</b>`;
+            
+            contentCell.innerHTML = `${nameInput}<br><textarea id="inline-hol-desc-${dateStr}" style="width:100%; height:40px; padding:2px;">${descVal}</textarea>`;
+            actionCell.innerHTML = `<button type="button" onclick="saveInlineEditHoliday('${dateStr}', ${isCustom})" style="background:#000; color:white;">保存</button> <button type="button" onclick="renderCustomHolidays()">ｷｬﾝｾﾙ</button>`;
+        }
+
+        async function saveInlineEditHoliday(dateStr, isCustom) {
+            let desc = document.getElementById(`inline-hol-desc-${dateStr}`).value.trim();
+            if (isCustom) {
+                let name = document.getElementById(`inline-hol-name-${dateStr}`).value.trim();
+                if(!name) return alert("名称を入力してください。");
+                customHolidays[dateStr] = { name: name, desc: desc };
+                await db.collection("config").doc("custom_holidays").set(customHolidays);
+            } else {
+                holidayDescs[dateStr] = desc;
+                await db.collection("config").doc("holiday_descs").set(holidayDescs, {merge:true});
+            }
+            alert("保存しました。");
+            renderCustomHolidays();
+        }
+
         async function saveHolidaySetting() {
             let dStr = document.getElementById('holiday-edit-date').value;
             let name = document.getElementById('holiday-edit-name').value.trim();
             let desc = document.getElementById('holiday-edit-desc').value.trim();
-            if(!dStr) return alert("日付を選択してください。");
+            if(!dStr || !name) return alert("日付と名称を入力してください。");
             
-            if (name) {
-                customHolidays[dStr] = { name: name, desc: desc };
-                await db.collection("config").doc("custom_holidays").set(customHolidays);
-            } else {
-                holidayDescs[dStr] = desc;
-                await db.collection("config").doc("holiday_descs").set(holidayDescs, {merge:true});
-            }
+            customHolidays[dStr] = { name: name, desc: desc };
+            await db.collection("config").doc("custom_holidays").set(customHolidays);
+            
             document.getElementById('holiday-edit-date').value = ""; document.getElementById('holiday-edit-name').value = ""; document.getElementById('holiday-edit-desc').value = ""; alert("登録・保存しました。");
         }
         
@@ -757,15 +1106,23 @@
             let keys = Object.keys(customHolidays).sort();
             keys.forEach(k => {
                 let nameVal = String(customHolidays[k].name).replace(/'/g, "\\'"); let descVal = String(customHolidays[k].desc).replace(/'/g, "\\'");
-                html += `<tr class="tr-custom"><td>${k}</td><td style="text-align:left;"><b>${customHolidays[k].name}</b> (独自)<br><span style="font-size:0.85em;">${customHolidays[k].desc}</span></td><td><button type="button" onclick="document.getElementById('holiday-edit-date').value='${k}'; document.getElementById('holiday-edit-name').value='${nameVal}'; document.getElementById('holiday-edit-desc').value='${descVal}';">編集</button><button type="button" onclick="deleteCustomHoliday('${k}')">削除</button></td></tr>`;
+                html += `<tr class="tr-custom admin-hol-row-${k}" data-iscustom="true">
+                    <td>${k}</td>
+                    <td style="text-align:left;" class="hol-content-cell"><b>${customHolidays[k].name}</b> (独自)<br><span style="font-size:0.85em;">${customHolidays[k].desc}</span></td>
+                    <td class="hol-action-cell"><button type="button" onclick="startInlineEditHoliday('${k}', true)">編集</button><button type="button" onclick="deleteCustomHoliday('${k}')">削除</button></td>
+                </tr>`;
             });
             let allHol = Object.keys(holidays).sort();
             allHol.forEach(k => {
                 if (!customHolidays[k]) {
                     let desc = holidayDescs[k] || getDefaultHolidayDesc(holidays[k], k);
-                    let isChanged = !!holidayDescs[k]; let trClass = isChanged ? 'tr-changed' : ''; let descVal = String(desc).replace(/'/g, "\\'");
+                    let isChanged = !!holidayDescs[k]; let trClass = isChanged ? 'tr-changed' : ''; 
                     let displayName = holidays[k].includes("振替休日") ? "振替休日" : holidays[k];
-                    html += `<tr class="${trClass}"><td>${k}</td><td style="text-align:left;"><b>${displayName}</b> ${isChanged?'<span style="color:#d32f2f; font-size:0.8em;">(説明変更済)</span>':''}<br><span style="font-size:0.85em;">${desc}</span></td><td><button type="button" onclick="document.getElementById('holiday-edit-date').value='${k}'; document.getElementById('holiday-edit-name').value=''; document.getElementById('holiday-edit-desc').value='${descVal}';">編集</button>${isChanged?`<button type="button" onclick="deleteHolidayDesc('${k}')">戻す</button>`:''}</td></tr>`;
+                    html += `<tr class="${trClass} admin-hol-row-${k}" data-iscustom="false">
+                        <td>${k}</td>
+                        <td style="text-align:left;" class="hol-content-cell"><b>${displayName}</b> ${isChanged?'<span style="color:#d32f2f; font-size:0.8em;">(説明変更済)</span>':''}<br><span style="font-size:0.85em;">${desc}</span></td>
+                        <td class="hol-action-cell"><button type="button" onclick="startInlineEditHoliday('${k}', false)">編集</button>${isChanged?`<button type="button" onclick="deleteHolidayDesc('${k}')">戻す</button>`:''}</td>
+                    </tr>`;
                 }
             });
             html += `</table>`;
@@ -793,7 +1150,7 @@
         }
 
         function renderAdminCountdowns() {
-            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;"></th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾</th></tr>`;
+            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
             let colorOpts = `<option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#fce4ec">Pink</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option>`;
             let iconOpts = `<option value="">(なし)</option><option value="🎯">🎯的</option><option value="🌸">🌸桜</option><option value="🎄">🎄ﾂﾘｰ</option><option value="🏃">🏃運動</option><option value="⚽">⚽球技</option><option value="🎵">🎵音楽</option><option value="🎓">🎓卒業</option><option value="🎒">🎒ｶﾊﾞﾝ</option><option value="🚌">🚌ﾊﾞｽ</option><option value="🔥">🔥炎</option>`;
             COUNTDOWN_PRESETS.forEach(p => {
@@ -812,7 +1169,7 @@
         function renderAdminSubmissionsUI() {
             const adminTable = document.getElementById('admin-submission-table');
             if (submissionsList.length === 0) { adminTable.innerHTML = "<p>提出物はありません。</p>"; return; }
-            let adminHtml = `<table style="width:100%; min-width:500px;"><tr><th>提出物名</th><th>締切日</th><th>未提出者</th><th>操作</th></tr>`;
+            let adminHtml = `<table style="width:100%; min-width:500px;"><tr><th>提出物名</th><th>締め切り</th><th>未提出者</th><th>操作</th></tr>`;
             const week = ["日", "月", "火", "水", "木", "金", "土"];
             submissionsList.forEach(sub => {
                 const dObj = new Date(sub.deadline); 
@@ -969,13 +1326,13 @@
         function markMessageRead(id, isRead) { if (!isRead) db.collection("messages").doc(id).update({ isRead: true }).catch(e => console.error(e)); }
         async function toggleProtectMessage(id, currentStatus) { await db.collection("messages").doc(id).update({ isProtected: !currentStatus }); }
         async function deleteMessage(id, isProtected) {
-            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に保護を解除してください。");
+            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に「保護を解除」してください。");
             if (confirm("削除しますか？")) await db.collection("messages").doc(id).delete();
         }
 
         async function addExitTimePeriod() { 
             const s = document.getElementById('exit-period-start').value; const e = document.getElementById('exit-period-end').value; const t = document.getElementById('exit-period-time').value;
-            if (!s || !e || !t) return alert("開始・終了・時刻のすべてを入力してください。"); if (s > e) return alert("終了日は開始日以降に設定してください。");
+            if (!s || !e || !t) return alert("開始・終了・時刻を入力してください。"); if (s > e) return alert("終了日は開始日以降に設定してください。");
             exitTimePeriods.push({ start: s, end: e, time: t });
             await db.collection("config").doc("exit_times").set({ periods: exitTimePeriods });
             try {
@@ -1073,7 +1430,7 @@
             
             await db.collection("config").doc("regular_schedule").set(newData, { merge: true }); 
             recordSystemUpdate(); 
-            alert("標準時間割・各種設定を保存しました。"); 
+            alert("標準時間割の設定を保存しました。"); 
         }
 
         function clearRegularSetting() {
@@ -1200,7 +1557,7 @@
 
         function renderStudentListUI() {
             const area = document.getElementById('student-list-area'); if(!area) return;
-            let html = "<table><tr><th>氏名</th><th>メールアドレス</th><th>係</th><th>委員会</th><th>Pt</th><th>準編集</th><th>投稿禁止</th><th>操作</th></tr>";
+            let html = "<table><tr><th>氏名</th><th>E-Mail Address</th><th>係</th><th>委員会</th><th>Pt</th><th>準編集</th><th>投稿禁止</th><th>操作</th></tr>";
             for(let email in studentMaster) {
                 if(email === TEACHER_EMAIL) continue;
                 const d = studentMaster[email]; const safeId = email.replace(/[@.]/g, '_');
@@ -1270,7 +1627,7 @@
         }
 
         async function registerDirect() {
-            const email = document.getElementById('direct-email').value.trim(); if(!email) return alert("メールアドレスを入力");
+            const email = document.getElementById('direct-email').value.trim(); if(!email) return alert("E-Mail Addressを入力");
             await db.collection("students").doc(email).set({ name: document.getElementById('direct-name').value.trim(), role: document.getElementById('direct-role').value.trim(), committee: document.getElementById('direct-committee').value.trim(), isSubAdmin: false, isBanned: false });
             document.getElementById('direct-email').value = ""; document.getElementById('direct-name').value = ""; alert("登録しました");
         }
@@ -1309,7 +1666,6 @@
             });
         }
 
-        // ★ 過去のブログ投稿をエクスポート
         async function exportBlogs() {
             let snap = await db.collection("blogs").orderBy("createdAt", "asc").get();
             if (snap.empty) return alert("エクスポートする投稿がありません。");
@@ -1327,7 +1683,6 @@
             XLSX.writeFile(wb, `Blogs_Export.xlsx`);
         }
 
-        // ★ フルバックアップ（JSONエクスポート）
         async function exportFullBackup() {
             try {
                 let backupData = {
@@ -1355,7 +1710,6 @@
             } catch (e) { alert("バックアップの作成に失敗しました: " + e.message); }
         }
 
-        // ★ フルバックアップ（JSONインポート）
         async function importFullBackup() {
             let fileInput = document.getElementById('backup-file-input');
             if (!fileInput.files.length) return alert("バックアップファイル(.json)を選択してください。");
@@ -1402,7 +1756,6 @@
             reader.readAsText(file);
         }
 
-        // 復元オプション表示用
         document.getElementById('backup-file-input').addEventListener('change', function(e) {
             if(e.target.files.length > 0) {
                 document.getElementById('backup-restore-options').style.display = 'block';
@@ -1411,7 +1764,6 @@
             }
         });
 
-        // ★ 次年度用 システム全リセット
         async function resetEntireSystem() {
             let msg = "【非常に危険な操作です】\n\n・生徒のアカウント、ポイント、名簿データ\n・すべてのスケジュール（時間割・行事・備考）\n・標準時間割の設定\n・提出物、委員会連絡、メッセージ、アクセスログ\n・ブログ記事（担任のやつ）\n\nこれらのすべてのデータが完全に削除され、初期状態に戻ります。\n\n本当に実行してよろしいですか？（管理者の設定は一部残ります）";
             if (!confirm(msg)) return;
@@ -1426,7 +1778,6 @@
                         let batch = db.batch();
                         snap.forEach(doc => {
                             if (cName === "students" && doc.id === TEACHER_EMAIL) {
-                                // 管理者アカウント自体は残し、設定等はリセットする
                                 batch.set(doc.ref, { name: "管理者", isSubAdmin: false, isBanned: false });
                             } else {
                                 batch.delete(doc.ref);
@@ -1435,10 +1786,7 @@
                         await batch.commit();
                     }
                 }
-                
-                // 標準時間割のリセット
                 await db.collection("config").doc("regular_schedule").delete();
-                
                 alert("全データのリセットが完了しました。\n新年度の運用を開始できます。ページをリロードします。"); location.reload();
             } catch (err) {
                 alert("リセット中にエラーが発生しました: " + err.message);

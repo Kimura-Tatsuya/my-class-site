@@ -41,6 +41,13 @@ th { background-color: rgba(0,0,0,0.05); }
 .spinner-btn { background: #ff9800; color: white; border: 1px solid #000; padding: 4px 10px; font-weight: bold; cursor: pointer; }
 .edit-box { background:#f9f9f9; padding:10px; border:2px dashed #000; margin-bottom:10px; color: #000; }
 
+.goal-box { width: 100%; background: #fff; border: 2px solid #000; padding: 15px; margin-bottom: 20px; text-align: center; }
+.goal-label { font-size: 0.85em; text-align: left; font-weight: bold; margin-bottom: 10px; color: #555; }
+.goal-text { font-size: 1.5em; font-weight: bold; line-height: 1.4; white-space: pre-wrap; }
+
+.bonus-card { width: 60px; height: 80px; background: #2196f3; color: white; display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: bold; cursor: pointer; border-radius: 5px; border: 2px solid #0d47a1; transition: transform 0.3s; }
+.bonus-card:hover { transform: scale(1.05); }
+
 body.dark-mode { background-color: #121212 !important; color: #e0e0e0; }
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item, body.dark-mode .day-label { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode .panel, body.dark-mode .day-box { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
@@ -65,6 +72,8 @@ body.dark-mode #settings-modal-content li { border-color: #555 !important; }
 body.dark-mode #committee-form-area { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #committee-form-area h3, body.dark-mode #my-role-name-container, body.dark-mode .edit-box h4 { color: #e0e0e0 !important; }
 body.dark-mode .edit-box { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode .goal-box { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode .goal-label { color: #aaa !important; }
 body.dark-mode #point-details-modal > div { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #point-details-modal h3 { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #dm-input { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
@@ -81,13 +90,15 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
 </head>
 <body>
 <div id="login-section" style="text-align: center; margin-top: 50px;">
-    <h1 id="login-portal-title">My Class Portal</h1>
-    <input type="email" id="login-email" placeholder="E-Mail Adress"><br>
+    <h1 id="login-portal-title">Class Portal</h1>
+    <input type="email" id="login-email" placeholder="E-Mail Address"><br>
     <input type="password" id="login-password" placeholder="Password"><br>
     <button type="button" id="login-btn">Login</button>
 </div>
 
 <div id="main-content" style="display: none;">
+    <div id="new-arrival-info" style="display:none; margin-bottom:15px;"></div>
+
     <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
         <div>
             <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.4em;">Class Portal</h1>
@@ -96,19 +107,34 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                 <span id="realtime-clock" style="font-size: 0.9em; font-weight: bold; color: #000;"></span>
                 <span id="holiday-msg" style="font-weight:bold; color:#d32f2f; cursor:pointer; display:none; background:#ffcdd2; padding:2px 8px; font-size:0.85em; border:1px solid #d32f2f;" onclick="openHolidayModal()"></span>
                 <span id="my-points-display" class="point-badge" onclick="openPointDetails()">0 Pt</span>
-                <button type="button" id="spinner-btn" class="spinner-btn" style="display:none;" onclick="spinRoulette()">BONUS CHANCE</button>
+                <button type="button" id="spinner-btn" class="spinner-btn" style="display:none;" onclick="openBonusModal()">BONUS CHANCE</button>
             </div>
             <div id="top-reminder" style="font-weight: bold; font-size: 0.9em; margin-top: 5px; line-height: 1.6;"></div>
         </div>
         <div style="display: flex; gap: 5px; flex-direction:column; align-items:flex-end;">
-            <button type="button" id="btn-admin-page" style="display:none; background:#d32f2f; color:white; border-color:#000;" onclick="location.href='admin.html'">Admin Panel</button>
+            <button type="button" id="btn-admin-page" style="display:none; background:#d32f2f; color:white; border-color:#000;" onclick="location.href='admin.html'">管理画面</button>
             <button type="button" onclick="logout()">Logout</button>
         </div>
     </header>
 
     <main>
+        <div id="emergency-msg-container" style="display:none;"></div>
+        <div id="class-goal-container" style="display:none;"></div>
+        <div id="personal-goal-container" style="display:none;"></div>
+
         <div id="countdown-display-area" style="display:none; flex-wrap:wrap; gap:10px; margin-bottom:20px;"></div>
+        
         <div id="main-sections-container">
+            
+            <section id="sec-goal-form" class="panel" style="display:none;">
+                <div class="section-header"><h2 id="goal-sec-title">◆ 目標</h2></div>
+                <p id="goal-sec-desc" style="font-size:0.85em; margin-top:10px;"></p>
+                <div id="goal-form-inner">
+                    <textarea id="goal-text-input" placeholder="入力してください..." style="height:60px; width:100%; padding:5px;"></textarea>
+                    <div style="text-align:right;"><button type="button" onclick="submitPersonalGoal()">提出する</button></div>
+                </div>
+            </section>
+
             <section id="sec-recent" class="panel">
                 <div class="section-header">
                     <h2>◆ 直近の予定</h2>
@@ -151,10 +177,10 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                     <span style="margin: 0 5px;">|</span>
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-my-event" onchange="displayWeeklySchedule()">個人予定</label>
                     <label style="cursor: pointer;"><input type="checkbox" id="toggle-club" onchange="displayWeeklySchedule()">部活動詳細</label>
-                    <button type="button" onclick="editMyEventOptions()" style="padding: 2px 8px; font-size: 0.9em; margin-left:auto;">予定リスト編集</button>
+                    <button type="button" onclick="editMyEventOptions()" style="padding: 2px 8px; font-size: 0.9em; margin-left:auto;">予定リストの編集</button>
                 </div>
                 <div id="my-list-editor-area" style="display: none; background:#fff3cd; border:1px solid #000; padding:10px; margin-bottom:10px; color:black;">
-                    <h4 style="margin-top:0;">予定リストの編集 (カンマで区切ってください)</h4>
+                    <h4 style="margin-top:0;">予定リストの編集 (カンマ区切り)</h4>
                     <p style="margin:0 0 5px 0; font-size:0.85em;">自分の予定：</p><input type="text" id="edit-my-events-input" style="width:100%;">
                     <p style="margin:10px 0 5px 0; font-size:0.85em;">部活動の予定：</p><input type="text" id="edit-my-clubs-input" style="width:100%;">
                     <div style="text-align:right; margin-top:5px;"><button type="button" onclick="saveMyListOptions()">保存</button> <button type="button" onclick="closeMyListEditor()">閉じる</button></div>
@@ -164,7 +190,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
 
             <section id="sec-submissions" class="panel">
                 <div class="section-header"><h2>◆ 提出物・課題等</h2></div>
-                <p style="font-size: 0.85em; margin-top: 10px;">※提出が完了したらチェックを入れてください。</p>
+                <p style="font-size: 0.85em; margin-top: 10px;">提出が完了したらチェックを入れてください。</p>
                 <div id="submission-list" class="scroll-area">確認中...</div>
             </section>
 
@@ -176,8 +202,8 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                 <div id="committee-form-area" style="display:none; padding:15px; border:1px solid #000; margin-bottom:15px; background:rgba(0,0,0,0.02);">
                     <h3 style="margin-top:0; font-size:1em; color:inherit;">■ 連絡を投稿する</h3>
                     <p style="font-size:0.85em; color:inherit; margin:0 0 10px 0;">連絡の際は具体的な日時を知らせましょう。<br>（悪い例：明日まで、よい例：3/1(月)まで）</p>
-                    <div style="margin-bottom: 10px; font-size: 0.9em; color: inherit;">投稿者: <span id="my-role-name-container"></span></div>
-                    <input type="text" id="committee-title" placeholder="連絡のタイトル（任意）" style="width:100%; margin-bottom:5px;">
+                    <div style="margin-bottom: 10px; font-size: 0.9em; color: inherit;">投稿者（役職）: <span id="my-role-name-container"></span></div>
+                    <input type="text" id="committee-title" placeholder="記事のタイトル（任意）" style="width:100%; margin-bottom:5px;">
                     <textarea id="committee-input" placeholder="連絡内容を入力してください..." style="height:80px;"></textarea>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items:center; font-size:0.9em; color:inherit;">
                         <div>背景色：<select id="committee-color" style="width:100px; margin-bottom:0;" onchange="updateCommitteeInputColor(this.value)">
@@ -202,11 +228,18 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
                     <button type="button" onclick="document.getElementById('blog-form-area').style.display='block'; this.style.display='none';">＋ 新規投稿</button>
                 </div>
                 <div id="blog-form-area" class="edit-box" style="display:none;">
-                    <h4 style="margin-top:0;">■ 記事を投稿する</h4>
+                    <h4 style="margin-top:0;">記事を投稿する</h4>
                     <input type="text" id="blog-title" placeholder="記事のタイトル（任意）" style="width:100%; margin-bottom:5px;">
                     <textarea id="blog-input" placeholder="記事の内容を入力..." style="height:80px; width:100%;"></textarea>
+                    
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:5px; font-size:0.9em;">
+                        <div style="display:flex; align-items:center; gap:5px;">文字色: <input type="color" id="blog-font-color" value="#000000" style="width:40px; height:30px; padding:0; margin:0; border:none; cursor:pointer;"></div>
+                        <div>サイズ: <select id="blog-font-size" style="width:80px; margin:0; padding:4px;"><option value="1em">標準</option><option value="1.2em">やや大</option><option value="1.5em">特大</option></select></div>
+                        <label style="display:flex; align-items:center; gap:2px; cursor:pointer;"><input type="checkbox" id="blog-is-bold" style="margin:0;"> 太字</label>
+                    </div>
+
                     <div style="margin-top:5px; font-size:0.9em; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <div>予約投稿の日時:</div>
+                        <div>予約投稿(任意):</div>
                         <input type="date" id="blog-schedule-date" style="width:140px; margin-bottom:0; padding:4px;">
                         <input type="time" id="blog-schedule-time" style="width:100px; margin-bottom:0; padding:4px;">
                     </div>
@@ -222,23 +255,36 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
 
             <section id="sec-dm" class="panel">
                 <div class="section-header"><h2>◆ 担任へ連絡</h2></div>
-                <p style="font-size: 0.85em; margin-top: 10px; color:inherit;">送信内容は直接先生へ届きます。相談事の他にもバグ等の報告もできます。</p>
-                <textarea id="dm-input" placeholder="何か書いてください..." style="height: 80px;"></textarea><br>
-                <button type="button" onclick="sendDirectMessage()">送信</button>
+                <p style="font-size: 0.85em; margin-top: 10px; color:inherit;">ここで送信した内容は先生に直接届きます。相談事の他にもバグ等の報告もできます。</p>
+                <textarea id="dm-input" placeholder="相談事やバグの報告などを書いてください..." style="height: 80px;"></textarea><br>
+                <button type="button" onclick="sendDirectMessage()">送信する</button>
             </section>
         </div>
     </main>
     <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #000; font-size: 0.85em; color: inherit;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div>
-                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">Mobile View</button>
+                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">📱 スマホ表示 (切替)</button>
                 <button type="button" onclick="toggleTheme()">Light / Dark</button>
-                <button type="button" id="btn-lightness" onclick="toggleLightness()">Brightness</button>
-                <button type="button" onclick="openSettingsModal()">Settings</button>
+                <button type="button" id="btn-lightness" onclick="toggleLightness()">明るさ調整</button>
+                <button type="button" onclick="openSettingsModal()">設定</button>
             </div>
-            <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T.Kimura All Rights Reserved.</div>
+            <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
         </div>
     </footer>
+</div>
+
+<div id="bonus-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; text-align:center; border:1px solid #000; color:#000; border-radius:5px;">
+        <h3 style="margin-top:0; color:#d32f2f;">Bonus Chance!</h3>
+        <p style="font-weight:bold; margin-bottom:15px;">カードを1枚選んでください。</p>
+        <div style="display:flex; gap:15px; justify-content:center; margin-bottom:20px;" id="bonus-cards-container">
+            <div class="bonus-card" id="bcard-0" onclick="selectBonusCard(0)">?</div>
+            <div class="bonus-card" id="bcard-1" onclick="selectBonusCard(1)">?</div>
+            <div class="bonus-card" id="bcard-2" onclick="selectBonusCard(2)">?</div>
+            <div class="bonus-card" id="bcard-3" onclick="selectBonusCard(3)">?</div>
+        </div>
+    </div>
 </div>
 
 <div id="event-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
@@ -275,16 +321,20 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
         <div style="margin-bottom:20px; font-size:0.9em; display:flex; flex-direction:column; gap:5px;">
             <label><input type="checkbox" id="set-cd-visible" style="margin:0; vertical-align:middle;"> カウントダウンを表示する</label>
             <div>サイズ：<label style="margin-right:10px;"><input type="radio" name="set-cd-size" value="normal" style="margin:0; vertical-align:middle;"> 標準</label><label><input type="radio" name="set-cd-size" value="small" style="margin:0; vertical-align:middle;"> 小</label></div>
+            <div style="margin-top:10px; border-top:1px dashed #000; padding-top:5px;">■ 新着通知の表示</div>
+            <label><input type="checkbox" id="set-notify-comm" style="margin:0; vertical-align:middle;"> 係・委員会からの連絡</label>
+            <label><input type="checkbox" id="set-notify-blog" style="margin:0; vertical-align:middle;"> 担任のやつ</label>
+            <label><input type="checkbox" id="set-notify-subm" style="margin:0; vertical-align:middle;"> 提出物・課題等</label>
         </div>
         <div style="text-align:right; margin-bottom:20px; border-bottom:1px solid #000; padding-bottom:20px;">
             <button type="button" onclick="saveUserSettings()" style="background:#000; color:white;">設定を保存</button>
             <button type="button" onclick="resetUserSettings()" style="color:#d32f2f;">初期設定に戻す</button>
         </div>
         <details>
-            <summary style="cursor:pointer; font-weight:bold; font-size:1.1em; outline:none;">◆ パスワード変更</summary>
+            <summary style="cursor:pointer; font-weight:bold; font-size:1.1em; outline:none;">◆ Password変更</summary>
             <div style="margin-top:10px; font-size:0.9em;">
-                <input type="password" id="old-password" placeholder="現在のパスワード"><br>
-                <input type="password" id="new-password" placeholder="新しいパスワード（6文字以上）"><br>
+                <input type="password" id="old-password" placeholder="現在のPassword"><br>
+                <input type="password" id="new-password" placeholder="新しいPassword（6文字以上）"><br>
                 <input type="password" id="new-password-confirm" placeholder="確認用"><br>
                 <button type="button" id="change-pw-btn" style="background:#000; color:white;">変更する</button>
             </div>
@@ -325,12 +375,12 @@ let weatherLocation = { lat: 35.9251, lng: 139.4858, cityName: "埼玉県川越�
 let editingBlogId = null;
 let lastRenderMin = -1;
 let schoolInfo = { year: new Date().getFullYear(), className: "" };
-
-// 入力データの一時保存用（再描画時のデータ消失防止）
+let goalSettings = { isActive: false, title: "", description: "" };
+let classGoalsList = [];
 let tempInputStore = {};
 
-let userSettings = { order: ['sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' }, cdVisible: true, cdSize: 'normal', showMyEventColumn: true, showClubColumn: true, showEvents: true, showMorning: true, showLunch: true, showClean: true, showClubStatus: true };
-const SECTION_NAMES = { 'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等', 'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡' };
+let userSettings = { order: ['sec-goal-form', 'sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' }, cdVisible: true, cdSize: 'normal', showMyEventColumn: true, showClubColumn: true, showEvents: true, showMorning: true, showLunch: true, showClean: true, showClubStatus: true, notifyCommittee: true, notifyBlog: true, notifySubmission: true };
+const SECTION_NAMES = { 'sec-goal-form': '目標の提出', 'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等', 'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡' };
 const COUNTDOWN_PRESETS = [{id:"kenritsu",label:"県立入試"},{id:"shiritsu",label:"私立入試"},{id:"exam",label:"定期試験"},{id:"sports",label:"体育祭"},{id:"chorus",label:"合唱祭"},{id:"soutai",label:"学総"},{id:"shinjin",label:"新人戦"},{id:"school_trip",label:"修学旅行"},{id:"camp",label:"宿泊学習"},{id:"field_trip",label:"校外学習"},{id:"term2_start",label:"2学期始業式"},{id:"term3_start",label:"3学期始業式"},{id:"graduation",label:"卒業式"},{id:"summer",label:"夏休み"},{id:"winter",label:"冬休み"},{id:"custom1",isCustom:true},{id:"custom2",isCustom:true},{id:"custom3",isCustom:true}];
 
 function getLocalDateStr(d) { return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`; }
@@ -406,8 +456,6 @@ function updatePortalTitle() {
         t = `${schoolInfo.year} ${schoolInfo.className} ${t}`;
     } else if (schoolInfo.year) {
         t = `${schoolInfo.year} ${t}`;
-    } else {
-        t = `My Class Portal`;
     }
     document.getElementById('login-portal-title').innerText = t;
     document.getElementById('main-portal-title').innerText = t;
@@ -425,7 +473,7 @@ function toggleDeviceView() {
     let meta = document.getElementById('viewport-meta'); isPcView = !isPcView; meta.setAttribute('content', isPcView ? 'width=850' : 'width=device-width, initial-scale=1.0'); 
     let btn = document.getElementById('btn-device-view');
     if(btn) {
-        btn.innerText = isPcView ? 'PC View' : 'Mobile View'; btn.style.backgroundColor = isPcView ? '#e0f7fa' : ''; btn.style.color = isPcView ? '#000' : '';
+        btn.innerText = isPcView ? '💻 PC表示 (切替)' : '📱 スマホ表示 (切替)'; btn.style.backgroundColor = isPcView ? '#e0f7fa' : ''; btn.style.color = isPcView ? '#000' : '';
         if(document.body.classList.contains('dark-mode') && isPcView) { btn.style.backgroundColor = '#004d40'; btn.style.color = '#fff'; }
     }
 }
@@ -449,7 +497,7 @@ firebase.auth().onAuthStateChanged(user => {
     if(user){ resetInactivityTimer(); initApp(user); }
     else { document.getElementById('main-content').style.display='none'; document.getElementById('login-section').style.display='block'; }
 });
-document.getElementById('login-btn').onclick = () => { firebase.auth().signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value).catch(e=>alert("ログイン失敗: "+e.message)); };
+document.getElementById('login-btn').onclick = () => { firebase.auth().signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value).catch(e=>alert("Login Failed: "+e.message)); };
 function logout() { firebase.auth().signOut().then(()=> { localStorage.removeItem('lastActivity'); location.reload(); }); }
 
 async function fetchWeather() {
@@ -469,6 +517,7 @@ async function safeRenderAll() {
         await displayWeeklySchedule();
         renderSubmissionsUI();
         updateTopReminder();
+        updateNewArrivals();
     } catch(e) { console.error(e); } 
     finally {
         isRendering = false; 
@@ -484,18 +533,137 @@ function resetWeekDatesOnly() {
     currentWeekBaseDate = now;
 }
 
+function updateNewArrivals() {
+    let html = "";
+    let now = new Date();
+    let threeDaysAgo = new Date(); threeDaysAgo.setDate(now.getDate() - 3);
+
+    let notifyComm = userSettings.notifyCommittee !== false;
+    let notifyBlog = userSettings.notifyBlog !== false;
+    let notifySubm = userSettings.notifySubmission !== false;
+
+    let dismissedStr = localStorage.getItem('dismissedNotifications');
+    let dismissed = dismissedStr ? JSON.parse(dismissedStr) : [];
+
+    if (notifyComm) {
+        let unreadComms = allCommitteePosts.filter(p => p.createdAt && p.createdAt.toDate() > threeDaysAgo && p.status === 'approved' && !(p.likes||[]).includes(currentUserEmail) && !dismissed.includes(p.id));
+        unreadComms.forEach(p => {
+            let d = p.createdAt.toDate();
+            let ds = `${d.getMonth()+1}/${d.getDate()}(${["日","月","火","水","木","金","土"][d.getDay()]})`;
+            let role = p.roleName || "係・委員会";
+            html += `
+                <div style="background:#e3f2fd; border:1px solid #2196f3; padding:10px; margin-bottom:5px; border-radius:4px; font-weight:bold; color:#1976d2; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('comm-post-${p.id}')">【${ds}更新】${role}からの連絡が入りました。</div>
+                    <button type="button" style="background:transparent; border:none; font-size:1.4em; color:#1976d2; cursor:pointer; padding:0 5px;" onclick="dismissNotification('${p.id}')">×</button>
+                </div>
+            `;
+        });
+    }
+
+    if (notifyBlog) {
+        let recentBlogs = allBlogs.filter(p => p.createdAt && p.createdAt.toDate() > threeDaysAgo && p.createdAt.toDate() <= now && !dismissed.includes(p.id));
+        recentBlogs.forEach(p => {
+            let d = p.createdAt.toDate();
+            let ds = `${d.getMonth()+1}/${d.getDate()}(${["日","月","火","水","木","金","土"][d.getDay()]})`;
+            html += `
+                <div style="background:#e3f2fd; border:1px solid #2196f3; padding:10px; margin-bottom:5px; border-radius:4px; font-weight:bold; color:#1976d2; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('sec-blogs')">【${ds}更新】担任のやつが更新されました。</div>
+                    <button type="button" style="background:transparent; border:none; font-size:1.4em; color:#1976d2; cursor:pointer; padding:0 5px;" onclick="dismissNotification('${p.id}')">×</button>
+                </div>
+            `;
+        });
+    }
+
+    if (notifySubm && !isAdmin) {
+        let myChecks = studentMaster[currentUserEmail]?.checks || {};
+        submissionsList.forEach(s => {
+            if (!myChecks[s.id] && !dismissed.includes('subm_'+s.id)) {
+                let d = new Date(s.deadline);
+                let ds = isNaN(d) ? s.deadline : `${d.getMonth()+1}/${d.getDate()}(${["日","月","火","水","木","金","土"][d.getDay()]})`;
+                html += `
+                <div style="background:#fff3cd; border:1px solid #fbc02d; padding:10px; margin-bottom:5px; border-radius:4px; font-weight:bold; color:#f57f17; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('sec-submissions')">【${ds}締切】「${s.title}」の提出物があります。</div>
+                    <button type="button" style="background:transparent; border:none; font-size:1.4em; color:#f57f17; cursor:pointer; padding:0 5px;" onclick="dismissNotification('subm_${s.id}')">×</button>
+                </div>
+                `;
+            }
+        });
+    }
+
+    let container = document.getElementById('new-arrival-info');
+    if(html && !isAdmin) {
+        container.innerHTML = html;
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+}
+
+function dismissNotification(id) {
+    let dismissedStr = localStorage.getItem('dismissedNotifications');
+    let dismissed = dismissedStr ? JSON.parse(dismissedStr) : [];
+    if(!dismissed.includes(id)) {
+        dismissed.push(id);
+        localStorage.setItem('dismissedNotifications', JSON.stringify(dismissed));
+    }
+    updateNewArrivals();
+}
+
+function scrollToElement(id) {
+    let el = document.getElementById(id);
+    if(el) {
+        el.scrollIntoView({behavior: 'smooth', block: 'center'});
+        let origBg = el.style.backgroundColor;
+        el.style.transition = "background-color 0.5s";
+        el.style.backgroundColor = "#fff9c4";
+        setTimeout(() => { el.style.backgroundColor = origBg; }, 1500);
+    }
+}
+
 async function initApp(user) {
     db.collection("config").doc("school_info").onSnapshot(s => {
         if(s.exists) { schoolInfo = s.data(); updatePortalTitle(); }
     });
 
     db.collection("config").doc("weather").onSnapshot(async s => { if(s.exists) weatherLocation = s.data(); await fetchWeather(); safeRenderAll(); });
+    
+    db.collection("config").doc("emergency_msg").onSnapshot(s => {
+        let data = s.exists ? s.data() : null;
+        let container = document.getElementById('emergency-msg-container');
+        if (data && data.isActive) {
+            let title = data.title || "⚠ 重要なお知らせ";
+            let bg = data.bgColor || "#fffde7"; 
+            let border = data.borderColor || "#fdd835";
+            container.innerHTML = `<div class="goal-box" style="border: 4px dashed ${border}; background-color: ${bg}; margin-bottom: 20px; color: #000; text-align:left; padding:15px;">
+                <h3 style="margin-top:0; border-bottom: 1px solid ${border}; color: #000; font-size:1.2em; padding-bottom:5px;">${title}</h3>
+                <div style="white-space: pre-wrap; font-size: 1.05em; line-height:1.6;">${data.content}</div>
+            </div>`;
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+            container.innerHTML = '';
+        }
+    });
+
+    db.collection("config").doc("student_goal_setting").onSnapshot(s => {
+        if(s.exists) { goalSettings = s.data(); }
+        else { goalSettings = { isActive: false, title: "", description: "" }; }
+        renderPersonalGoal();
+    });
+
+    db.collection("config").doc("class_goals").onSnapshot(s => {
+        classGoalsList = s.exists ? (s.data().items || []) : [];
+        renderClassGoals();
+    });
+
     document.getElementById('login-section').style.display='none'; document.getElementById('main-content').style.display='block';
     currentUserEmail = user.email; isAdmin = (user.email === TEACHER_EMAIL);
     
     if(isAdmin) { 
         let adminBtn = document.getElementById('btn-admin-page'); if(adminBtn) adminBtn.style.display = 'block';
         let btnBlog = document.getElementById('btn-show-blog-form'); if(btnBlog) btnBlog.style.display = 'block';
+        document.getElementById('my-points-display').style.display = 'none'; 
     }
 
     db.collection("config").doc("countdowns").onSnapshot(s => { countdownSettings = s.exists ? s.data() : {}; renderCountdownsUI(); });
@@ -514,20 +682,27 @@ async function initApp(user) {
     db.collection("students").onSnapshot(snap => {
         studentMaster = {}; snap.forEach(doc => { studentMaster[doc.id] = doc.data(); });
         let myD = studentMaster[currentUserEmail] || {}; isSubAdmin = myD.isSubAdmin === true; myPoints = myD.points || 0; myStreak = myD.streak || 0;
-        document.getElementById('my-points-display').innerText = `${myPoints} Pt`;
+        
+        if(!isAdmin) document.getElementById('my-points-display').innerText = `${myPoints} Pt`;
         
         let todayStr = getLocalDateStr(new Date());
         if(myD.spinnerUsedDate === todayStr && myD.todaySpinnerMulti) { spinnerMulti = myD.todaySpinnerMulti; } else { spinnerMulti = 1; }
         if(myD.spinnerUsedDate !== todayStr && isSchoolDay(todayStr) && !isAdmin) { document.getElementById('spinner-btn').style.display='inline-block'; } else { document.getElementById('spinner-btn').style.display='none'; }
 
+        renderPersonalGoal();
+        renderClassGoals();
+
         if(myD.settings) {
             if(myD.settings.showClubColumn === undefined) myD.settings.showClubColumn = true;
             if(myD.settings.showMyEventColumn === undefined) myD.settings.showMyEventColumn = true;
             if(myD.settings.showEvents === undefined) myD.settings.showEvents = true;
-            if(myD.settings.showMorning === undefined) myD.settings.showMorning = true;
-            if(myD.settings.showLunch === undefined) myD.settings.showLunch = true;
-            if(myD.settings.showClean === undefined) myD.settings.showClean = true;
-            if(myD.settings.showClubStatus === undefined) myD.settings.showClubStatus = true;
+            if(myD.settings.showMorning === undefined) myD.settings.showMorning = false;
+            if(myD.settings.showLunch === undefined) myD.settings.showLunch = false;
+            if(myD.settings.showClean === undefined) myD.settings.showClean = false;
+            if(myD.settings.showClubStatus === undefined) myD.settings.showClubStatus = false;
+            if(myD.settings.notifyCommittee === undefined) myD.settings.notifyCommittee = true;
+            if(myD.settings.notifyBlog === undefined) myD.settings.notifyBlog = true;
+            if(myD.settings.notifySubmission === undefined) myD.settings.notifySubmission = true;
             userSettings = Object.assign({}, userSettings, myD.settings);
             
             document.getElementById('toggle-weekend').checked = false;
@@ -560,8 +735,145 @@ async function initApp(user) {
     db.collection("access_logs").add({ email: user.email, name: isAdmin ? "先生" : (studentMaster[user.email]?.name || "生徒"), accessedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
     db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => { submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() })); if(holidaysLoaded) safeRenderAll(); });
-    db.collection("blogs").orderBy("createdAt", "desc").onSnapshot(snap => { allBlogs = []; snap.forEach(d => allBlogs.push({id: d.id, ...d.data()})); currentBlogPage = 1; renderBlogs(); });
-    db.collection("committee_posts").onSnapshot(snap => { allCommitteePosts = []; snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()})); renderCommitteePosts(); });
+    db.collection("blogs").orderBy("createdAt", "desc").onSnapshot(snap => { allBlogs = []; snap.forEach(d => allBlogs.push({id: d.id, ...d.data()})); currentBlogPage = 1; renderBlogs(); updateNewArrivals(); });
+    db.collection("committee_posts").onSnapshot(snap => { allCommitteePosts = []; snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()})); renderCommitteePosts(); updateNewArrivals(); });
+}
+
+function renderPersonalGoal() {
+    let myD = studentMaster[currentUserEmail] || {};
+    let myGoal = myD.goal || {};
+    let goalDisplay = document.getElementById('personal-goal-container');
+    let goalForm = document.getElementById('sec-goal-form');
+    
+    if (myGoal.status === 'approved') {
+        goalDisplay.innerHTML = `<div class="goal-box"><div class="goal-label">${myGoal.label || '目標'}</div><div class="goal-text">${myGoal.text}</div></div>`;
+        goalDisplay.style.display = 'block';
+        if(goalForm && !isAdmin) goalForm.style.display = 'none';
+    } else {
+        goalDisplay.style.display = 'none';
+        if (goalSettings && goalSettings.isActive && !isAdmin) {
+            goalForm.style.display = 'block';
+            document.getElementById('goal-sec-title').innerText = `◆ ${goalSettings.title}`;
+            document.getElementById('goal-sec-desc').innerText = goalSettings.description;
+            
+            let formInner = document.getElementById('goal-form-inner');
+            if (myGoal.status === 'pending') {
+                formInner.innerHTML = `<p style="color:#f57c00; font-weight:bold; text-align:center;">現在、先生の確認待ちです...</p>`;
+            } else {
+                let rejectMsg = myGoal.status === 'rejected' ? `<p style="color:#d32f2f; font-weight:bold;">差し戻されました。内容を修正して再提出してください。</p>` : "";
+                formInner.innerHTML = `${rejectMsg}
+                <textarea id="goal-text-input" placeholder="入力してください..." style="height:60px; width:100%; padding:5px;">${myGoal.text||''}</textarea>
+                <div style="text-align:right; margin-top:5px;"><button type="button" onclick="submitPersonalGoal()">提出する</button></div>`;
+            }
+        } else {
+            if(goalForm) goalForm.style.display = 'none';
+        }
+    }
+}
+
+async function submitPersonalGoal() {
+    let text = document.getElementById('goal-text-input').value.trim();
+    if(!text) return alert("内容を入力してください。");
+    await db.collection("students").doc(currentUserEmail).update({ "goal.label": goalSettings.title, "goal.text": text, "goal.status": "pending" });
+    alert("提出しました。先生の確認をお待ちください。");
+}
+
+function renderClassGoals() {
+    let container = document.getElementById('class-goal-container');
+    let visibleGoals = classGoalsList.filter(g => g.isVisible).sort((a,b) => (a.order||0) - (b.order||0));
+    
+    if (visibleGoals.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    let html = "";
+    visibleGoals.forEach((g) => {
+        let canEdit = isAdmin || isSubAdmin;
+        let editBtn = canEdit ? `<button type="button" onclick="startEditClassGoal('${g.id}')" style="font-size:0.75em; padding:2px 6px; float:right;">編集</button>` : "";
+        
+        let colors = {
+            'blue': { border: '#3f51b5', label: '#3f51b5' },
+            'red': { border: '#d32f2f', label: '#d32f2f' },
+            'green': { border: '#388e3c', label: '#388e3c' },
+            'yellow': { border: '#fbc02d', label: '#f57f17' }
+        };
+        let theme = colors[g.theme || 'blue'];
+
+        html += `<div class="goal-box" style="border-color:${theme.border}; margin-bottom:10px;" id="class-goal-box-${g.id}">
+            <div class="goal-label" style="color:${theme.label}; overflow:hidden;">${g.label || '行事の目標'} ${editBtn}</div>
+            <div class="goal-text">${g.text}</div>
+        </div>`;
+    });
+    container.innerHTML = html;
+    container.style.display = 'block';
+}
+
+function startEditClassGoal(id) {
+    let g = classGoalsList.find(x => x.id === id);
+    if (!g) return;
+    let box = document.getElementById(`class-goal-box-${id}`);
+    box.innerHTML = `
+        <div style="text-align:left; margin-bottom:5px;">見出し: <input type="text" id="edit-cg-label-${id}" value="${String(g.label||'').replace(/"/g, '&quot;')}" style="width:100%; padding:4px; border-radius:0;"></div>
+        <div style="text-align:left;">内容: <textarea id="edit-cg-text-${id}" style="width:100%; height:60px; padding:4px; border-radius:0;">${g.text||''}</textarea></div>
+        <div style="text-align:right; margin-top:5px;">
+            <button type="button" onclick="saveClassGoal('${id}')" style="background:#3f51b5; color:white; border-color:#3f51b5;">保存</button>
+            <button type="button" onclick="renderClassGoals()">キャンセル</button>
+        </div>
+    `;
+}
+
+async function saveClassGoal(id) {
+    let label = document.getElementById(`edit-cg-label-${id}`).value.trim();
+    let text = document.getElementById(`edit-cg-text-${id}`).value.trim();
+    
+    let newList = classGoalsList.map(g => {
+        if(g.id === id) { return { ...g, label: label, text: text }; }
+        return g;
+    });
+    
+    await db.collection("config").doc("class_goals").set({ items: newList });
+}
+
+function openBonusModal() {
+    let cards = document.querySelectorAll('.bonus-card');
+    cards.forEach(c => {
+        c.style.transform = "rotateY(0deg)";
+        c.style.background = "#2196f3";
+        c.style.color = "white";
+        c.innerText = "?";
+        c.onclick = () => selectBonusCard(Array.from(cards).indexOf(c));
+    });
+    document.getElementById('bonus-modal-overlay').style.display = 'flex';
+}
+
+async function selectBonusCard(idx) {
+    let r = Math.random() * 100; 
+    let result = 1; let msg = "";
+    if(r < 5) { result = 4; msg = "大当たり！本日のボーナスが 4倍！🎉"; } 
+    else if(r < 20) { result = 3; msg = "当たり！本日のボーナスが 3倍！✨"; } 
+    else if(r < 50) { result = 2; msg = "小当たり！本日のボーナスが 2倍！👍"; } 
+    else { result = 1; msg = "残念... 本日のボーナスは 1倍 です。"; }
+
+    let cards = document.querySelectorAll('.bonus-card');
+    cards.forEach(c => c.onclick = null); 
+    
+    cards[idx].style.transform = "rotateY(90deg)";
+    setTimeout(() => {
+        cards[idx].style.background = "#ffca28";
+        cards[idx].style.color = "#d84315";
+        cards[idx].style.borderColor = "#f57f17";
+        cards[idx].innerText = "x" + result;
+        cards[idx].style.transform = "rotateY(0deg)";
+    }, 150);
+
+    setTimeout(async () => {
+        spinnerMulti = result; 
+        await db.collection("students").doc(currentUserEmail).update({ spinnerUsedDate: getLocalDateStr(new Date()), todaySpinnerMulti: spinnerMulti });
+        document.getElementById('spinner-btn').style.display='none'; 
+        alert(`🎯 Bonus Chance 結果\n\n${msg}`);
+        document.getElementById('bonus-modal-overlay').style.display = 'none';
+    }, 1000);
 }
 
 async function processPendingPoints(pendingArray) {
@@ -598,7 +910,7 @@ async function addPoints(reason, pts) {
 function openPointDetails() {
     if(isAdmin) return;
     let details = studentMaster[currentUserEmail]?.pointDetails || {}; let todayStr = getLocalDateStr(new Date());
-    let html = `<div style="text-align:center; margin-bottom:10px; padding:5px; background:#fff3cd; border:1px solid #ffc107; font-weight:bold; color:#d32f2f;">本日のルーレット倍率：${spinnerMulti} 倍</div>`;
+    let html = `<div style="text-align:center; margin-bottom:10px; padding:5px; background:#fff3cd; border:1px solid #ffc107; font-weight:bold; color:#d32f2f;">本日の倍率：${spinnerMulti} 倍</div>`;
     if (details.date === todayStr && details.history && details.history.length > 0) {
         html += details.history.map(h => `<div style="border-bottom:1px dashed #000; padding:5px 0;">${h.time} - ${h.reason} <span style="color:#d32f2f; font-weight:bold; float:right;">${h.points>0?'+':''}${h.points}Pt</span></div>`).join('');
     } else { html += "<p>本日のポイント獲得履歴はありません。</p>"; }
@@ -641,15 +953,6 @@ async function claimDailyBonus() {
     await db.collection("students").doc(currentUserEmail).update({ streak: newStreak, lastCheckDate: todayStr });
     await addPoints(`帰りの会（連続${newStreak}日${spinnerMulti>1?'×'+spinnerMulti:''}）`, pts);
     document.getElementById('bonus-check-area').style.display='none'; alert(`予定を確認しました！\n連続 ${newStreak} 日達成！\n${pts} Pt 獲得しました✨`);
-}
-
-async function spinRoulette() {
-    let myD = studentMaster[currentUserEmail] || {}; let todayStr = getLocalDateStr(new Date());
-    if(myD.spinnerUsedDate === todayStr) return alert("本日のルーレットは終了しています。");
-    let r = Math.random() * 100; let result = 1; let msg = "";
-    if(r < 5) { result = 4; msg = "大当たり！本日のボーナスが 4倍！🎉"; } else if(r < 20) { result = 3; msg = "当たり！本日のボーナスが 3倍！✨"; } else if(r < 50) { result = 2; msg = "小当たり！本日のボーナスが 2倍！👍"; } else { result = 1; msg = "残念... 本日のボーナスは 1倍 です。"; }
-    spinnerMulti = result; await db.collection("students").doc(currentUserEmail).update({ spinnerUsedDate: todayStr, todaySpinnerMulti: spinnerMulti });
-    document.getElementById('spinner-btn').style.display='none'; alert(`🎯 ルーレット結果\n\n${msg}`);
 }
 
 async function likePost(postId) {
@@ -736,6 +1039,7 @@ function applyUserSettings() {
     const container = document.getElementById('main-sections-container'); if(container) userSettings.order.forEach(id => { let el = document.getElementById(id); if(el) container.appendChild(el); });
     let cdArea = document.getElementById('countdown-display-area'); if(cdArea) cdArea.style.display = userSettings.cdVisible ? 'flex' : 'none';
     renderCountdownsUI(); 
+    updateNewArrivals();
 }
 
 function openSettingsModal() {
@@ -754,6 +1058,10 @@ function openSettingsModal() {
     } else { 
         let nb = document.querySelector('input[name="set-cd-size"][value="normal"]'); if(nb) nb.checked = true; 
     }
+
+    let nComm = document.getElementById('set-notify-comm'); if(nComm) nComm.checked = userSettings.notifyCommittee !== false;
+    let nBlog = document.getElementById('set-notify-blog'); if(nBlog) nBlog.checked = userSettings.notifyBlog !== false;
+    let nSubm = document.getElementById('set-notify-subm'); if(nSubm) nSubm.checked = userSettings.notifySubmission !== false;
     
     if(userSettings.bgColors) {
         document.getElementById('set-bg-recent').value = userSettings.bgColors['sec-recent'] || '#ffffff';
@@ -773,6 +1081,10 @@ async function saveUserSettings() {
     
     let cdSizeNode = document.querySelector('input[name="set-cd-size"]:checked');
     userSettings.cdSize = cdSizeNode ? cdSizeNode.value : 'normal';
+
+    let nComm = document.getElementById('set-notify-comm'); if(nComm) userSettings.notifyCommittee = nComm.checked;
+    let nBlog = document.getElementById('set-notify-blog'); if(nBlog) userSettings.notifyBlog = nBlog.checked;
+    let nSubm = document.getElementById('set-notify-subm'); if(nSubm) userSettings.notifySubmission = nSubm.checked;
     
     let bgColors = {};
     bgColors['sec-recent'] = document.getElementById('set-bg-recent').value;
@@ -782,6 +1094,11 @@ async function saveUserSettings() {
     bgColors['sec-blogs'] = document.getElementById('set-bg-blogs').value;
     let dmBg = document.getElementById('set-bg-dm'); if(dmBg) bgColors['sec-dm'] = dmBg.value;
     userSettings.bgColors = bgColors;
+
+    let lis = document.querySelectorAll('#sortable-list li');
+    let newOrder = [];
+    lis.forEach(li => newOrder.push(li.dataset.id));
+    if(newOrder.length > 0) userSettings.order = newOrder;
 
     if (currentUserEmail) {
         await db.collection("students").doc(currentUserEmail).set({ settings: userSettings }, { merge: true });
@@ -794,10 +1111,11 @@ async function saveUserSettings() {
 async function resetUserSettings() {
     if(!confirm("設定を初期状態に戻しますか？")) return;
     userSettings = { 
-        order: ['sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], 
+        order: ['sec-goal-form', 'sec-recent', 'sec-weekly', 'sec-submissions', 'sec-committee', 'sec-blogs', 'sec-dm'], 
         bgColors: { 'sec-recent': '#ffffff', 'sec-weekly': '#ffffff', 'sec-submissions': '#ffffff', 'sec-committee': '#ffffff', 'sec-blogs': '#ffffff', 'sec-dm': '#ffffff' }, 
         cdVisible: true, cdSize: 'normal', 
-        showMyEventColumn: true, showClubColumn: true, showEvents: true, showMorning: true, showLunch: true, showClean: true, showClubStatus: true 
+        showMyEventColumn: true, showClubColumn: true, showEvents: true, showMorning: false, showLunch: false, showClean: false, showClubStatus: false, 
+        notifyCommittee: true, notifyBlog: true, notifySubmission: true 
     };
     if (currentUserEmail) {
         await db.collection("students").doc(currentUserEmail).set({ settings: userSettings }, { merge: true });
@@ -846,19 +1164,20 @@ async function renderDay(dateStr, elId, prefix) {
         const regWeek = regularScheduleData[dayKey] && regularScheduleData[dayKey].subs ? regularScheduleData[dayKey].subs : (regularScheduleData[dayKey]||[]);
         if (!data.lessons) { data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" })); if(!doc.exists && regWeek) data.lessons.forEach((l, i) => l.sub = regWeek[i] || ""); }
         
-        let editBtn = isAdmin ? `<button type="button" id="admin-edit-btn-${dateStr}" onclick="startAdminInlineEdit('${dateStr}')" style="padding:2px 6px; font-size:0.8em; margin-left:10px;">編集</button>
-        <button type="button" id="admin-save-btn-${dateStr}" onclick="saveAdminInlineEdit('${dateStr}')" style="display:none; padding:2px 6px; font-size:0.8em; margin-left:10px; background:#000; color:white;">保存</button>
-        <button type="button" id="admin-revert-btn-${dateStr}" onclick="revertToRegularSchedule('${dateStr}')" style="display:none; padding:2px 6px; font-size:0.8em; color:#d32f2f;">戻す</button>
-        <button type="button" id="admin-cancel-btn-${dateStr}" onclick="safeRenderAll()" style="display:none; padding:2px 6px; font-size:0.8em;">キャンセル</button>` : '';
+        let editBtn = isAdmin ? `<div style="display:flex; flex-wrap:nowrap; gap:2px; justify-content:flex-end;">
+        <button type="button" id="admin-edit-btn-${dateStr}" onclick="startAdminInlineEdit('${dateStr}')" style="padding:2px 4px; font-size:clamp(0.6em, 2vw, 0.8em); white-space:nowrap; margin:0;">編集</button>
+        <button type="button" id="admin-save-btn-${dateStr}" onclick="saveAdminInlineEdit('${dateStr}')" style="display:none; padding:2px 4px; font-size:clamp(0.6em, 2vw, 0.8em); background:#000; color:white; white-space:nowrap; margin:0;">保存</button>
+        <button type="button" id="admin-revert-btn-${dateStr}" onclick="revertToRegularSchedule('${dateStr}')" style="display:none; padding:2px 4px; font-size:clamp(0.6em, 2vw, 0.8em); color:#d32f2f; white-space:nowrap; margin:0;">削除</button>
+        <button type="button" id="admin-cancel-btn-${dateStr}" onclick="safeRenderAll()" style="display:none; padding:2px 4px; font-size:clamp(0.6em, 2vw, 0.8em); white-space:nowrap; margin:0;">キャンセル</button></div>` : '';
         
-        let html = `<div class="day-label" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>${prefix} ${d.getMonth()+1}/${d.getDate()}（${week[d.getDay()]}）${weatherHtml}</div>
-                        <div>${editBtn}</div>
+        let html = `<div class="day-label" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:nowrap; gap:5px;">
+                        <div style="flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${prefix} ${d.getMonth()+1}/${d.getDate()}（${week[d.getDay()]}）${weatherHtml}</div>
+                        ${editBtn}
                     </div>`;
         
         let vac = vacationData && vacationData.find(v=>dateStr>=v.start&&dateStr<=v.end);
         let isVac = !!vac; let isHol = !isSchoolDay(dateStr);
-        let aEv = isHol ? (holidays[dateStr] ? `<span style="color:red; font-weight:bold;">${holidays[dateStr].includes("振替休日")?"振替休日":holidays[dateStr]}</span>` : (customHolidays[dateStr]?`<span style="color:red; font-weight:bold;">${customHolidays[dateStr].name}</span>`:(isVac && vac.note ? `<span style="color:#888; font-weight:normal;">${vac.note}</span>` : ""))) : (data.event||"");
+        let aEv = isHol ? (holidays[dateStr] ? `<span style="color:red; font-weight:bold;">${holidays[dateStr].includes("振替休日")?"振替休日":holidays[dateStr]}</span>` : (customHolidays[dateStr]?`<span style="color:red; font-weight:bold;">${customHolidays[dateStr].name}</span>`:(isVac && vac.note ? `<span style="font-weight:normal; color:inherit;">${vac.note}</span>` : ""))) : (data.event ? `・${data.event}` : "");
         
         if(aEv) html += `<div style="font-weight:bold; margin-bottom:5px;">${aEv}</div>`;
         
@@ -986,7 +1305,7 @@ function resetWeek() { resetWeekDatesOnly(); safeRenderAll(); }
 
 function toggleEditMyWeek() { 
     isEditingMyWeek = !isEditingMyWeek;
-    if (isEditingMyWeek) tempInputStore = {}; // 編集開始時に一時保存をクリア
+    if (isEditingMyWeek) tempInputStore = {}; 
     document.getElementById('btn-edit-my-week').style.display = isEditingMyWeek ? 'none' : 'inline-block'; 
     document.getElementById('btn-save-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none'; 
     document.getElementById('btn-cancel-my-week').style.display = isEditingMyWeek ? 'inline-block' : 'none'; 
@@ -1046,6 +1365,8 @@ function saveTempInputs() {
 }
 
 async function saveMyWeek() {
+    let st = window.scrollY;
+    
     let t_m = document.getElementById('toggle-morning'); if(t_m) userSettings.showMorning = t_m.checked;
     let t_l = document.getElementById('toggle-lunch'); if(t_l) userSettings.showLunch = t_l.checked;
     let t_c = document.getElementById('toggle-clean'); if(t_c) userSettings.showClean = t_c.checked;
@@ -1058,24 +1379,40 @@ async function saveMyWeek() {
     
     let obj = {}; 
     currentWeeklyDates.forEach(ds => { 
-        let sd = { clubType: document.getElementById(`edit-my-club-type-${ds}`)?.value||"", clubDetail: document.getElementById(`edit-my-club-detail-${ds}`)?.value||"" }; 
-        let rows = document.querySelectorAll(`#my-events-rows-${ds} .my-event-row`);
+        let ct = document.getElementById(`edit-my-club-type-${ds}`);
+        let cd = document.getElementById(`edit-my-club-detail-${ds}`);
+        
+        let cTypeVal = ct ? ct.value : (tempInputStore[ds]?.type || "");
+        let cDetVal = cd ? cd.value : (tempInputStore[ds]?.detail || "");
+
+        let sd = { clubType: cTypeVal, clubDetail: cDetVal }; 
         sd.myEvents = [];
-        rows.forEach(r => { sd.myEvents.push({ type: r.querySelector('.my-ev-type').value, time: r.querySelector('.my-ev-time').value, note: r.querySelector('.my-ev-note').value }); });
+        
+        let rows = document.querySelectorAll(`#my-events-rows-${ds} .my-event-row`);
+        if (rows.length > 0) {
+            rows.forEach(r => { sd.myEvents.push({ type: r.querySelector('.my-ev-type').value, time: r.querySelector('.my-ev-time').value, note: r.querySelector('.my-ev-note').value }); });
+        } else if (tempInputStore[ds] && tempInputStore[ds].evs) {
+            sd.myEvents = tempInputStore[ds].evs;
+        }
+        
         obj[`schedules.${ds}`] = sd;
     });
+    
     await db.collection("students").doc(currentUserEmail).update(obj); 
     
     isEditingMyWeek = false; 
+    tempInputStore = {}; 
     document.getElementById('btn-edit-my-week').style.display = 'inline-block'; 
     document.getElementById('btn-save-my-week').style.display = 'none'; 
     document.getElementById('btn-cancel-my-week').style.display = 'none'; 
     document.getElementById('my-week-settings').style.display = 'none'; 
     
-    displayWeeklySchedule();
+    await displayWeeklySchedule();
+    requestAnimationFrame(() => { window.scrollTo(0, st); });
 }
 
 async function displayWeeklySchedule() {
+    let st = window.scrollY;
     saveTempInputs();
     
     let toggleW = document.getElementById('toggle-weekend'); let showWeek = toggleW ? toggleW.checked : false; 
@@ -1126,7 +1463,7 @@ async function displayWeeklySchedule() {
             }).join("<br>");
             let vac = vacationData && vacationData.find(v=>ds>=v.start&&ds<=v.end);
             let isVac = !!vac;
-            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[ds].name}</span>`:(isVac && vac.note ? `<span style="color:#888; font-weight:normal;">${vac.note}</span>` : ""))) : (wd[i].event||"");
+            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[dateStr].name}</span>`:(isVac && vac.note ? `<span style="color:inherit; font-weight:normal;">${vac.note}</span>` : ""))) : (wd[i].event ? `${wd[i].event}` : "");
             
             let cEvHtml = "";
             if (showEvents) {
@@ -1207,6 +1544,7 @@ async function displayWeeklySchedule() {
             html += `<tr class="${isHol?'holiday-row':''}"><td style="padding:2px;">${dobj.getMonth()+1}/${dobj.getDate()}<br><span style="color:${wIdx===0?'red':wIdx===6?'blue':'inherit'}; font-weight:bold;">${names[wIdx]}</span></td>${cEvHtml}${infoColHtml}${myN}${clH}</tr>` + adminEditRow;
         });
         document.getElementById('weekly-schedule-display').innerHTML = html + "</table>";
+        requestAnimationFrame(() => { window.scrollTo(0, st); });
     } catch(e) { document.getElementById('weekly-schedule-display').innerHTML = "読込エラー: " + e.message; console.error(e); }
 }
 
@@ -1317,7 +1655,7 @@ function editMyCommitteePost(id) {
     
     container.innerHTML = `
         <div class="edit-box">
-            <h4 style="margin-top:0;">■ 連絡の再編集</h4>
+            <h4 style="margin-top:0;">連絡の再編集</h4>
             <input type="text" id="student-edit-comm-title-${id}" value="${post.title||''}" placeholder="記事のタイトル（任意）" style="width:100%; margin-bottom:5px; border-radius:0;">
             <textarea id="student-edit-comm-input-${id}" style="width:100%; height:80px; padding:5px; border-radius:0;">${post.content}</textarea>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size:0.9em; align-items:center;">
@@ -1326,7 +1664,7 @@ function editMyCommitteePost(id) {
                 <div>公開: <input type="date" id="student-edit-comm-start-${id}" value="${post.startDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"> 〜 <input type="date" id="student-edit-comm-end-${id}" value="${post.endDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"></div>
             </div>
             <div style="text-align:right; margin-top:5px;">
-                <button type="button" onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white; border-color:#ff9800;">${isAdmin?'投稿する':'保存して承認待ちへ'}</button>
+                <button type="button" onclick="saveStudentEditCommitteePost('${id}')" style="background:#ff9800; color:white; border-color:#ff9800;">${isAdmin?'保存して承認(公開)':'保存して承認待ちへ'}</button>
                 <button type="button" onclick="renderCommitteePosts()">キャンセル</button>
             </div>
         </div>
@@ -1361,11 +1699,14 @@ async function postCommitteeMessage() {
 }
 function updateCommitteeInputColor(c) { document.getElementById('committee-input').style.backgroundColor = c==='#ffffff'?'':c; }
 
-// ★ 担任のブログ機能
 async function postBlog() {
     let title = document.getElementById('blog-title').value.trim();
     let val = document.getElementById('blog-input').value.trim();
     if(!val) return alert("内容を入力してください");
+    
+    let fontColor = document.getElementById('blog-font-color').value;
+    let fontSize = document.getElementById('blog-font-size').value;
+    let isBold = document.getElementById('blog-is-bold').checked;
     
     let sDate = document.getElementById('blog-schedule-date').value;
     let sTime = document.getElementById('blog-schedule-time').value;
@@ -1391,15 +1732,21 @@ async function postBlog() {
     
     let ts = firebase.firestore.Timestamp.fromDate(targetDate);
     
+    let payload = { title: title, content: val, color: fontColor, size: fontSize, isBold: isBold, createdAt: ts, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    
     if(editingBlogId) {
-        await db.collection("blogs").doc(editingBlogId).update({ title: title, content: val, createdAt: ts, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await db.collection("blogs").doc(editingBlogId).update(payload);
         editingBlogId = null;
     } else {
-        await db.collection("blogs").add({ title: title, content: val, createdAt: ts });
+        delete payload.updatedAt;
+        await db.collection("blogs").add(payload);
     }
     
     document.getElementById('blog-title').value = '';
     document.getElementById('blog-input').value = '';
+    document.getElementById('blog-font-color').value = '#000000';
+    document.getElementById('blog-font-size').value = '1em';
+    document.getElementById('blog-is-bold').checked = false;
     document.getElementById('blog-schedule-date').value = '';
     document.getElementById('blog-schedule-time').value = '';
     document.getElementById('blog-form-area').style.display='none'; 
@@ -1413,6 +1760,9 @@ function editBlog(id) {
     editingBlogId = id; 
     document.getElementById('blog-title').value = b.title || '';
     document.getElementById('blog-input').value = b.content;
+    document.getElementById('blog-font-color').value = b.color || '#000000';
+    document.getElementById('blog-font-size').value = b.size || '1em';
+    document.getElementById('blog-is-bold').checked = !!b.isBold;
     
     if (b.createdAt && b.createdAt.toDate() > new Date()) {
         let d = b.createdAt.toDate();
@@ -1425,6 +1775,7 @@ function editBlog(id) {
     
     document.getElementById('blog-form-area').style.display = 'block'; 
     document.getElementById('btn-show-blog-form').style.display = 'none';
+    window.scrollTo(0, document.getElementById('sec-blogs').offsetTop);
 }
 
 async function deleteBlog(id) { if(confirm("この記事を削除しますか？")) await db.collection("blogs").doc(id).delete(); }
@@ -1438,7 +1789,10 @@ function renderBlogs() {
     let html = paged.map(d => {
         let adminAction = isAdmin ? `<div style="text-align:right; margin-top:5px;"><button type="button" onclick="editBlog('${d.id}')" style="padding:2px 6px; font-size:0.75em;">編集</button> <button type="button" onclick="deleteBlog('${d.id}')" style="padding:2px 6px; font-size:0.75em; color:#d32f2f;">削除</button></div>` : '';
         let titleHtml = d.title ? `<div style="font-weight:bold; margin-bottom:5px;">${d.title}</div>` : '';
-        return `<div class="post-item"><div class="post-date">${d.createdAt?formatDateTime(d.createdAt.toDate()):''}</div>${titleHtml}<div>${d.content.replace(/\n/g,'<br>')}</div>${adminAction}</div>`;
+        let fColor = d.color || 'inherit';
+        let fSize = d.size || '1em';
+        let fWeight = d.isBold ? 'bold' : 'normal';
+        return `<div class="post-item"><div class="post-date">${d.createdAt?formatDateTime(d.createdAt.toDate()):''}</div>${titleHtml}<div style="color:${fColor}; font-size:${fSize}; font-weight:${fWeight};">${d.content.replace(/\n/g,'<br>')}</div>${adminAction}</div>`;
     }).join('');
     document.getElementById('blog-list').innerHTML = html || "<p>投稿はありません。</p>";
     
@@ -1459,10 +1813,13 @@ function renderBlogs() {
                 let td = d.createdAt.toDate();
                 let ds = `${td.getMonth()+1}/${td.getDate()}(${days[td.getDay()]}) ${('0'+td.getHours()).slice(-2)}:${('0'+td.getMinutes()).slice(-2)}`;
                 let titleHtml = d.title ? `<div style="font-weight:bold; margin-bottom:5px;">${d.title}</div>` : '';
+                let fColor = d.color || 'inherit';
+                let fSize = d.size || '1em';
+                let fWeight = d.isBold ? 'bold' : 'normal';
                 sHtml += `<div class="post-item" style="background:white; border-color:#f57c00;">
                     <div class="post-date" style="color:#d32f2f;">📅 予約日時: ${ds}</div>
                     ${titleHtml}
-                    <div>${d.content.replace(/\n/g,'<br>')}</div>
+                    <div style="color:${fColor}; font-size:${fSize}; font-weight:${fWeight};">${d.content.replace(/\n/g,'<br>')}</div>
                     <div style="text-align:right; margin-top:5px;">
                         <button type="button" onclick="editBlog('${d.id}')" style="padding:2px 6px; font-size:0.75em;">編集</button> 
                         <button type="button" onclick="deleteBlog('${d.id}')" style="padding:2px 6px; font-size:0.75em; color:#d32f2f;">削除</button>
@@ -1488,7 +1845,7 @@ async function sendDirectMessage() {
 document.getElementById('change-pw-btn').onclick = async () => {
     const user = firebase.auth().currentUser; const o = document.getElementById('old-password').value, n = document.getElementById('new-password').value, c = document.getElementById('new-password-confirm').value;
     if(!o || !n || !c) return alert("入力してください"); if(n!==c) return alert("確認用と一致しません"); if(n.length<6) return alert("6文字以上");
-    try { await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, o)); await user.updatePassword(n); alert("パスワード変更完了"); document.getElementById('old-password').value=""; document.getElementById('new-password').value=""; document.getElementById('new-password-confirm').value=""; } catch (e) { alert("変更失敗"); }
+    try { await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, o)); await user.updatePassword(n); alert("Password変更完了"); document.getElementById('old-password').value=""; document.getElementById('new-password').value=""; document.getElementById('new-password-confirm').value=""; } catch (e) { alert("変更失敗"); }
 };
 </script>
 </body>
