@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理画面 - Class Portal</title>
+    <title>Admin Panel - Class Portal</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { background-color: #888888; color: #000; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; transition: background-color 0.3s; }
@@ -95,11 +95,11 @@
     <div id="main-content" style="display: none;">
         <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
             <div>
-                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;">管理画面</h1>
-                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">ログイン中: <span id="admin-email-display"></span></div>
+                <h1 id="main-portal-title" style="border:none; margin:0 0 5px 0; font-size:1.5em; color:inherit;"></h1>
+                <div style="font-weight: bold; font-size: 0.9em; margin-top: 5px; color: inherit;">Logging in: <span id="admin-email-display"></span></div>
             </div>
             <div style="display: flex; gap: 5px; flex-direction:column; align-items:flex-end;">
-                <button type="button" onclick="location.href='index.html'">ポータルへ</button>
+                <button type="button" onclick="location.href='index.html'">Return</button>
                 <button type="button" onclick="logout()" style="margin-top:0;">Logout</button>
             </div>
         </header>
@@ -117,10 +117,10 @@
                     <h2 style="border-bottom:none; color:inherit;">管理者用メニュー</h2>
                 </div>
 
-                <div class="category-title">■ システム・学校基本設定</div>
+                <div class="category-title">■ システム基本設定</div>
 
                 <details class="admin-form-box" open>
-                    <summary>［設定］学校・クラス情報の設定</summary>
+                    <summary>［設定］学級情報の設定</summary>
                     <p style="font-size:0.85em; margin-top:5px;">ここで設定した情報がポータルのタイトル等に反映されます。</p>
                     <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <div>
@@ -129,7 +129,7 @@
                             </select>
                         </div>
                         <div>
-                            クラス名: <input type="text" id="set-school-class" placeholder="例: 1年1組" style="width:150px; margin-bottom:0; border-radius:0;">
+                            学級名: <input type="text" id="set-school-class" placeholder="例: 1年1組" style="width:150px; margin-bottom:0; border-radius:0;">
                         </div>
                         <button type="button" onclick="saveSchoolInfo()" style="margin-bottom:0; background:#000; color:white;">設定を保存</button>
                         <button type="button" onclick="clearSchoolInfo()" style="margin-bottom:0;">クリア</button>
@@ -138,19 +138,19 @@
 
                 <details class="admin-form-box" id="admin-form-box-excel">
                     <summary>［一括管理］全設定のExcelインポート/エクスポート</summary>
-                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール（朝・昼休・清掃・放課後の有無を含む）、長期休業、下校時刻を1つのExcelファイルで管理できます。</p>
+                    <p style="font-size:0.9em; margin-top:5px;">名簿、係・委員会、スケジュール、長期休業、下校時刻を1つのファイルで管理できます。</p>
                     <div style="margin-top:10px; padding-bottom:15px; border-bottom:1px dashed #000;">
-                        <b>1. エクスポート（ダウンロード）</b><br>
+                        <b>1. データエクスポート</b><br>
                         <span style="font-size:0.85em;">指定した月のスケジュールを含めて出力します。</span><br>
                         スケジュール出力月：<input type="month" id="excel-month-input" style="width:150px; margin-right:10px;">
                         <button type="button" onclick="exportExcel()">現在の設定をダウンロード</button>
                     </div>
                     <div style="margin-top:15px;">
-                        <b>2. インポート（一括更新・プレビュー付き）</b><br>
+                        <b>2. データインポート</b><br>
                         <span style="font-size:0.85em;">Excelファイルを読み込むと、更新される内容を事前に確認できます。</span><br>
                         <input type="file" id="excel-file-input" accept=".xlsx" style="width:250px; border:1px solid #000; padding:4px;" onchange="handleExcelFileChange(event)">
                         <div id="import-preview-area" style="display:none; border:2px solid #d9534f; padding:15px; background:#fdf0f0; margin-top:10px; color:black;">
-                            <h4 style="margin-top:0; color:#d9534f; border:none;">🚨 インポートプレビュー（まだ保存されていません）</h4>
+                            <h4 style="margin-top:0; color:#d9534f; border:none;">インポートプレビュー</h4>
                             <div id="import-preview-content" style="font-size:0.9em; margin-bottom:10px; line-height:1.6;"></div>
                             <button type="button" onclick="commitExcelImport()" style="background:#d9534f; color:white; font-weight:bold; border:1px solid #000;">この内容で更新を実行する</button>
                             <button type="button" onclick="cancelExcelImport()">キャンセル</button>
@@ -179,7 +179,7 @@
                         </div>
                     </div>
                     <div style="padding-top:15px;">
-                        <b style="color:#d32f2f;">3. 次年度用 システムフルリセット</b>
+                        <b style="color:#d32f2f;">3. システムフルリセット</b>
                         <p style="font-size:0.85em; margin:5px 0; font-weight:bold;">現在の生徒データ、ポイント、投稿、スケジュール、標準時間割、アクセスログなどを完全に消去し、システムを初期化します。</p>
                         <button type="button" onclick="resetEntireSystem()" style="background:#d32f2f; color:white; border-color:#b71c1c;">システム全リセットを実行</button>
                     </div>
@@ -187,10 +187,10 @@
                 
                 <details class="admin-form-box">
                     <summary>［設定］天気予報の地域設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">トップ画面に表示する天気予報の地域を設定します。</p>
+                    <p style="font-size:0.85em; margin-top:5px;">天気予報の地域設定をします。</p>
                     <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <select id="weather-pref-select" style="width:150px; margin-bottom:0; border-radius:0;" onchange="loadCitiesForWeather()"></select>
-                        <select id="weather-city-select" style="width:150px; margin-bottom:0; border-radius:0;"><option value="">市町村を選択</option></select>
+                        <select id="weather-city-select" style="width:150px; margin-bottom:0; border-radius:0;"><option value="">市町村選択</option></select>
                         <button type="button" onclick="saveWeatherLocation()" style="margin-bottom:0;">保存する</button>
                     </div>
                     <div id="current-weather-location" style="margin-top:10px; font-weight:bold; font-size:0.9em; color:#0d47a1;">現在の設定: 取得中...</div>
@@ -202,7 +202,7 @@
                     <div id="unread-students-list" style="margin-top: 10px; font-weight: bold; line-height: 1.8;"></div>
                     <hr style="border-top:1px dashed #000; margin:15px 0;">
                     <details style="margin-top:10px; outline:none;">
-                        <summary style="font-weight:bold; cursor:pointer; outline:none; border:none;">■ 直近7日間のアクセス推移</summary>
+                        <summary style="font-weight:bold; cursor:pointer; outline:none; border:none;">■ 直近７日間のアクセス推移</summary>
                         <div style="width:100%; max-width:400px; margin:10px auto;">
                             <canvas id="accessChart"></canvas>
                         </div>
@@ -214,10 +214,10 @@
                     <div id="access-log-list" class="scroll-area" style="margin-top: 10px; max-height: 250px;"></div>
                 </details>
 
-                <div class="category-title">■ メッセージ・目標・ポイント</div>
+                <div class="category-title">■ メッセージ・目標</div>
 
-                <details class="admin-form-box">
-                    <summary>［設定］緊急メッセージ（お知らせ）の配信</summary>
+                <details class="admin-form-box" open>
+                    <summary>［設定］緊急メッセージの配信</summary>
                     <p style="font-size:0.85em; margin-top:5px;">ページ最上部に目立つようにメッセージを表示します。タイトルの入力がない場合は「⚠ 重要なお知らせ」と表示します。</p>
                     <div style="margin-top:10px;">
                         <label><input type="checkbox" id="emergency-active"> 表示を有効にする</label><br>
@@ -226,37 +226,37 @@
                         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:5px; align-items:center;">
                             <div>配色: 
                                 <select id="emergency-color-theme" style="width:150px; margin-bottom:0;">
-                                    <option value="yellow">注意 (黄色)</option>
-                                    <option value="red">緊急 (赤色)</option>
-                                    <option value="blue">情報 (青色)</option>
-                                    <option value="green">成功 (緑色)</option>
+                                    <option value="yellow">注意 (黄)</option>
+                                    <option value="red">緊急 (赤)</option>
+                                    <option value="blue">情報 (青)</option>
+                                    <option value="green">成功 (緑)</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="button" onclick="saveEmergencyMsg()" style="background:#000; color:white;">配信・保存</button>
+                        <button type="button" onclick="saveEmergencyMsg()" style="background:#000; color:white;">配信</button>
                     </div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］生徒の目標（ステータスメッセージ）の設定</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">生徒に目標を提出させるための入力枠をポータルに表示します。提出後、承認すると生徒のページ上部に固定表示されます。</p>
+                    <summary>［設定］ステータスメッセージの設定</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">生徒が目標を入力するための枠を表示します。担任の確認後、自分のページ上部に固定表示されます。</p>
                     <div style="margin-top:10px;">
                         <label><input type="checkbox" id="goal-active"> 表示を有効にする</label><br>
-                        生徒へのタイトル: <input type="text" id="goal-title" placeholder="例: 1学期の目標を考えましょう" style="width:100%; margin-bottom:5px;"><br>
+                        生徒へのタイトル: <input type="text" id="goal-title" placeholder="例: １学期の目標を考えましょう" style="width:100%; margin-bottom:5px;"><br>
                         生徒への説明文: <textarea id="goal-desc" placeholder="例: 今学期の目標を考えて提出してください。" style="height:60px; width:100%;"></textarea><br>
                         <button type="button" onclick="saveGoalSetting()" style="background:#000; color:white;">保存</button>
                     </div>
                 </details>
 
                 <details class="admin-form-box" id="admin-form-box-goals">
-                    <summary>［確認］生徒のステータスメッセージ（目標）管理</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">生徒から提出された目標の承認、差戻し、または公開中データの削除を行えます。</p>
+                    <summary>［確認］生徒のステータスメッセージ管理</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">生徒から提出された目標などを確認できます。</p>
                     <div id="admin-pending-goals" style="margin-top:10px; max-height: 400px; overflow-y: auto;">確認中...</div>
                 </details>
 
                 <details class="admin-form-box">
-                    <summary>［設定］行事・クラスの目標</summary>
-                    <p style="font-size:0.85em; margin-top:5px;">ポータル上部に表示するクラス全体の目標や行事の目標を管理します。複数登録し、任意のタイミングで表示・非表示を切り替えられます。</p>
+                    <summary>［設定］学級の目標</summary>
+                    <p style="font-size:0.85em; margin-top:5px;">ポータル上部に表示する学級目標や行事の目標を管理します。複数登録し、任意のタイミングで表示・非表示を切り替えられます。</p>
                     
                     <div style="background:#f9f9f9; padding:10px; border:1px dashed #000; margin-bottom:15px; color:inherit;">
                         <h4 style="margin-top:0; border-bottom:none;">新規追加</h4>
@@ -264,10 +264,10 @@
                         内容: <textarea id="new-cg-text" placeholder="目標の内容を入力..." style="height:60px; width:100%;"></textarea><br>
                         配色: 
                         <select id="new-cg-color" style="width:150px; margin-bottom:5px;">
-                            <option value="blue">通常 (青系)</option>
-                            <option value="red">重要 (赤系)</option>
-                            <option value="green">成功 (緑系)</option>
-                            <option value="yellow">注意 (黄系)</option>
+                            <option value="blue">通常 (青)</option>
+                            <option value="red">重要 (赤)</option>
+                            <option value="green">成功 (緑)</option>
+                            <option value="yellow">注意 (黄)</option>
                         </select><br>
                         <button type="button" onclick="addClassGoal()">追加</button>
                     </div>
@@ -309,8 +309,8 @@
                 <div class="category-title">■ スケジュール・課題・背景設定</div>
 
                 <details class="admin-form-box">
-                    <summary>［設定］祝日・休日等の登録</summary>
-                    <p style="font-size:0.85em; margin-bottom:5px;">祝日の説明文を編集したり、独自の休日を登録したりできます。</p>
+                    <summary>［設定］祝日休日等の登録</summary>
+                    <p style="font-size:0.85em; margin-bottom:5px;">祝日の説明文編集や、独自の休日の登録ができます。</p>
                     <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; align-items:baseline;">
                         <input type="date" id="holiday-edit-date" style="width:150px; margin:0;">
                         <input type="text" id="holiday-edit-name" placeholder="名称 (独自休日の場合)" style="width:240px; margin:0;">
@@ -376,7 +376,7 @@
                         <table id="reg-table" style="min-width: 700px;"></table>
                     </div>
                     <label style="display:flex; align-items:center; gap:5px; margin-top:10px;">
-                        <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（チェック中は時間や曜日を問わず常にボーナス発生）</span>
+                        <input type="checkbox" id="bonus-test-mode" style="margin:0;"><span>実験用（常にボーナス発生）</span>
                     </label>
                     <div style="display:flex; justify-content:space-between; margin-top:15px;">
                         <button type="button" onclick="saveRegularSetting()" style="background:#000; color:white;">保存</button>
@@ -407,9 +407,7 @@
             </section>
 
             <section style="border-color: #000;">
-                <div class="section-header">
-                    <h2 style="color:inherit;">名簿・役割個別管理</h2>
-                </div>
+                <div class="category-title" style="margin-top:0;">■ 名簿・役割個別管理</div>
                 <div class="admin-form-box" style="margin-top:15px;">
                     <h3 style="margin-top:0;">係・委員会の登録</h3>
                     <div style="display:flex; gap:20px; flex-wrap:wrap;">
@@ -421,14 +419,14 @@
                         </div>
                         <div style="flex:1; min-width:200px;">
                             <p style="font-weight:bold; margin-bottom:5px;">委員会の登録</p>
-                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書）" style="width:150px; display:inline-block;">
+                            <input type="text" id="new-comm-input" placeholder="委員会名（例: 図書委員）" style="width:150px; display:inline-block;">
                             <button type="button" onclick="addCommittee()">追加</button>
                             <div id="comm-list-display" style="margin-top:5px; font-size:0.9em; line-height:2;"></div>
                         </div>
                     </div>
                 </div>
                 <div class="admin-form-box" style="margin-top:15px;">
-                    <h3 style="margin-top:0;">生徒の新規登録 (1件ずつ手動)</h3>
+                    <h3 style="margin-top:0;">生徒の新規登録</h3>
                     <input type="email" id="direct-email" placeholder="E-Mail Address" style="width:200px;">
                     <input type="text" id="direct-name" placeholder="氏名" style="width:100px;">
                     <select id="direct-role" style="width:100px; padding:8px; margin-bottom:10px;"><option value="">係</option></select>
@@ -456,7 +454,7 @@
             <p style="margin-top:0;">現在のポイント: <span id="pt-modal-current" style="font-weight:bold; font-size:1.2em; color:#d81b60;"></span> Pt</p>
             
             <div style="border:1px dashed #000; padding:10px; margin-bottom:15px;">
-                <h4 style="margin-top:0; margin-bottom:5px;">◆ 特別ポイントの付与（減点も可）</h4>
+                <h4 style="margin-top:0; margin-bottom:5px;">◆ 特別ポイントの付与または減点</h4>
                 <select id="pt-rule-select" onchange="applyPointRule()" style="width:100%; margin-bottom:5px; padding:4px;">
                     <option value="">（プリセットから選択）</option>
                 </select><br>
@@ -508,6 +506,8 @@
         let parsedBackupData = null;
         let classGoalsList = [];
         let pointRules = [];
+        let unreadMessageCount = 0;
+        let lastSystemUpdate = null;
 
         const COUNTDOWN_PRESETS = [
             { id: "kenritsu", defaultLabel: "県立入試" }, { id: "shiritsu", defaultLabel: "私立入試" }, { id: "exam", defaultLabel: "定期試験" },
@@ -547,8 +547,8 @@
                 }
             }
             if (name.includes("元日")) return "年のはじめを祝う日です。";
-            if (name.includes("成人")) return "おとなになったことを自覚し、みずから生き抜こうとする青年を祝いはげます日です。";
-            if (name.includes("建国記念")) return "建国をしのび、国を愛する心を養う日です。";
+            if (name.includes("成人")) return "大人になったことを自覚し、自ら生き抜こうとする青年を祝い励ます日です。";
+            if (name.includes("建国記念")) return "建国を偲び、国を愛する心を養う日です。";
             if (name.includes("天皇誕生日")) return "天皇の誕生日を祝う日です。";
             if (name.includes("春分")) return "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。";
             if (name.includes("昭和")) return "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。";
@@ -557,12 +557,12 @@
             if (name.includes("こども")) return "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。";
             if (name.includes("海の日")) return "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。";
             if (name.includes("山の日")) return "山の恩恵に感謝し、自然に親しむ機会とする日です。";
-            if (name.includes("敬老")) return "多年にわたり社会につくしてきた老人を敬愛し、長寿を祝う日です。";
-            if (name.includes("秋分")) return "祖先をうやまい、なくなった人々をしのぶ日です。";
-            if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身をつちかう日です。";
+            if (name.includes("敬老")) return "老人の長寿を祝う日です。";
+            if (name.includes("秋分")) return "祖先をうやまい、なくなった人々を偲ぶ日です。";
+            if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身を培う日です。";
             if (name.includes("文化の日")) return "自由と平和を愛し、文化をすすめる日です。";
-            if (name.includes("勤労感謝")) return "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日です。";
-            if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となった日です。";
+            if (name.includes("勤労感謝")) return "勤労を尊び、生産を祝い、国民たがいに感謝しあう日です。";
+            if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となったちょっとラッキーな日です。";
             return "国民の祝日です。";
         }
 
@@ -666,6 +666,11 @@
             initExitTimeOptions(document.getElementById('exit-period-time'), false);
             initWeatherSetting();
 
+            db.collection("config").doc("system").onSnapshot(s => {
+                lastSystemUpdate = s.exists ? s.data().lastUpdatedAt?.toDate() : null;
+                updateAdminDashboard();
+            });
+
             db.collection("config").doc("emergency_msg").onSnapshot(s => {
                 let data = s.exists ? s.data() : null;
                 if(data) {
@@ -749,7 +754,7 @@
                     html += `<div id="msg-${doc.id}" class="${bgClass}" onmouseenter="markMessageRead('${doc.id}', ${!!d.isRead})" style="border:1px solid #000; padding:10px; margin-bottom:10px; transition: background-color 0.3s;">
                                 <div style="font-weight:bold; font-size:0.9em; border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:5px; color:inherit;">${badge}${protectBadge}${dateStr} 送信者：${d.name}</div>
                                 <div style="margin-bottom: 10px; color:inherit;">${(d.content || "").replace(/\n/g, '<br>')}</div>
-                                <div style="text-align:right;"><button type="button" onclick="toggleProtectMessage('${doc.id}', ${!!d.isProtected})">${d.isProtected ? '保護を解除' : '保護する'}</button> <button type="button" onclick="deleteMessage('${doc.id}', ${!!d.isProtected})">削除</button></div>
+                                <div style="text-align:right;"><button type="button" onclick="toggleProtectMessage('${doc.id}', ${!!d.isProtected})">${d.isProtected ? '保護解除' : '保護'}</button> <button type="button" onclick="deleteMessage('${doc.id}', ${!!d.isProtected})">削除</button></div>
                              </div>`;
                 });
                 document.getElementById('admin-message-list').innerHTML = html; 
@@ -863,10 +868,10 @@
             if(!g) return;
             let row = document.getElementById(`cg-row-${id}`);
             
-            let colorOpts = `<option value="blue" ${g.theme==='blue'?'selected':''}>通常 (青系)</option>
-                             <option value="red" ${g.theme==='red'?'selected':''}>重要 (赤系)</option>
-                             <option value="green" ${g.theme==='green'?'selected':''}>成功 (緑系)</option>
-                             <option value="yellow" ${g.theme==='yellow'?'selected':''}>注意 (黄系)</option>`;
+            let colorOpts = `<option value="blue" ${g.theme==='blue'?'selected':''}>通常 (青)</option>
+                             <option value="red" ${g.theme==='red'?'selected':''}>重要 (赤)</option>
+                             <option value="green" ${g.theme==='green'?'selected':''}>成功 (緑)</option>
+                             <option value="yellow" ${g.theme==='yellow'?'selected':''}>注意 (黄)</option>`;
                              
             row.innerHTML = `
                 <td><input type="checkbox" id="edit-cg-vis-${id}" ${g.isVisible ? 'checked' : ''} style="margin:0;"></td>
@@ -876,9 +881,9 @@
                     <select id="edit-cg-theme-${id}" style="width:100%; padding:2px; margin:0; font-size:0.85em;">${colorOpts}</select>
                 </td>
                 <td><textarea id="edit-cg-txt-${id}" style="width:100%; height:60px; padding:2px; margin:0;">${g.text}</textarea></td>
-                <td>
-                    <button type="button" onclick="saveAdminClassGoalInline('${id}')" style="font-size:0.8em; padding:2px 4px; background:#000; color:white;">保存</button>
-                    <button type="button" onclick="renderAdminClassGoals()" style="font-size:0.8em; padding:2px 4px;">ｷｬﾝｾﾙ</button>
+                <td style="white-space:nowrap;">
+                    <button type="button" onclick="saveAdminClassGoalInline('${id}')" style="font-size:0.8em; padding:2px 4px; background:#000; color:white; margin:0;">保存</button>
+                    <button type="button" onclick="renderAdminClassGoals()" style="font-size:0.8em; padding:2px 4px; margin:0;">ｷｬﾝｾﾙ</button>
                 </td>
             `;
         }
@@ -1001,48 +1006,45 @@
 
         function updateAdminDashboard() {
             let html = "";
-            db.collection("config").doc("system").get().then(sysDoc => {
-                let lastUpdate = sysDoc.exists ? sysDoc.data().lastUpdatedAt?.toDate() : null;
-                let unreadCount = 0;
-                for(let email in studentMaster) {
-                    if (email === TEACHER_EMAIL) continue;
-                    let loginTime = studentMaster[email].lastLogin?.toDate();
-                    if (!loginTime || (lastUpdate && loginTime < lastUpdate)) unreadCount++;
-                }
-                if(unreadCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-access')">アクセス未確認の生徒が ${unreadCount} 人います。</a></li>`;
-                
-                let unsubmittedTaskCount = 0;
-                let totalStudents = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL).length;
-                submissionsList.forEach(sub => {
-                    let diffDays = getSchoolDaysDiff(sub.deadline);
-                    if (diffDays <= 4) {
-                        let unsubmittedCount = 0;
-                        for(let em in studentMaster) {
-                            if(em === TEACHER_EMAIL) continue;
-                            if(!studentMaster[em].checks || !studentMaster[em].checks[sub.id]) unsubmittedCount++;
-                        }
-                        if(unsubmittedCount > 0 && totalStudents > 0) unsubmittedTaskCount++;
+            
+            let unreadCount = 0;
+            for(let email in studentMaster) {
+                if (email === TEACHER_EMAIL) continue;
+                let loginTime = studentMaster[email].lastLogin?.toDate();
+                if (!loginTime || (lastSystemUpdate && loginTime < lastSystemUpdate)) unreadCount++;
+            }
+            if(unreadCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-access')">アクセス未確認の生徒が ${unreadCount} 人います。</a></li>`;
+            
+            let unsubmittedTaskCount = 0;
+            let totalStudents = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL).length;
+            submissionsList.forEach(sub => {
+                let diffDays = getSchoolDaysDiff(sub.deadline);
+                if (diffDays <= 4) {
+                    let unsubmittedCount = 0;
+                    for(let em in studentMaster) {
+                        if(em === TEACHER_EMAIL) continue;
+                        if(!studentMaster[em].checks || !studentMaster[em].checks[sub.id]) unsubmittedCount++;
                     }
-                });
-                if(unsubmittedTaskCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-submissions')">未提出者がいる課題（または期限間近）が ${unsubmittedTaskCount} 件あります。</a></li>`;
-                
-                let pendingCount = allCommitteePosts.filter(p => p.status === 'pending').length;
-                if(pendingCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-committee')">承認待ちの連絡が ${pendingCount} 件あります。</a></li>`;
-                
-                let pendingGoalCount = 0;
-                for(let email in studentMaster) {
-                    if (studentMaster[email].goal && studentMaster[email].goal.status === 'pending') pendingGoalCount++;
+                    if(unsubmittedCount > 0 && totalStudents > 0) unsubmittedTaskCount++;
                 }
-                if(pendingGoalCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-goals')">承認待ちの生徒の目標が ${pendingGoalCount} 件あります。</a></li>`;
-
-                let unreadMessageCount = document.querySelectorAll('.msg-unread').length;
-                if(unreadMessageCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-messages')">未読のメッセージが ${unreadMessageCount} 件あります。</a></li>`;
-
-                if(html === "") html = `<li style="color:green;">現在、対応が必要な事項はありません。</li>`;
-                
-                let dbList = document.getElementById('dashboard-list');
-                if(dbList) dbList.innerHTML = html;
             });
+            if(unsubmittedTaskCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-submissions')">未提出者がいる課題が ${unsubmittedTaskCount} 件あります。</a></li>`;
+            
+            let pendingCount = allCommitteePosts.filter(p => p.status === 'pending').length;
+            if(pendingCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-committee')">承認待ちの連絡が ${pendingCount} 件あります。</a></li>`;
+            
+            let pendingGoalCount = 0;
+            for(let email in studentMaster) {
+                if (studentMaster[email].goal && studentMaster[email].goal.status === 'pending') pendingGoalCount++;
+            }
+            if(pendingGoalCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-goals')">承認待ちの生徒の目標が ${pendingGoalCount} 件あります。</a></li>`;
+
+            if(unreadMessageCount > 0) html += `<li><a onclick="jumpTo('admin-form-box-messages')">未読のメッセージが ${unreadMessageCount} 件あります。</a></li>`;
+
+            if(html === "") html = `<li style="color:green;">現在、対応が必要な事項はありません。</li>`;
+            
+            let dbList = document.getElementById('dashboard-list');
+            if(dbList) dbList.innerHTML = html;
         }
 
         function initExitTimeOptions(targetEl, includeDefault = false) {
@@ -1150,7 +1152,7 @@
         }
 
         function renderAdminCountdowns() {
-            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾(隠し)</th></tr>`;
+            let html = `<table style="width:100%; font-size:0.85em; text-align:left; min-width: 650px;"><tr><th style="width:30px;">表示</th><th>イベント名</th><th>日付</th><th>計算方法</th><th>背景色</th><th>装飾</th></tr>`;
             let colorOpts = `<option value="#ffffff">White</option><option value="#e8f5e9">Green</option><option value="#e3f2fd">Blue</option><option value="#ffebee">Red</option><option value="#fff8e1">Yellow</option><option value="#fff3e0">Orange</option><option value="#fce4ec">Pink</option><option value="#f3e5f5">Purple</option><option value="#e0e0e0">Ash</option>`;
             let iconOpts = `<option value="">(なし)</option><option value="🎯">🎯的</option><option value="🌸">🌸桜</option><option value="🎄">🎄ﾂﾘｰ</option><option value="🏃">🏃運動</option><option value="⚽">⚽球技</option><option value="🎵">🎵音楽</option><option value="🎓">🎓卒業</option><option value="🎒">🎒ｶﾊﾞﾝ</option><option value="🚌">🚌ﾊﾞｽ</option><option value="🔥">🔥炎</option>`;
             COUNTDOWN_PRESETS.forEach(p => {
@@ -1283,7 +1285,7 @@
                         <div>公開: <input type="date" id="edit-comm-start-${id}" value="${post.startDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"> 〜 <input type="date" id="edit-comm-end-${id}" value="${post.endDate||''}" style="width:130px; margin-bottom:0; border-radius:0;"></div>
                     </div>
                     <div style="text-align:right;">
-                        <button type="button" onclick="saveAndApproveCommitteePost('${id}')" style="background:#4caf50; color:white; border-color:#4caf50;">保存して承認(公開)</button>
+                        <button type="button" onclick="saveAndApproveCommitteePost('${id}')" style="background:#4caf50; color:white; border-color:#4caf50;">保存して公開</button>
                         <button type="button" onclick="saveAsPendingCommitteePost('${id}')" style="background:#ff9800; color:white; border-color:#ff9800;">保存して承認待ちへ</button>
                         <button type="button" onclick="renderAdminCommitteePosts()">キャンセル</button>
                     </div>
@@ -1326,7 +1328,7 @@
         function markMessageRead(id, isRead) { if (!isRead) db.collection("messages").doc(id).update({ isRead: true }).catch(e => console.error(e)); }
         async function toggleProtectMessage(id, currentStatus) { await db.collection("messages").doc(id).update({ isProtected: !currentStatus }); }
         async function deleteMessage(id, isProtected) {
-            if (isProtected) return alert("このメッセージは保護されています。\n削除するには先に「保護を解除」してください。");
+            if (isProtected) return alert("このメッセージは保護されています。");
             if (confirm("削除しますか？")) await db.collection("messages").doc(id).delete();
         }
 
@@ -1406,7 +1408,7 @@
             }
             html += `</tr>`;
             
-            html += `<tr><td style="font-size:0.85em;">帰りの会<br>(ボーナス)</td>`;
+            html += `<tr><td style="font-size:0.85em;">帰りの会</td>`;
             for(let j=0; j<days.length; j++) {
                 let bs = data[days[j]]?.bonusStart || ""; let be = data[days[j]]?.bonusEnd || "";
                 html += `<td><input type="time" id="reg-bs-${days[j]}" value="${bs}" style="width:100%; padding:2px; margin-bottom:2px;"><br>〜<br><input type="time" id="reg-be-${days[j]}" value="${be}" style="width:100%; padding:2px; margin-top:2px;"></td>`;
@@ -1565,12 +1567,14 @@
                             <td id="name-td-${safeId}">${d.name || ""}</td><td>${email}</td>
                             <td id="role-td-${safeId}">${d.role || ""}</td><td id="comm-td-${safeId}">${d.committee || ""}</td>
                             <td style="text-align:right; font-weight:bold;">${d.points || 0}</td>
-                            <td id="subadmin-td-${safeId}" style="text-align:center;">${d.isSubAdmin ? '👑' : ''}</td>
-                            <td id="ban-td-${safeId}" style="text-align:center;">${d.isBanned ? '🚫' : ''}</td>
+                            <td id="subadmin-td-${safeId}" style="text-align:center;">${d.isSubAdmin ? '許可' : ''}</td>
+                            <td id="ban-td-${safeId}" style="text-align:center;">${d.isBanned ? 'BAN' : ''}</td>
                             <td id="action-td-${safeId}">
-                                <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${String(d.name||"").replace(/'/g, "\\'")}', '${String(d.role||"").replace(/'/g, "\\'")}', '${String(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isSubAdmin}, ${!!d.isBanned})" style="font-size:0.8em; padding:2px 4px;">編集</button> 
-                                <button type="button" onclick="openPointManager('${email}')" style="font-size:0.8em; padding:2px 4px; background:#ff9800; color:white; border-color:#ff9800;">Pt管理</button>
-                                <button type="button" onclick="deleteStudent('${email}')" style="font-size:0.8em; padding:2px 4px; color:#d32f2f;">削除</button>
+                                <div style="display:flex; flex-wrap:nowrap; gap:2px; justify-content:center;">
+                                    <button type="button" onclick="startInlineEditStudent('${safeId}', '${email}', '${String(d.name||"").replace(/'/g, "\\'")}', '${String(d.role||"").replace(/'/g, "\\'")}', '${String(d.committee||"").replace(/'/g, "\\'")}', ${!!d.isSubAdmin}, ${!!d.isBanned})" style="font-size:clamp(0.6em, 2vw, 0.8em); padding:2px 4px; margin:0;">編集</button> 
+                                    <button type="button" onclick="openPointManager('${email}')" style="font-size:clamp(0.6em, 2vw, 0.8em); padding:2px 4px; margin:0; background:#ff9800; color:white; border-color:#ff9800;">Pt管理</button>
+                                    <button type="button" onclick="deleteStudent('${email}')" style="font-size:clamp(0.6em, 2vw, 0.8em); padding:2px 4px; margin:0; color:#d32f2f;">削除</button>
+                                </div>
                             </td>
                          </tr>`; 
             }
@@ -1583,7 +1587,7 @@
             document.getElementById(`comm-td-${safeId}`).innerHTML = `<select id="input-comm-${safeId}" style="width:100%; padding:2px; margin:0; border-radius:0;">${getCommOptions(comm)}</select>`;
             document.getElementById(`subadmin-td-${safeId}`).innerHTML = `<input type="checkbox" id="input-subadmin-${safeId}" ${isSubAdmin ? 'checked' : ''} style="transform:scale(1.5);">`;
             document.getElementById(`ban-td-${safeId}`).innerHTML = `<input type="checkbox" id="input-ban-${safeId}" ${isBanned ? 'checked' : ''} style="transform:scale(1.5);">`;
-            document.getElementById(`action-td-${safeId}`).innerHTML = `<button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')" style="background:#0d47a1; color:white; border-color:#0d47a1;">保存</button> <button type="button" onclick="renderStudentListUI()">キャンセル</button>`;
+            document.getElementById(`action-td-${safeId}`).innerHTML = `<div style="display:flex; flex-wrap:nowrap; gap:2px; justify-content:center;"><button type="button" onclick="saveInlineEditStudent('${email}', '${safeId}')" style="font-size:clamp(0.6em, 2vw, 0.8em); padding:2px 4px; margin:0; background:#0d47a1; color:white; border-color:#0d47a1;">保存</button> <button type="button" onclick="renderStudentListUI()" style="font-size:clamp(0.6em, 2vw, 0.8em); padding:2px 4px; margin:0;">キャンセル</button></div>`;
         }
         async function saveInlineEditStudent(email, safeId) {
             try {
@@ -1765,9 +1769,9 @@
         });
 
         async function resetEntireSystem() {
-            let msg = "【非常に危険な操作です】\n\n・生徒のアカウント、ポイント、名簿データ\n・すべてのスケジュール（時間割・行事・備考）\n・標準時間割の設定\n・提出物、委員会連絡、メッセージ、アクセスログ\n・ブログ記事（担任のやつ）\n\nこれらのすべてのデータが完全に削除され、初期状態に戻ります。\n\n本当に実行してよろしいですか？（管理者の設定は一部残ります）";
+            let msg = "【警告】\n\n・生徒のアカウント、ポイント、名簿データ\n・すべてのスケジュール\n・標準時間割の設定\n・提出物、委員会連絡、メッセージ、アクセスログ\n・担任のやつ\n\nこれらのすべてのデータが完全に削除され、初期状態に戻ります。\n\n本当に実行してよろしいですか？（管理者の設定は一部残ります）";
             if (!confirm(msg)) return;
-            let msg2 = "最終確認です。\n実行後にデータを取り戻すことはできません（事前にフルバックアップを推奨します）。\nよろしいですか？";
+            let msg2 = "最終確認です。\n実行後にデータを取り戻すことはできません。\nよろしいですか？";
             if (!confirm(msg2)) return;
             
             try {
@@ -1787,7 +1791,7 @@
                     }
                 }
                 await db.collection("config").doc("regular_schedule").delete();
-                alert("全データのリセットが完了しました。\n新年度の運用を開始できます。ページをリロードします。"); location.reload();
+                alert("全データのリセットが完了しました。\nページをリロードします。"); location.reload();
             } catch (err) {
                 alert("リセット中にエラーが発生しました: " + err.message);
             }

@@ -45,9 +45,12 @@ th { background-color: rgba(0,0,0,0.05); }
 .goal-label { font-size: 0.85em; text-align: left; font-weight: bold; margin-bottom: 10px; color: #555; }
 .goal-text { font-size: 1.5em; font-weight: bold; line-height: 1.4; white-space: pre-wrap; }
 
+.emergency-box { width: 100%; margin-bottom: 20px; text-align: left; padding: 15px; }
+
 .bonus-card { width: 60px; height: 80px; background: #2196f3; color: white; display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: bold; cursor: pointer; border-radius: 5px; border: 2px solid #0d47a1; transition: transform 0.3s; }
 .bonus-card:hover { transform: scale(1.05); }
 
+/* ダークモード */
 body.dark-mode { background-color: #121212 !important; color: #e0e0e0; }
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .section-header, body.dark-mode .post-item, body.dark-mode .day-label { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode .panel, body.dark-mode .day-box { border-color: #555 !important; background-color: #1e1e1e !important; color: #e0e0e0 !important; }
@@ -77,6 +80,9 @@ body.dark-mode .goal-label { color: #aaa !important; }
 body.dark-mode #point-details-modal > div { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #point-details-modal h3 { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #dm-input { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
+/* 緊急メッセージはダークモードの影響を受けないようにする */
+body.dark-mode .emergency-box { color: #000 !important; }
+body.dark-mode .emergency-box h3, body.dark-mode .emergency-box div { color: #000 !important; }
 
 .like-btn { background: transparent; border: 1px solid #000; color: #000; padding: 2px 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
 .like-btn.liked { background: #000; color: white; border-color: #000; }
@@ -112,7 +118,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
             <div id="top-reminder" style="font-weight: bold; font-size: 0.9em; margin-top: 5px; line-height: 1.6;"></div>
         </div>
         <div style="display: flex; gap: 5px; flex-direction:column; align-items:flex-end;">
-            <button type="button" id="btn-admin-page" style="display:none; background:#d32f2f; color:white; border-color:#000;" onclick="location.href='admin.html'">管理画面</button>
+            <button type="button" id="btn-admin-page" style="display:none; background:#d32f2f; color:white; border-color:#000;" onclick="location.href='admin.html'">Admin Panel</button>
             <button type="button" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -264,10 +270,9 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
     <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #000; font-size: 0.85em; color: inherit;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div>
-                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">📱 スマホ表示 (切替)</button>
-                <button type="button" onclick="toggleTheme()">Light / Dark</button>
-                <button type="button" id="btn-lightness" onclick="toggleLightness()">明るさ調整</button>
-                <button type="button" onclick="openSettingsModal()">設定</button>
+                <button type="button" id="btn-device-view" onclick="toggleDeviceView()">Mobile View</button>
+                <button type="button" id="btn-theme" onclick="toggleTheme()">Brightness</button>
+                <button type="button" onclick="openSettingsModal()">Settings</button>
             </div>
             <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T.K. All Rights Reserved.</div>
         </div>
@@ -305,7 +310,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
 <div id="settings-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
     <div id="settings-modal-content" style="background:white; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; position:relative; color:black; border: 1px solid #000;">
         <button type="button" onclick="closeSettingsModal()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:1.5em; cursor:pointer; color:inherit;">✖</button>
-        <h2 style="margin-top:0; border-bottom:1px solid #000; padding-bottom:5px;">設定</h2>
+        <h2 style="margin-top:0; border-bottom:1px solid #000; padding-bottom:5px;">Settings</h2>
         <h4 style="margin-bottom:5px;">■ セクションの並び替え</h4>
         <ul id="sortable-list" style="list-style-type:none; padding:0; margin:0 0 20px 0; border:1px solid #000; background:rgba(0,0,0,0.02);"></ul>
         <h4 style="margin-bottom:5px;">■ セクションの背景色</h4>
@@ -383,6 +388,8 @@ let userSettings = { order: ['sec-goal-form', 'sec-recent', 'sec-weekly', 'sec-s
 const SECTION_NAMES = { 'sec-goal-form': '目標の提出', 'sec-recent': '直近の予定', 'sec-weekly': '週予定', 'sec-submissions': '提出物・課題等', 'sec-committee': '係・委員会連絡', 'sec-blogs': '担任のやつ', 'sec-dm': '担任へ連絡' };
 const COUNTDOWN_PRESETS = [{id:"kenritsu",label:"県立入試"},{id:"shiritsu",label:"私立入試"},{id:"exam",label:"定期試験"},{id:"sports",label:"体育祭"},{id:"chorus",label:"合唱祭"},{id:"soutai",label:"学総"},{id:"shinjin",label:"新人戦"},{id:"school_trip",label:"修学旅行"},{id:"camp",label:"宿泊学習"},{id:"field_trip",label:"校外学習"},{id:"term2_start",label:"2学期始業式"},{id:"term3_start",label:"3学期始業式"},{id:"graduation",label:"卒業式"},{id:"summer",label:"夏休み"},{id:"winter",label:"冬休み"},{id:"custom1",isCustom:true},{id:"custom2",isCustom:true},{id:"custom3",isCustom:true}];
 
+let currentTheme = parseInt(localStorage.getItem('themeMode') || '0', 10);
+
 function getLocalDateStr(d) { return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`; }
 function formatDateTime(d) { return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${('0'+d.getHours()).slice(-2)}:${('0'+d.getMinutes()).slice(-2)}`; }
 function getSchoolDaysDiff(tStr) { let t1=new Date(); t1.setHours(0,0,0,0); let t2=new Date(tStr); t2.setHours(0,0,0,0); if(t2<t1) return -1; let d=0, c=new Date(t1); while(c<t2){ c.setDate(c.getDate()+1); if(isSchoolDay(getLocalDateStr(c))) d++; } return d; }
@@ -411,43 +418,79 @@ setInterval(() => {
     }
 }, 1000);
 
-function toggleLightness() {
-    if(document.body.classList.contains('dark-mode')) return alert("ダークモード中は変更できません。");
-    let current = localStorage.getItem('lightBgLevel') || '1';
-    let next = current === '1' ? '2' : (current === '2' ? '3' : '1');
-    localStorage.setItem('lightBgLevel', next);
-    applyLightness();
-}
+function applyTheme() {
+    let btn = document.getElementById('btn-theme');
+    let bgColors = ['#f7f9fc', '#e2e8f0', '#cfd8dc', '#121212'];
+    let panelColors = ['#ffffff', '#f0f2f5', '#e0e0e0', '#1e1e1e'];
+    let labels = ['Light 3', 'Light 2', 'Light 1', 'Dark Mode'];
 
-function applyLightness() {
-    let level = localStorage.getItem('lightBgLevel') || '1';
-    let bgColor = ""; let secBgColor = "white";
-    let forceBg = regularScheduleData.useForceBg ? regularScheduleData.forceGlobalBgColor : null;
-
-    if(document.body.classList.contains('dark-mode')) { 
-        document.body.style.backgroundColor = ""; 
-        let panels = document.querySelectorAll('.panel'); panels.forEach(p => p.style.backgroundColor = "");
-        return; 
+    if (currentTheme === 3) {
+        document.body.classList.add('dark-mode');
+        document.body.style.backgroundColor = '';
+    } else {
+        document.body.classList.remove('dark-mode');
+        let forceBg = regularScheduleData && regularScheduleData.useForceBg ? regularScheduleData.forceGlobalBgColor : null;
+        document.body.style.backgroundColor = forceBg ? forceBg : bgColors[currentTheme];
     }
     
-    if(forceBg) {
-        document.body.style.backgroundColor = forceBg;
-        let panels = document.querySelectorAll('.panel');
-        panels.forEach(p => { p.style.backgroundColor = "rgba(255,255,255,0.6)"; });
-        return;
-    }
-    
-    if(level === '1') { bgColor = "#f7f9fc"; secBgColor = "white"; }
-    else if(level === '2') { bgColor = "#c9d1d9"; secBgColor = "#f0f2f5"; }
-    else if(level === '3') { bgColor = "#888888"; secBgColor = "#e0e0e0"; }
-    
-    document.body.style.backgroundColor = bgColor;
+    if(btn) btn.innerText = labels[currentTheme];
+
     let panels = document.querySelectorAll('.panel');
     panels.forEach(p => {
-        let secId = p.id;
-        if(userSettings.bgColors && userSettings.bgColors[secId] && userSettings.bgColors[secId] !== '#ffffff') { p.style.backgroundColor = userSettings.bgColors[secId]; } 
-        else { p.style.backgroundColor = secBgColor; }
+        if(currentTheme === 3) {
+            p.style.backgroundColor = ''; 
+        } else {
+            let forceBg = regularScheduleData && regularScheduleData.useForceBg ? regularScheduleData.forceGlobalBgColor : null;
+            if(forceBg) {
+                p.style.backgroundColor = "rgba(255,255,255,0.6)";
+            } else {
+                let secId = p.id;
+                if(userSettings && userSettings.bgColors && userSettings.bgColors[secId] && userSettings.bgColors[secId] !== '#ffffff') { 
+                    p.style.backgroundColor = userSettings.bgColors[secId]; 
+                } else { 
+                    p.style.backgroundColor = panelColors[currentTheme]; 
+                }
+            }
+        }
     });
+
+    if (allBlogs && allBlogs.length > 0) renderBlogs();
+    applyDeviceView();
+}
+
+function toggleTheme() {
+    currentTheme = (currentTheme + 1) % 4;
+    localStorage.setItem('themeMode', currentTheme.toString());
+    applyTheme();
+}
+
+function initDeviceView() {
+    let isMobileUA = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    let isWideScreen = window.innerWidth > 800;
+    isPcView = isWideScreen && !isMobileUA;
+    let savedView = localStorage.getItem('isPcView');
+    if (savedView !== null) isPcView = savedView === 'true';
+    applyDeviceView();
+}
+function toggleDeviceView() {
+    isPcView = !isPcView;
+    localStorage.setItem('isPcView', isPcView);
+    applyDeviceView();
+}
+function applyDeviceView() {
+    let meta = document.getElementById('viewport-meta');
+    let btn = document.getElementById('btn-device-view');
+    if(meta) meta.setAttribute('content', isPcView ? 'width=850' : 'width=device-width, initial-scale=1.0');
+    if(btn) {
+        btn.innerText = isPcView ? 'PC View' : 'Mobile View';
+        if(isPcView) {
+            btn.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#004d40' : '#e0f7fa';
+            btn.style.color = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+        } else {
+            btn.style.backgroundColor = '';
+            btn.style.color = '';
+        }
+    }
 }
 
 function updatePortalTitle() {
@@ -464,27 +507,11 @@ function updatePortalTitle() {
 
 window.addEventListener('DOMContentLoaded', async () => {
     if (checkAutoLogout()) return;
-    if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    initDeviceView();
+    applyTheme();
     document.getElementById('copyright-year').innerText = new Date().getFullYear();
     resetInactivityTimer();
 });
-
-function toggleDeviceView() { 
-    let meta = document.getElementById('viewport-meta'); isPcView = !isPcView; meta.setAttribute('content', isPcView ? 'width=850' : 'width=device-width, initial-scale=1.0'); 
-    let btn = document.getElementById('btn-device-view');
-    if(btn) {
-        btn.innerText = isPcView ? '💻 PC表示 (切替)' : '📱 スマホ表示 (切替)'; btn.style.backgroundColor = isPcView ? '#e0f7fa' : ''; btn.style.color = isPcView ? '#000' : '';
-        if(document.body.classList.contains('dark-mode') && isPcView) { btn.style.backgroundColor = '#004d40'; btn.style.color = '#fff'; }
-    }
-}
-
-function toggleTheme() { 
-    document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
-    let lightBtn = document.getElementById('btn-lightness'); if(document.body.classList.contains('dark-mode')) { lightBtn.style.display = 'none'; } else { lightBtn.style.display = 'inline-block'; }
-    let btn = document.getElementById('btn-device-view');
-    if(btn) { if(isPcView) { btn.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#004d40' : '#e0f7fa'; btn.style.color = document.body.classList.contains('dark-mode') ? '#fff' : '#000'; } else { btn.style.backgroundColor = ''; btn.style.color = ''; } }
-    applyLightness(); applyUserSettings(); 
-}
 
 function resetInactivityTimer() { 
     localStorage.setItem('lastActivity', Date.now().toString());
@@ -550,10 +577,11 @@ function updateNewArrivals() {
         unreadComms.forEach(p => {
             let d = p.createdAt.toDate();
             let ds = `${d.getMonth()+1}/${d.getDate()}(${["日","月","火","水","木","金","土"][d.getDay()]})`;
+            let h = d.getHours();
             let role = p.roleName || "係・委員会";
             html += `
                 <div style="background:#e3f2fd; border:1px solid #2196f3; padding:10px; margin-bottom:5px; border-radius:4px; font-weight:bold; color:#1976d2; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('comm-post-${p.id}')">【${ds}更新】${role}からの連絡が入りました。</div>
+                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('comm-post-${p.id}')">【${ds}${h}時 更新】${role}からの連絡が投稿されました。</div>
                     <button type="button" style="background:transparent; border:none; font-size:1.4em; color:#1976d2; cursor:pointer; padding:0 5px;" onclick="dismissNotification('${p.id}')">×</button>
                 </div>
             `;
@@ -565,9 +593,10 @@ function updateNewArrivals() {
         recentBlogs.forEach(p => {
             let d = p.createdAt.toDate();
             let ds = `${d.getMonth()+1}/${d.getDate()}(${["日","月","火","水","木","金","土"][d.getDay()]})`;
+            let h = d.getHours();
             html += `
                 <div style="background:#e3f2fd; border:1px solid #2196f3; padding:10px; margin-bottom:5px; border-radius:4px; font-weight:bold; color:#1976d2; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('sec-blogs')">【${ds}更新】担任のやつが更新されました。</div>
+                    <div style="cursor:pointer; flex:1;" onclick="scrollToElement('sec-blogs')">【${ds}${h}時 更新】担任のやつが更新されました。</div>
                     <button type="button" style="background:transparent; border:none; font-size:1.4em; color:#1976d2; cursor:pointer; padding:0 5px;" onclick="dismissNotification('${p.id}')">×</button>
                 </div>
             `;
@@ -635,9 +664,9 @@ async function initApp(user) {
             let title = data.title || "⚠ 重要なお知らせ";
             let bg = data.bgColor || "#fffde7"; 
             let border = data.borderColor || "#fdd835";
-            container.innerHTML = `<div class="goal-box" style="border: 4px dashed ${border}; background-color: ${bg}; margin-bottom: 20px; color: #000; text-align:left; padding:15px;">
+            container.innerHTML = `<div class="emergency-box" style="border: 4px dashed ${border}; background-color: ${bg}; margin-bottom: 20px; text-align:left; padding:15px;">
                 <h3 style="margin-top:0; border-bottom: 1px solid ${border}; color: #000; font-size:1.2em; padding-bottom:5px;">${title}</h3>
-                <div style="white-space: pre-wrap; font-size: 1.05em; line-height:1.6;">${data.content}</div>
+                <div style="white-space: pre-wrap; font-size: 1.05em; line-height:1.6; color: #000;">${data.content}</div>
             </div>`;
             container.style.display = 'block';
         } else {
@@ -669,7 +698,7 @@ async function initApp(user) {
     db.collection("config").doc("countdowns").onSnapshot(s => { countdownSettings = s.exists ? s.data() : {}; renderCountdownsUI(); });
     db.collection("config").doc("exit_times").onSnapshot(s => { exitTimePeriods = s.exists ? (s.data().periods||[]) : []; safeRenderAll(); });
     db.collection("config").doc("club_options").onSnapshot(s => { let opts = s.exists ? s.data().items || ["外練習","体育館","校舎","ミーティング","筋トレ","午前練習","午後練習","全日","練習試合","大会","OFF"] : ["外練習","体育館","校舎","ミーティング","筋トレ","午前練習","午後練習","全日","練習試合","大会","OFF"]; if(!opts.includes("")) opts = ["", ...opts]; clubOptionsList = opts; });
-    db.collection("config").doc("regular_schedule").onSnapshot(s => { regularScheduleData = s.exists ? s.data() : {}; applyLightness(); });
+    db.collection("config").doc("regular_schedule").onSnapshot(s => { regularScheduleData = s.exists ? s.data() : {}; applyTheme(); });
 
     let holidaysLoaded = false;
     fetch('https://holidays-jp.github.io/api/v1/date.json').then(r=>r.json()).then(hRes => {
@@ -714,7 +743,7 @@ async function initApp(user) {
             let t_cl = document.getElementById('toggle-clean'); if(t_cl) t_cl.checked = userSettings.showClean;
             let t_cs = document.getElementById('toggle-club-status'); if(t_cs) t_cs.checked = userSettings.showClubStatus;
         }
-        applyUserSettings();
+        applyTheme();
 
         let myRoles = [myD.role, myD.committee].filter(Boolean);
         if(myRoles.length > 0 || isAdmin) {
@@ -734,7 +763,7 @@ async function initApp(user) {
     await db.collection("students").doc(user.email).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
     db.collection("access_logs").add({ email: user.email, name: isAdmin ? "先生" : (studentMaster[user.email]?.name || "生徒"), accessedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
 
-    db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => { submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() })); if(holidaysLoaded) safeRenderAll(); });
+    db.collection("submissions").orderBy("deadline", "asc").onSnapshot(snap => { submissionsList = []; snap.forEach(doc => submissionsList.push({ id: doc.id, ...doc.data() })); if(holidaysLoaded) safeRenderAll(); updateNewArrivals(); });
     db.collection("blogs").orderBy("createdAt", "desc").onSnapshot(snap => { allBlogs = []; snap.forEach(d => allBlogs.push({id: d.id, ...d.data()})); currentBlogPage = 1; renderBlogs(); updateNewArrivals(); });
     db.collection("committee_posts").onSnapshot(snap => { allCommitteePosts = []; snap.forEach(doc => allCommitteePosts.push({id: doc.id, ...doc.data()})); renderCommitteePosts(); updateNewArrivals(); });
 }
@@ -985,14 +1014,14 @@ function openHolidayModal() {
     let dateStr = document.getElementById('holiday-msg').dataset.date; if(!dateStr) return;
     let name = holidays[dateStr] || (customHolidays[dateStr] ? customHolidays[dateStr].name : "祝日");
     
-    let desc = "国民の祝日です。";
+    let desc = "国民の祝日です。\nA national holiday.";
     if (holidayDescs[dateStr]) {
         desc = holidayDescs[dateStr];
     } else {
         if (name.includes("振替休日")) {
             let baseName = name.replace(" 振替休日", "").replace("振替休日", "").trim();
             if (baseName) {
-                desc = `${baseName}の振替休日です。`;
+                desc = `${baseName}の振替休日です。\nSubstitute holiday for ${baseName}.`;
             } else {
                 let d = new Date(dateStr); d.setDate(d.getDate() - 1);
                 let prevStr = getLocalDateStr(d); let prevName = holidays[prevStr];
@@ -1000,34 +1029,38 @@ function openHolidayModal() {
                     if (prevName) break;
                     d.setDate(d.getDate() - 1); prevStr = getLocalDateStr(d); prevName = holidays[prevStr];
                 }
-                if(prevName) desc = `${prevName.replace(" 振替休日", "").replace("振替休日", "").trim()}の振替休日です。`;
-                else desc = `国民の祝日の振替休日です。`;
+                if(prevName) {
+                    let n = prevName.replace(" 振替休日", "").replace("振替休日", "").trim();
+                    desc = `${n}の振替休日です。\nSubstitute holiday for ${n}.`;
+                } else {
+                    desc = `国民の祝日の振替休日です。\nSubstitute holiday for a national holiday.`;
+                }
             }
         } else {
-            if (name.includes("元日")) desc = "年のはじめを祝う日です。";
-            else if (name.includes("成人")) desc = "おとなになったことを自覚し、みずから生き抜こうとする青年を祝いはげます日です。";
-            else if (name.includes("建国記念")) desc = "建国をしのび、国を愛する心を養う日です。";
-            else if (name.includes("天皇誕生日")) desc = "天皇の誕生日を祝う日です。";
-            else if (name.includes("春分")) desc = "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。";
-            else if (name.includes("昭和")) desc = "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。";
-            else if (name.includes("憲法記念")) desc = "日本国憲法の施行を記念し、国の成長を期する日です。";
-            else if (name.includes("みどり")) desc = "自然に親しむとともにその恩恵に感謝し、豊かな心をはぐくむ日です。";
-            else if (name.includes("こども")) desc = "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。";
-            else if (name.includes("海の日")) desc = "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。";
-            else if (name.includes("山の日")) desc = "山の恩恵に感謝し、自然に親しむ機会とする日です。";
-            else if (name.includes("敬老")) desc = "多年にわたり社会につくしてきた老人を敬愛し、長寿を祝う日です。";
-            else if (name.includes("秋分")) desc = "祖先をうやまい、なくなった人々をしのぶ日です。";
-            else if (name.includes("スポーツ")) desc = "スポーツに親しみ、健康な心身をつちかう日です。";
-            else if (name.includes("文化の日")) desc = "自由と平和を愛し、文化をすすめる日です。";
-            else if (name.includes("勤労感謝")) desc = "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日です。";
-            else if (name.includes("国民の休日")) desc = "祝日と祝日に挟まれたため、休日となった日です。";
+            if (name.includes("元日")) desc = "年のはじめを祝う日です。\nA day to celebrate the beginning of the year.";
+            else if (name.includes("成人")) desc = "大人になったことを自覚し、自ら生き抜こうとする青年を祝い励ます日です。\nA day to celebrate new adults and their new lives.";
+            else if (name.includes("建国記念")) desc = "建国を偲び、国を愛する心を養う日です。\nA day to think about our country and its history.";
+            else if (name.includes("天皇誕生日")) desc = "天皇の誕生日を祝う日です。\nA day to celebrate the Emperor's birthday.";
+            else if (name.includes("春分")) desc = "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。\nA day to love nature and all living things.";
+            else if (name.includes("昭和")) desc = "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。\nA day to look back on the Showa era and think about the future.";
+            else if (name.includes("憲法記念")) desc = "日本国憲法の施行を記念し、国の成長を期する日です。\nA day to celebrate the Constitution and the country's growth.";
+            else if (name.includes("みどり")) desc = "自然に親しむとともにその恩恵に感謝し、豊かな心をはぐくむ日です。\nA day to enjoy nature and say thank you for its gifts.";
+            else if (name.includes("こども")) desc = "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。\nA day to wish for children's happiness and thank mothers.";
+            else if (name.includes("海の日")) desc = "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。\nA day to thank the sea and wish for Japan's success.";
+            else if (name.includes("山の日")) desc = "山の恩恵に感謝し、自然に親しむ機会とする日です。\nA day to thank the mountains and enjoy nature.";
+            else if (name.includes("敬老")) desc = "老人の長寿を祝う日です。\nA day to celebrate the long lives of elderly people.";
+            else if (name.includes("秋分")) desc = "祖先をうやまい、なくなった人々を偲ぶ日です。\nA day to respect our ancestors and remember people who passed away.";
+            else if (name.includes("スポーツ")) desc = "スポーツに親しみ、健康な心身を培う日です。\nA day to enjoy sports and stay healthy.";
+            else if (name.includes("文化の日")) desc = "自由と平和を愛し、文化をすすめる日です。\nA day to love peace and promote culture.";
+            else if (name.includes("勤労感謝")) desc = "勤労を尊び、生産を祝い、国民たがいに感謝しあう日です。\nA day to thank workers and everyone's hard work.";
+            else if (name.includes("国民の休日")) desc = "祝日と祝日に挟まれたため、休日となったちょっとラッキーな日です。\nA lucky holiday between two other holidays.";
         }
     }
     
     if (customHolidays[dateStr]) desc = customHolidays[dateStr].desc;
     let displayName = name.includes("振替休日") ? "振替休日" : name;
     
-    document.getElementById('event-modal-body').innerHTML = `<h3 style="margin-top:0; color:#d32f2f;">${displayName}</h3><p style="font-size:1.1em; line-height:1.8;">${desc}</p>`;
+    document.getElementById('event-modal-body').innerHTML = `<h3 style="margin-top:0; color:#d32f2f;">${displayName}</h3><p style="font-size:1.1em; line-height:1.8; white-space:pre-wrap;">${desc}</p>`;
     document.getElementById('event-modal-overlay').style.display = 'flex';
 }
 
@@ -1035,7 +1068,7 @@ function closeEventModal() { document.getElementById('event-modal-overlay').styl
 
 function applyUserSettings() {
     if (studentMaster[currentUserEmail] && studentMaster[currentUserEmail].settings) userSettings = Object.assign({}, userSettings, studentMaster[currentUserEmail].settings);
-    applyLightness(); 
+    applyTheme(); 
     const container = document.getElementById('main-sections-container'); if(container) userSettings.order.forEach(id => { let el = document.getElementById(id); if(el) container.appendChild(el); });
     let cdArea = document.getElementById('countdown-display-area'); if(cdArea) cdArea.style.display = userSettings.cdVisible ? 'flex' : 'none';
     renderCountdownsUI(); 
@@ -1365,7 +1398,9 @@ function saveTempInputs() {
 }
 
 async function saveMyWeek() {
-    let st = window.scrollY;
+    let container = document.getElementById('weekly-schedule-display');
+    let oldHeight = container.offsetHeight;
+    if (oldHeight > 0) container.style.minHeight = oldHeight + 'px';
     
     let t_m = document.getElementById('toggle-morning'); if(t_m) userSettings.showMorning = t_m.checked;
     let t_l = document.getElementById('toggle-lunch'); if(t_l) userSettings.showLunch = t_l.checked;
@@ -1408,11 +1443,13 @@ async function saveMyWeek() {
     document.getElementById('my-week-settings').style.display = 'none'; 
     
     await displayWeeklySchedule();
-    requestAnimationFrame(() => { window.scrollTo(0, st); });
 }
 
 async function displayWeeklySchedule() {
-    let st = window.scrollY;
+    let container = document.getElementById('weekly-schedule-display');
+    let oldHeight = container.offsetHeight;
+    if (oldHeight > 0) container.style.minHeight = oldHeight + 'px';
+
     saveTempInputs();
     
     let toggleW = document.getElementById('toggle-weekend'); let showWeek = toggleW ? toggleW.checked : false; 
@@ -1444,7 +1481,7 @@ async function displayWeeklySchedule() {
         let headerFSize = infoHeaders.length === 4 ? "clamp(0.6em, 2vw, 0.85em)" : (infoHeaders.length === 3 ? "clamp(0.7em, 2.5vw, 0.9em)" : "0.9em");
 
         let html = `<table><tr><th style="width:11%;">日付</th>`;
-        if(showEvents) html += `<th>主な行事・提出物</th>`;
+        if(showEvents) html += `<th>行事・提出物</th>`;
         if(showInfoCol) html += `<th style="width:12%; white-space:nowrap; padding:2px;"><div style="font-size:${headerFSize}; letter-spacing:-0.5px;">${infoHeaderStr}</div></th>`; 
         if(showMyEvent) html += `<th style="width:28%;">自分の予定</th>`;
         if(showClub) html += `<th style="width:18%;">部活動</th>`;
@@ -1463,7 +1500,7 @@ async function displayWeeklySchedule() {
             }).join("<br>");
             let vac = vacationData && vacationData.find(v=>ds>=v.start&&ds<=v.end);
             let isVac = !!vac;
-            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[dateStr].name}</span>`:(isVac && vac.note ? `<span style="color:inherit; font-weight:normal;">${vac.note}</span>` : ""))) : (wd[i].event ? `${wd[i].event}` : "");
+            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[ds].name}</span>`:(isVac && vac.note ? `<span style="font-weight:normal; color:inherit;">${vac.note}</span>` : ""))) : (wd[i].event ? `${wd[i].event}` : "");
             
             let cEvHtml = "";
             if (showEvents) {
@@ -1543,8 +1580,12 @@ async function displayWeeklySchedule() {
 
             html += `<tr class="${isHol?'holiday-row':''}"><td style="padding:2px;">${dobj.getMonth()+1}/${dobj.getDate()}<br><span style="color:${wIdx===0?'red':wIdx===6?'blue':'inherit'}; font-weight:bold;">${names[wIdx]}</span></td>${cEvHtml}${infoColHtml}${myN}${clH}</tr>` + adminEditRow;
         });
-        document.getElementById('weekly-schedule-display').innerHTML = html + "</table>";
-        requestAnimationFrame(() => { window.scrollTo(0, st); });
+        
+        container.innerHTML = html + "</table>";
+        
+        requestAnimationFrame(() => {
+            container.style.minHeight = '';
+        });
     } catch(e) { document.getElementById('weekly-schedule-display').innerHTML = "読込エラー: " + e.message; console.error(e); }
 }
 
@@ -1785,14 +1826,21 @@ function renderBlogs() {
     let published = allBlogs.filter(d => d.createdAt && d.createdAt.toDate() <= now);
     let scheduled = allBlogs.filter(d => d.createdAt && d.createdAt.toDate() > now);
 
+    let isDark = document.body.classList.contains('dark-mode');
+
     let paged = published.slice((currentBlogPage-1)*5, currentBlogPage*5);
     let html = paged.map(d => {
         let adminAction = isAdmin ? `<div style="text-align:right; margin-top:5px;"><button type="button" onclick="editBlog('${d.id}')" style="padding:2px 6px; font-size:0.75em;">編集</button> <button type="button" onclick="deleteBlog('${d.id}')" style="padding:2px 6px; font-size:0.75em; color:#d32f2f;">削除</button></div>` : '';
         let titleHtml = d.title ? `<div style="font-weight:bold; margin-bottom:5px;">${d.title}</div>` : '';
+        
         let fColor = d.color || 'inherit';
+        if (isDark && (fColor === '#000000' || fColor.toLowerCase() === 'black')) {
+            fColor = '#e0e0e0';
+        }
+        
         let fSize = d.size || '1em';
         let fWeight = d.isBold ? 'bold' : 'normal';
-        return `<div class="post-item"><div class="post-date">${d.createdAt?formatDateTime(d.createdAt.toDate()):''}</div>${titleHtml}<div style="color:${fColor}; font-size:${fSize}; font-weight:${fWeight};">${d.content.replace(/\n/g,'<br>')}</div>${adminAction}</div>`;
+        return `<div id="blog-post-${d.id}" class="post-item"><div class="post-date">${d.createdAt?formatDateTime(d.createdAt.toDate()):''}</div>${titleHtml}<div class="blog-content" style="color:${fColor}; font-size:${fSize}; font-weight:${fWeight};">${d.content.replace(/\n/g,'<br>')}</div>${adminAction}</div>`;
     }).join('');
     document.getElementById('blog-list').innerHTML = html || "<p>投稿はありません。</p>";
     
@@ -1813,7 +1861,10 @@ function renderBlogs() {
                 let td = d.createdAt.toDate();
                 let ds = `${td.getMonth()+1}/${td.getDate()}(${days[td.getDay()]}) ${('0'+td.getHours()).slice(-2)}:${('0'+td.getMinutes()).slice(-2)}`;
                 let titleHtml = d.title ? `<div style="font-weight:bold; margin-bottom:5px;">${d.title}</div>` : '';
+                
                 let fColor = d.color || 'inherit';
+                if (isDark && (fColor === '#000000' || fColor.toLowerCase() === 'black')) fColor = '#e0e0e0';
+                
                 let fSize = d.size || '1em';
                 let fWeight = d.isBold ? 'bold' : 'normal';
                 sHtml += `<div class="post-item" style="background:white; border-color:#f57c00;">
