@@ -29,7 +29,7 @@ th { background-color: rgba(0,0,0,0.05); }
 .deadline-warning { color: #f57c00 !important; font-weight: bold; }
 .deadline-overdue { color: #d32f2f !important; font-weight: bold; }
 .student-edit-btn { padding: 2px 6px; font-size: 0.75em; margin-left: 5px; cursor: pointer; }
-.weather-info { font-size: 0.85em; font-weight: normal; margin-left: 10px; color: #333; display:inline-block; }
+.weather-info { font-size: 0.85em; font-weight: normal; color: #333; display:block; margin-top: 2px; }
 .countdown-card { padding: 5px 10px; font-weight: bold; color: #000; width: 160px; height: 75px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; background: white; transition: 0.2s; }
 .countdown-card.small { width: auto; min-width: 90px; height: 40px; padding: 2px 5px; font-size: 0.85em; }
 .countdown-card.small .text-area span { font-size: 1.1em !important; }
@@ -67,7 +67,8 @@ body.dark-mode .deadline-overdue { color: #ef5350 !important; }
 body.dark-mode .countdown-card { color: #e0e0e0 !important; border-color: #444 !important; background: #2a2a2a !important; }
 body.dark-mode .changed-lesson { background-color: #4a401c !important; color: #e0e0e0 !important; }
 body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color: #555; }
-body.dark-mode .comm-box:not([style*="background-color"]) { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode .comm-default { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode .comm-colored { color: #000 !important; border-color: #555 !important; }
 body.dark-mode .checked-item { background-color: #111111 !important; color: #666666 !important; opacity: 0.6; }
 body.dark-mode #settings-modal-content { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #settings-modal-content h2, body.dark-mode #settings-modal-content h4 { border-color: #555 !important; color: #e0e0e0 !important; }
@@ -1014,12 +1015,24 @@ function updateTopReminder() {
     let reminderEl = document.getElementById('top-reminder'); if (!reminderEl) return; let msgs = [];
     if (submissionsList.length > 0) {
         submissionsList.forEach(sub => {
-            const diffDays = getSchoolDaysDiff(sub.deadline); let unsubmittedCount = 0; let myUnsubmitted = false;
+            let unsubmittedCount = 0; let myUnsubmitted = false;
             for(let em in studentMaster) { if(em === TEACHER_EMAIL) continue; if(!studentMaster[em].checks || !studentMaster[em].checks[sub.id]) { unsubmittedCount++; if(em === currentUserEmail) myUnsubmitted = true; } }
             let isUnsubmitted = isAdmin ? (unsubmittedCount > 0) : myUnsubmitted;
             if (isUnsubmitted) {
                 let dayStr = ""; let colorStyle = "";
-                if (diffDays < 0) { dayStr = "【期限超過】"; colorStyle = "color: #d32f2f;"; } else if (diffDays === 0) { dayStr = "【本日締切】"; colorStyle = "color: #f57c00;"; } else if (diffDays <= 3) { dayStr = `【あと${diffDays}日】`; colorStyle = "color: #f57c00;"; }
+                let todayStr = getLocalDateStr(new Date());
+                let diffDays = getSchoolDaysDiff(sub.deadline);
+                
+                if (sub.deadline < todayStr) {
+                    dayStr = "【期限超過】"; colorStyle = "color: #d32f2f;";
+                } else if (sub.deadline === todayStr) {
+                    dayStr = "【本日締切】"; colorStyle = "color: #f57c00;";
+                } else if (diffDays >= 0 && diffDays <= 3) {
+                    if(diffDays === 0) dayStr = "【次回登校日締切】";
+                    else dayStr = `【あと${diffDays}日】`;
+                    colorStyle = "color: #f57c00;";
+                }
+                
                 if (dayStr) msgs.push(`<span style="${colorStyle}">🚨 ${dayStr}「${sub.title}」</span>`);
             }
         });
@@ -1181,7 +1194,7 @@ async function displayNextSchoolDays() {
 async function renderDay(dateStr, elId, prefix) {
     const el = document.getElementById(elId); const d = new Date(dateStr); const week = ["日", "月", "火", "水", "木", "金", "土"];
     let weatherHtml = ""; let wInfo = weatherData[dateStr];
-    if (wInfo) weatherHtml = `<div class="weather-info" style="margin-top:5px; font-weight:normal;">${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃ ${wInfo.pop>0?`☔${wInfo.pop}%`:''}</div>`;
+    if (wInfo) weatherHtml = `<div class="weather-info" style="margin-top:5px; font-weight:normal; display:block;">${wInfo.desc} ${wInfo.max}℃/${wInfo.min}℃ ${wInfo.pop>0?`☔${wInfo.pop}%`:''}</div>`;
 
     try {
         const doc = await db.collection("schedules").doc(dateStr).get(); let data = doc.exists ? doc.data() : {};
@@ -1197,9 +1210,12 @@ async function renderDay(dateStr, elId, prefix) {
         <button type="button" id="admin-revert-btn-${dateStr}" onclick="revertToRegularSchedule('${dateStr}')" style="display:none; padding:2px 4px; font-size:clamp(0.6em, 2vw, 0.8em); color:#d32f2f; white-space:nowrap; margin:0;">削除</button>
         <button type="button" id="admin-cancel-btn-${dateStr}" onclick="safeRenderAll()" style="display:none; padding:2px 4px; font-size:clamp(0.6em, 2vw, 0.8em); white-space:nowrap; margin:0;">キャンセル</button></div>` : '';
         
-        let html = `<div class="day-label" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:nowrap; gap:5px;">
-                        <div style="flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${prefix} ${d.getMonth()+1}/${d.getDate()}（${week[d.getDay()]}）${weatherHtml}</div>
-                        ${editBtn}
+        let html = `<div class="day-label" style="display:flex; align-items:flex-start; justify-content:space-between; gap:5px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${prefix} ${d.getMonth()+1}/${d.getDate()}（${week[d.getDay()]}）</div>
+                            ${weatherHtml}
+                        </div>
+                        ${editBtn ? `<div style="flex-shrink:0;">${editBtn}</div>` : ''}
                     </div>`;
         
         let vac = vacationData && vacationData.find(v=>dateStr>=v.start&&dateStr<=v.end);
@@ -1486,15 +1502,24 @@ async function displayWeeklySchedule() {
         let clOpts = studentMaster[currentUserEmail]?.myClubOptions || clubOptionsList;
         if (!clOpts.includes("")) clOpts = ["", ...clOpts]; 
 
+        let todayStr = getLocalDateStr(new Date());
+
         currentWeeklyDates.forEach((ds, i) => {
             let dobj = new Date(ds); let wIdx = dobj.getDay(); let isHol = !isSchoolDay(ds);
+            
             let subsHtml = submissionsList.filter(s=>s.deadline===ds).map(s=>{
-                let diff = getSchoolDaysDiff(s.deadline); let cls = !studentMaster[currentUserEmail]?.checks?.[s.id] ? (diff<0?'deadline-overdue':'deadline-warning') : '';
+                let diffDays = getSchoolDaysDiff(s.deadline); 
+                let cls = '';
+                if (!studentMaster[currentUserEmail]?.checks?.[s.id]) {
+                    if (s.deadline < todayStr) cls = 'deadline-overdue';
+                    else if (s.deadline === todayStr || diffDays <= 3) cls = 'deadline-warning';
+                }
                 return `<span class="${cls}">【締切】${s.title}</span>`;
             }).join("<br>");
+            
             let vac = vacationData && vacationData.find(v=>ds>=v.start&&ds<=v.end);
             let isVac = !!vac;
-            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[ds].name}</span>`:(isVac && vac.note ? `<span style="font-weight:normal; color:inherit;">${vac.note}</span>` : ""))) : (wd[i].event ? `${wd[i].event}` : "");
+            let aEv = isHol ? (holidays[ds] ? `<span style="color:red; font-weight:bold;">${holidays[ds].includes("振替休日")?"振替休日":holidays[ds]}</span>` : (customHolidays[ds]?`<span style="color:red; font-weight:bold;">${customHolidays[ds].name}</span>`:(isVac && vac.note ? `<span style="color:inherit; font-weight:normal;">${vac.note}</span>` : ""))) : (wd[i].event ? `${wd[i].event}` : "");
             
             let cEvHtml = "";
             if (showEvents) {
@@ -1576,7 +1601,10 @@ async function displayWeeklySchedule() {
         });
         
         container.innerHTML = html + "</table>";
-        requestAnimationFrame(() => { container.style.minHeight = ''; });
+        
+        requestAnimationFrame(() => {
+            container.style.minHeight = '';
+        });
     } catch(e) { document.getElementById('weekly-schedule-display').innerHTML = "読込エラー: " + e.message; console.error(e); }
 }
 
@@ -1597,6 +1625,8 @@ function renderSubmissionsUI() {
     const week = ["日", "月", "火", "水", "木", "金", "土"];
     let totalStudents = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL).length;
 
+    let todayStr = getLocalDateStr(new Date());
+
     submissionsList.forEach(s => {
         let d = new Date(s.deadline); 
         let ds = isNaN(d) ? s.deadline : `${d.getMonth()+1}/${d.getDate()}(${week[d.getDay()]})`;
@@ -1608,8 +1638,13 @@ function renderSubmissionsUI() {
             if(!studentMaster[em].checks || !studentMaster[em].checks[s.id]) { unsubmittedCount++; unsubmittedNames.push(studentMaster[em].name || em); }
         }
         let isComplete = (unsubmittedCount === 0 && totalStudents > 0);
-        let diff = getSchoolDaysDiff(s.deadline); 
-        let cls = ''; if(isAdmin) { cls = (unsubmittedCount>0) ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : ''; } else { cls = !chk ? (diff<0?'deadline-overdue':(diff<=3?'deadline-warning':'')) : ''; }
+        let diffDays = getSchoolDaysDiff(s.deadline); 
+        
+        let cls = ''; 
+        if (!chk) {
+            if (s.deadline < todayStr) cls = 'deadline-overdue';
+            else if (s.deadline === todayStr || diffDays <= 3) cls = 'deadline-warning';
+        }
 
         let titleHtml = isComplete ? `<span style="color:#d81b60; font-weight:bold;">🌸</span> ${s.title} <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : s.title;
         if (!isComplete) { if(isAdmin) { titleHtml += ` <span style="font-size:0.85em; font-weight:normal; color:#d32f2f; margin-left:10px;">(残り${unsubmittedCount}人) ${unsubmittedNames.join('、')}</span>`; } else { titleHtml += ` <span style="font-size:0.85em; font-weight:normal; color:#666; margin-left:10px;">残り ${unsubmittedCount} 人</span>`; } }
@@ -1649,7 +1684,9 @@ function renderCommitteePosts() {
         let isMyPost = d.authorEmail === currentUserEmail;
         let isApprovedActive = d.status === 'approved' && (d.isAdminPost || (!d.startDate && !d.endDate) || (d.startDate <= td && (!d.endDate || d.endDate >= td)));
         if (isApprovedActive || isMyPost) {
-            let bg = d.bgColor && d.bgColor !== '#ffffff' ? `background-color:${d.bgColor}; color:#000;` : '';
+            let bgStyle = d.bgColor && d.bgColor !== '#ffffff' ? `background-color:${d.bgColor}; color:#000;` : '';
+            let addClass = d.bgColor && d.bgColor !== '#ffffff' ? "comm-colored" : "comm-default";
+
             let isLiked = (d.likes || []).includes(currentUserEmail);
             let likesCount = (d.likes || []).length;
             let totalStudents = Object.keys(studentMaster).filter(e => e !== TEACHER_EMAIL).length;
@@ -1671,10 +1708,10 @@ function renderCommitteePosts() {
             let actionBtns = "";
             if (isMyPost || isAdmin) { actionBtns = `<button type="button" onclick="editMyCommitteePost('${d.id}')" style="font-size:0.8em; padding:2px 6px;">再編集</button> <button type="button" onclick="deleteMyCommitteePost('${d.id}')" style="font-size:0.8em; padding:2px 6px; color:#d32f2f;">削除</button>`; }
 
-            html += `<div id="comm-post-${d.id}" class="post-item comm-box" style="${bg}">
+            html += `<div id="comm-post-${d.id}" class="post-item comm-box ${addClass}" style="${bgStyle}">
                         <div class="post-date">${infoText}</div>
                         ${titleHtml}
-                        <div style="white-space:pre-wrap;">${d.content}</div>
+                        <div style="white-space:pre-wrap; color:inherit;">${d.content}</div>
                         <div style="text-align:right; margin-top:5px;">
                             ${actionBtns}
                             <button type="button" class="${btnClass}" onclick="likePost('${d.id}')" ${isMyPost||isLiked?'disabled':''}>${btnText}</button>
@@ -1867,7 +1904,7 @@ function renderBlogs() {
                 let titleHtml = d.title ? `<div style="font-weight:bold; margin-bottom:5px;">${d.title}</div>` : '';
                 
                 let fColor = d.color || 'inherit';
-                if (isDark && (fColor === '#000000' || fColor.toLowerCase() === 'black')) fColor = '#e0e0e0';
+                if (isDark && (fColor === '#000000' || fColor.toLowerCase() === 'black' || fColor === 'rgb(0, 0, 0)')) fColor = '#e0e0e0';
                 
                 let fSize = d.size || '1em';
                 let fWeight = d.isBold ? 'bold' : 'normal';
@@ -1900,7 +1937,7 @@ async function sendDirectMessage() {
 document.getElementById('change-pw-btn').onclick = async () => {
     const user = firebase.auth().currentUser; const o = document.getElementById('old-password').value, n = document.getElementById('new-password').value, c = document.getElementById('new-password-confirm').value;
     if(!o || !n || !c) return alert("入力してください"); if(n!==c) return alert("確認用と一致しません"); if(n.length<6) return alert("6文字以上");
-    try { await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, o)); await user.updatePassword(n); alert("Password変更完了"); document.getElementById('old-password').value=""; document.getElementById('new-password').value=""; document.getElementById('new-password-confirm').value=""; } catch (e) { alert("変更失敗"); }
+    try { await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, o)); await user.updatePassword(n); alert("パスワード変更完了"); document.getElementById('old-password').value=""; document.getElementById('new-password').value=""; document.getElementById('new-password-confirm').value=""; } catch (e) { alert("変更失敗"); }
 };
 </script>
 </body>
