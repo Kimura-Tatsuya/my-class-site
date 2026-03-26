@@ -82,6 +82,8 @@ body.dark-mode .goal-label { color: #aaa !important; }
 body.dark-mode #point-details-modal > div { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #point-details-modal h3 { border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #dm-input { background-color: #2a2a2a !important; color: #e0e0e0 !important; border-color: #555 !important; }
+body.dark-mode #event-modal-content { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
+body.dark-mode #event-modal-content h3 { color: #ff8a80 !important; }
 
 /* 緊急メッセージはダークモードの影響を受けないようにする */
 body.dark-mode .emergency-box { color: #000 !important; }
@@ -404,6 +406,47 @@ function isSchoolDay(ds) {
     return true; 
 }
 function getStandardExitTime(ds) { for(let p of exitTimePeriods){ if(ds>=p.start&&ds<=p.end) return p.time; } return "16:30"; }
+
+function getDefaultHolidayDesc(name, dateStr) {
+    if (!name) return "国民の祝日です。\nA national holiday.";
+    if (name.includes("振替休日")) {
+        let baseName = name.replace(" 振替休日", "").replace("振替休日", "").trim();
+        if (baseName) {
+            return `${baseName}の振替休日です。\nSubstitute holiday for ${baseName}.`;
+        } else {
+            let d = new Date(dateStr); d.setDate(d.getDate() - 1);
+            let prevStr = getLocalDateStr(d); let prevName = holidays[prevStr];
+            for (let i=0; i<4; i++) {
+                if (prevName) break;
+                d.setDate(d.getDate() - 1); prevStr = getLocalDateStr(d); prevName = holidays[prevStr];
+            }
+            if(prevName) {
+                let n = prevName.replace(" 振替休日", "").replace("振替休日", "").trim();
+                return `${n}の振替休日です。\nSubstitute holiday for ${n}.`;
+            } else {
+                return `国民の祝日の振替休日です。\nSubstitute holiday for a national holiday.`;
+            }
+        }
+    }
+    if (name.includes("元日")) return "年のはじめを祝う日です。\nA day to celebrate the beginning of the year.";
+    if (name.includes("成人")) return "大人になったことを自覚し、自ら生き抜こうとする青年を祝い励ます日です。\nA day to celebrate new adults and their new lives.";
+    if (name.includes("建国記念")) return "建国を偲び、国を愛する心を養う日です。\nA day to think about our country and its history.";
+    if (name.includes("天皇誕生日")) return "天皇の誕生日を祝う日です。\nA day to celebrate the Emperor's birthday.";
+    if (name.includes("春分")) return "自然をたたえ、将来のために種まきをする季節として生物をいつくしむ日です。\nA day to love nature and all living things.";
+    if (name.includes("昭和")) return "激動の日々を経て、復興を遂げた昭和の時代を顧み、国の将来を思う日です。\nA day to look back on the Showa era and think about the future.";
+    if (name.includes("憲法記念")) return "日本国憲法の施行を記念し、国の成長を期する日です。\nA day to celebrate the Constitution and the country's growth.";
+    if (name.includes("みどり")) return "自然に親しむとともにその恩恵に感謝し、豊かな心をはぐくむ日です。\nA day to enjoy nature and say thank you for its gifts.";
+    if (name.includes("こども")) return "こどもの人格を重んじ、こどもの幸福をはかるとともに、母に感謝する日です。\nA day to wish for children's happiness and thank mothers.";
+    if (name.includes("海の日")) return "海の恩恵に感謝するとともに、海洋国日本の繁栄を願う日です。\nA day to thank the sea and wish for Japan's success.";
+    if (name.includes("山の日")) return "山の恩恵に感謝し、自然に親しむ機会とする日です。\nA day to thank the mountains and enjoy nature.";
+    if (name.includes("敬老")) return "老人の長寿を祝う日です。\nA day to celebrate the long lives of elderly people.";
+    if (name.includes("秋分")) return "祖先をうやまい、なくなった人々を偲ぶ日です。\nA day to respect our ancestors and remember people who passed away.";
+    if (name.includes("スポーツ")) return "スポーツに親しみ、健康な心身を培う日です。\nA day to enjoy sports and stay healthy.";
+    if (name.includes("文化の日")) return "自由と平和を愛し、文化をすすめる日です。\nA day to love peace and promote culture.";
+    if (name.includes("勤労感謝")) return "勤労を尊び、生産を祝い、国民たがいに感謝しあう日です。\nA day to thank workers and everyone's hard work.";
+    if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となったちょっとラッキーな日です。\nA lucky holiday between two other holidays.";
+    return "国民の祝日です。\nA national holiday.";
+}
 
 function checkAutoLogout() {
     let lastAct = localStorage.getItem('lastActivity');
@@ -1050,7 +1093,7 @@ function openHolidayModal() {
     if (customHolidays[dateStr]) desc = customHolidays[dateStr].desc;
     let displayName = name.includes("振替休日") ? "振替休日" : name;
     
-    document.getElementById('event-modal-body').innerHTML = `<h3 style="margin-top:0; color:#d32f2f;">${displayName}</h3><p style="font-size:1.1em; line-height:1.8; white-space:pre-wrap;">${desc}</p>`;
+    document.getElementById('event-modal-body').innerHTML = `<h3 style="margin-top:0;">${displayName}</h3><p style="font-size:1.1em; line-height:1.8; white-space:pre-wrap;">${desc}</p>`;
     document.getElementById('event-modal-overlay').style.display = 'flex';
 
     if (!isAdmin) {
@@ -1313,7 +1356,9 @@ function startStudentEdit(ds, idx, cur) {
 async function saveStudentEdit(ds, idx) {
     let val = document.getElementById(`student-input-${ds}-${idx}`).value.trim();
     if(val === "") return alert("内容を入力してください。（空欄での保存はできません）");
-    let docRef = db.collection("schedules").doc(ds); let doc = await docRef.get(); let data = doc.exists ? doc.data() : {};
+    let docRef = db.collection("schedules").doc(ds); 
+    let doc = await docRef.get(); 
+    let data = doc.exists ? doc.data() : {};
     if(!data.lessons) data.lessons = Array.from({length:6}, () => ({ sub: "", note: "" }));
     if(data.lessons[idx].note === val) { safeRenderAll(); return; } 
     
@@ -1339,8 +1384,24 @@ async function saveStudentEdit(ds, idx) {
             ptMsg = `（+${pt} Pt✨）`;
         }
     }
-    await docRef.set({ lessons: data.lessons, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    alert("保存しました" + ptMsg); safeRenderAll();
+
+    try {
+        if (doc.exists) {
+            await docRef.update({ lessons: data.lessons, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+            await docRef.set({ lessons: data.lessons, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        }
+        alert("保存しました" + ptMsg); 
+        safeRenderAll();
+    } catch (err) {
+        console.error(err);
+        if (err.message && err.message.includes("Missing or insufficient permissions")) {
+            alert("【保存エラー】\n管理者がこの日の予定枠をまだ作成していないため、生徒アカウントから備考を保存することができません。\n\n先に先生（管理者）に「" + ds + "」の予定を一度保存してもらってください。");
+            safeRenderAll();
+        } else {
+            alert("エラーが発生しました: " + err.message);
+        }
+    }
 }
 
 function changeWeek(w) { currentWeekBaseDate.setDate(currentWeekBaseDate.getDate() + w * 7); safeRenderAll(); }

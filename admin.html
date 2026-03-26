@@ -65,6 +65,7 @@
         body.dark-mode .edit-box { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
         body.dark-mode #admin-point-modal-overlay > div { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
         body.dark-mode #admin-point-modal-overlay button.close-btn { color: #e0e0e0 !important; }
+        body.dark-mode .new-item-box { background-color: #2a2a2a !important; border-color: #555 !important; color: #e0e0e0 !important; }
 
         @media screen and (max-width: 650px) {
             body { padding: 10px; }
@@ -256,7 +257,7 @@
                     <summary>［設定］行事・クラスの目標</summary>
                     <p style="font-size:0.85em; margin-top:5px;">ポータル上部に表示するクラス全体の目標や行事の目標を管理します。複数登録し、任意のタイミングで表示・非表示を切り替えられます。</p>
                     
-                    <div style="background:#f9f9f9; padding:10px; border:1px dashed #000; margin-bottom:15px; color:inherit;">
+                    <div class="new-item-box" style="background:#f9f9f9; padding:10px; border:1px dashed #000; margin-bottom:15px; color:inherit;">
                         <h4 style="margin-top:0; border-bottom:none;">新規追加</h4>
                         見出し: <input type="text" id="new-cg-label" placeholder="例: 体育祭の目標" style="width:100%; margin-bottom:5px;"><br>
                         内容: <textarea id="new-cg-text" placeholder="目標の内容を入力..." style="height:60px; width:100%;"></textarea><br>
@@ -1278,6 +1279,9 @@
             if (submissionsList.length === 0) { adminTable.innerHTML = "<p>提出物はありません。</p>"; return; }
             let adminHtml = `<table style="width:100%; min-width:500px;"><tr><th>提出物名</th><th>締め切り</th><th>未提出者</th><th>操作</th></tr>`;
             const week = ["日", "月", "火", "水", "木", "金", "土"];
+            
+            let todayStr = getLocalDateStr(new Date());
+
             submissionsList.forEach(sub => {
                 const dObj = new Date(sub.deadline); 
                 const dateStrFormatted = isNaN(dObj) ? sub.deadline : `${dObj.getMonth()+1}/${dObj.getDate()}(${week[dObj.getDay()]})`;
@@ -1291,10 +1295,12 @@
                 let isComplete = (unsubmitCount === 0 && totalStudents > 0);
                 let diffDays = getSchoolDaysDiff(sub.deadline);
                 let dateClass = '';
-                if (!isComplete && !isNaN(dObj)) {
-                    if (diffDays < 0) dateClass = 'deadline-overdue';
-                    else if (diffDays <= 3) dateClass = 'deadline-warning';
+                
+                if (!isComplete) {
+                    if (sub.deadline < todayStr) dateClass = 'deadline-overdue';
+                    else if (sub.deadline === todayStr || diffDays <= 3) dateClass = 'deadline-warning';
                 }
+                
                 let titleHtml = isComplete ? `<span style="color:#d81b60; font-weight:bold;">🌸</span> ${sub.title} <span style="color:#d81b60; font-weight:bold;">Complete!</span>` : sub.title;
                 let unsubmittedStr = isComplete ? `<span style="color:green; font-weight:bold;">全員提出済</span>` : `<span class="${dateClass}">(残り${unsubmitCount}人) ${unsubmittedNames.join('、')}</span>`;
                 adminHtml += `<tr id="subm-row-${sub.id}"><td id="subm-title-td-${sub.id}" style="text-align:left; font-weight:bold;" class="${dateClass}">${titleHtml}</td><td id="subm-deadline-td-${sub.id}" class="${dateClass}">${dateStrFormatted}</td><td style="text-align:left; font-size:0.9em;">${unsubmittedStr}</td><td id="subm-action-td-${sub.id}"><button type="button" onclick="startInlineEditSubm('${sub.id}', '${String(sub.title).replace(/'/g, "\\'")}', '${sub.deadline}')">編集</button><button type="button" onclick="deleteSubmission('${sub.id}')">削除</button></td></tr>`;
