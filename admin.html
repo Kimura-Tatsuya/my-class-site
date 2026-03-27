@@ -6,7 +6,7 @@
     <title>Admin Panel - Class Portal</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        body { background-color: #888888; color: #000; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; transition: background-color 0.3s; }
+        body { background-color: #c0c0c0; color: #000; font-family: sans-serif; line-height: 1.5; padding: 15px; max-width: 900px; margin: 0 auto; transition: background-color 0.3s; }
         h1, h2, h3 { font-weight: bold; margin-top: 10px; padding-bottom: 5px; border-bottom: 1px solid #000; }
         .section-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; margin-top: 0; padding-bottom: 5px; color: #000; }
         .section-header h2 { border: none; margin: 0; padding: 0; }
@@ -240,7 +240,7 @@
                 <details class="admin-form-box">
                     <summary>［設定］行事・クラスの目標</summary>
                     <div class="new-item-box" style="background:#f9f9f9; padding:8px; border:1px dashed #000; margin-bottom:10px; color:inherit;">
-                        <h4 style="margin:top:0; margin-bottom:5px; border-bottom:none;">新規追加</h4>
+                        <h4 style="margin-top:0; margin-bottom:5px; border-bottom:none;">新規追加</h4>
                         <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap; margin-bottom:5px;">
                             <input type="text" id="new-cg-label" placeholder="見出し (例: 体育祭)" style="width:180px; margin:0; padding:4px;">
                             <select id="new-cg-color" style="width:120px; margin:0; padding:4px;">
@@ -420,7 +420,7 @@
         
         <footer style="text-align: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #000; font-size: 0.85em; color: inherit;">
             <div>
-                <button type="button" id="btn-theme" onclick="toggleTheme()" style="padding:4px 8px; font-size:0.9em; border: 1px solid #000; background:white; color:#000;">Light 1</button>
+                <button type="button" id="btn-theme" onclick="toggleTheme()" style="padding:4px 8px; font-size:0.9em; border: 1px solid #000; background:white; color:#000;">Light 3</button>
             </div>
             <div id="copyright-year-container" style="margin-top:10px;">&copy; <span id="copyright-year"></span> T.Kimura All Rights Reserved.</div>
         </footer>
@@ -501,7 +501,7 @@
 
         function applyTheme() {
             let btn = document.getElementById('btn-theme');
-            let bgColors = ['#888888', '#a0a0a0', '#c0c0c0', '#121212'];
+            let bgColors = ['#c0c0c0', '#a0a0a0', '#888888', '#121212'];
             let panelColors = ['#ffffff', '#f0f2f5', '#e0e0e0', '#1e1e1e'];
             let labels = ['Light 3', 'Light 2', 'Light 1', 'Dark Mode'];
 
@@ -1344,7 +1344,9 @@
                 let checkBadge = isAllChecked ? `<span style="color:#388e3c; font-weight:bold; font-size:1.1em;">全員確認</span>` : `<span style="color:#e91e63; font-size:1.1em;">確認者数 (${likesCount})</span>`;
                 let titleHtml = d.title ? `<div style="font-weight:bold; margin-bottom:5px;">${d.title}</div>` : "";
 
-                let contentHtml = `<div id="admin-comm-post-${d.id}" class="post-item comm-box ${isColored ? 'comm-colored' : 'comm-default'}" style="${bgStyle} border:1px solid #000; margin-bottom:10px;">
+                let addClass = isColored ? "comm-colored" : "comm-default";
+
+                let contentHtml = `<div id="admin-comm-post-${d.id}" class="post-item comm-box ${addClass}" style="${bgStyle} border:1px solid #000; margin-bottom:10px;">
                     <div class="post-date" style="color:inherit; display:flex; justify-content:space-between;"><span>${infoText}</span>${checkBadge}</div>
                     ${titleHtml}
                     <div style="white-space:pre-wrap; padding: 5px 0; color:inherit;">${d.content}</div>`;
