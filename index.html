@@ -68,7 +68,7 @@ body.dark-mode .countdown-card { color: #e0e0e0 !important; border-color: #444 !
 body.dark-mode .changed-lesson { background-color: #4a401c !important; color: #e0e0e0 !important; }
 body.dark-mode .point-badge { background: #4a401c; color: #ffd700; border-color: #555; }
 body.dark-mode .comm-default { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
-body.dark-mode .comm-colored { color: #000 !important; border-color: #555 !important; }
+body.dark-mode .comm-colored { filter: brightness(0.65) saturate(0.85); color: #000 !important; border-color: #555 !important; }
 body.dark-mode .checked-item { background-color: #111111 !important; color: #666666 !important; opacity: 0.6; }
 body.dark-mode #settings-modal-content { background-color: #1e1e1e !important; border-color: #555 !important; color: #e0e0e0 !important; }
 body.dark-mode #settings-modal-content h2, body.dark-mode #settings-modal-content h4 { border-color: #555 !important; color: #e0e0e0 !important; }
@@ -86,8 +86,7 @@ body.dark-mode #event-modal-content { background-color: #1e1e1e !important; bord
 body.dark-mode #event-modal-content h3 { color: #ff8a80 !important; }
 
 /* 緊急メッセージはダークモードの影響を受けないようにする */
-body.dark-mode .emergency-box { color: #000 !important; }
-body.dark-mode .emergency-box h3, body.dark-mode .emergency-box div { color: #000 !important; border-color: inherit; }
+body.dark-mode .emergency-box { filter: brightness(0.65) saturate(0.85); color: #000 !important; border-color: inherit; }
 
 .like-btn { background: transparent; border: 1px solid #000; color: #000; padding: 2px 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
 .like-btn.liked { background: #000; color: white; border-color: #000; }
@@ -276,7 +275,7 @@ body.dark-mode .like-btn.all-checked { background: #388e3c; color: white; border
         <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div>
                 <button type="button" id="btn-device-view" onclick="toggleDeviceView()">Mobile View</button>
-                <button type="button" id="btn-theme" onclick="toggleTheme()">Brightness</button>
+                <button type="button" id="btn-theme" onclick="toggleTheme()">Light 1</button>
                 <button type="button" onclick="openSettingsModal()">Settings</button>
             </div>
             <div id="copyright-year-container">&copy; <span id="copyright-year"></span> T.Kimura All Rights Reserved.</div>
@@ -396,17 +395,6 @@ const COUNTDOWN_PRESETS = [{id:"kenritsu",label:"県立入試"},{id:"shiritsu",l
 
 let currentTheme = parseInt(localStorage.getItem('themeMode') || '0', 10);
 
-function getLocalDateStr(d) { return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`; }
-function formatDateTime(d) { return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${('0'+d.getHours()).slice(-2)}:${('0'+d.getMinutes()).slice(-2)}`; }
-function getSchoolDaysDiff(tStr) { let t1=new Date(); t1.setHours(0,0,0,0); let t2=new Date(tStr); t2.setHours(0,0,0,0); if(t2<t1) return -1; let d=0, c=new Date(t1); while(c<t2){ c.setDate(c.getDate()+1); if(isSchoolDay(getLocalDateStr(c))) d++; } return d; }
-function isSchoolDay(ds) { 
-    let d = new Date(ds).getDay(); 
-    if (d === 0 || d === 6 || holidays[ds] || customHolidays[ds]) return false;
-    if (vacationData && vacationData.find && vacationData.find(v => ds >= v.start && ds <= v.end)) return false; 
-    return true; 
-}
-function getStandardExitTime(ds) { for(let p of exitTimePeriods){ if(ds>=p.start&&ds<=p.end) return p.time; } return "16:30"; }
-
 function getDefaultHolidayDesc(name, dateStr) {
     if (!name) return "国民の祝日です。\nA national holiday.";
     if (name.includes("振替休日")) {
@@ -447,6 +435,17 @@ function getDefaultHolidayDesc(name, dateStr) {
     if (name.includes("国民の休日")) return "祝日と祝日に挟まれたため、休日となったちょっとラッキーな日です。\nA lucky holiday between two other holidays.";
     return "国民の祝日です。\nA national holiday.";
 }
+
+function getLocalDateStr(d) { return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`; }
+function formatDateTime(d) { return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${('0'+d.getHours()).slice(-2)}:${('0'+d.getMinutes()).slice(-2)}`; }
+function getSchoolDaysDiff(tStr) { let t1=new Date(); t1.setHours(0,0,0,0); let t2=new Date(tStr); t2.setHours(0,0,0,0); if(t2<t1) return -1; let d=0, c=new Date(t1); while(c<t2){ c.setDate(c.getDate()+1); if(isSchoolDay(getLocalDateStr(c))) d++; } return d; }
+function isSchoolDay(ds) { 
+    let d = new Date(ds).getDay(); 
+    if (d === 0 || d === 6 || holidays[ds] || customHolidays[ds]) return false;
+    if (vacationData && vacationData.find && vacationData.find(v => ds >= v.start && ds <= v.end)) return false; 
+    return true; 
+}
+function getStandardExitTime(ds) { for(let p of exitTimePeriods){ if(ds>=p.start&&ds<=p.end) return p.time; } return "16:30"; }
 
 function checkAutoLogout() {
     let lastAct = localStorage.getItem('lastActivity');
